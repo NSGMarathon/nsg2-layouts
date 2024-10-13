@@ -1,7 +1,7 @@
 <template>
     <ipl-dialog
         v-model:is-open="isOpen"
-        style="width: 500px"
+        style="width: 400px"
     >
         <ipl-dialog-title
             title="Assign mixer channels"
@@ -15,7 +15,6 @@
             <talent-mixer-channel-assignment-space
                 v-for="(team, i) in scheduleStore.activeSpeedrun.teams"
                 :speaking-threshold="teamChannels[team.id]?.speakingThresholdDB"
-                :channel-level-exponent="teamChannels[team.id]?.channelLevelExponent"
                 :team-id="team.id"
                 :assigned-channel="teamChannels[team.id]?.channelId"
                 :visible="isOpen"
@@ -23,7 +22,6 @@
                 :fallback-label="`Team ${i + 1}`"
                 @update:assigned-channel="selectChannel('team', team.id, $event)"
                 @update:speaking-threshold="updateSpeakingThreshold('team', team.id, $event)"
-                @update:channel-level-exponent="updateChannelLevelExponent('team', team.id, $event)"
             />
             <div class="m-t-8">Players</div>
             <hr class="m-y-2">
@@ -31,7 +29,6 @@
         <talent-mixer-channel-assignment-space
             v-for="talentId in scheduleStore.activeSpeedrunTalentIds"
             :speaking-threshold="talentChannels[talentId]?.speakingThresholdDB"
-            :channel-level-exponent="talentChannels[talentId]?.channelLevelExponent"
             :talent-id="talentId"
             :assigned-channel="talentChannels[talentId]?.channelId"
             :visible="isOpen"
@@ -39,11 +36,9 @@
             :fallback-label="`Unknown talent ${talentId}`"
             @update:assigned-channel="selectChannel('talent', talentId, $event)"
             @update:speaking-threshold="updateSpeakingThreshold('talent', talentId, $event)"
-            @update:channel-level-exponent="updateChannelLevelExponent('talent', talentId, $event)"
         />
         <talent-mixer-channel-assignment-space
             :speaking-threshold="hostChannel.speakingThresholdDB"
-            :channel-level-exponent="hostChannel.channelLevelExponent"
             :talent-id="talentStore.currentHostId"
             :assigned-channel="hostChannel.channelId"
             class="m-t-8"
@@ -52,7 +47,6 @@
             :visible="isOpen"
             @update:assigned-channel="hostChannel.channelId = $event"
             @update:speaking-threshold="hostChannel.speakingThresholdDB = $event"
-            @update:channel-level-exponent="hostChannel.channelLevelExponent = $event"
         />
 
         <ipl-space
@@ -87,7 +81,7 @@ const mixerStore = useMixerStore();
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 
-type ChannelAssignment = { channelId?: number, speakingThresholdDB?: number, channelLevelExponent?: number };
+type ChannelAssignment = { channelId?: number, speakingThresholdDB?: number };
 
 const hostChannel = ref<ChannelAssignment>({ });
 const talentChannels = ref<Record<string, ChannelAssignment>>({});
@@ -113,24 +107,13 @@ function updateSpeakingThreshold(dataType: 'team' | 'talent', id: string, thresh
     }
 }
 
-function updateChannelLevelExponent(dataType: 'team' | 'talent', id: string, exponent?: number) {
-    const currentValue = dataType === 'team' ? teamChannels : talentChannels;
-    const existingEntry = currentValue.value[id];
-    if (existingEntry == null) {
-        currentValue.value[id] = { channelLevelExponent: exponent };
-    } else {
-        existingEntry.channelLevelExponent = exponent;
-    }
-}
-
 function save() {
     const channelMapToReplicant = (channelMap: Record<string, ChannelAssignment>) =>
         Object.entries(channelMap).reduce((result, [talentId, assignment]) => {
             if (assignment.channelId != null) {
                 result[talentId] = {
                     channelId: Number(assignment.channelId),
-                    speakingThresholdDB: assignment.speakingThresholdDB,
-                    channelLevelExponent: assignment.channelLevelExponent
+                    speakingThresholdDB: assignment.speakingThresholdDB
                 };
             }
             return result;
@@ -148,8 +131,7 @@ function open() {
     talentChannels.value = Object.entries(mixerStore.talentMixerChannelAssignments.speedrunTalent).reduce((result, [talentId, assignment]) => {
         result[talentId] = {
             channelId: assignment.channelId,
-            speakingThresholdDB: assignment.speakingThresholdDB,
-            channelLevelExponent: assignment.channelLevelExponent
+            speakingThresholdDB: assignment.speakingThresholdDB
         };
         return result;
     }, {} as Record<string, ChannelAssignment>);

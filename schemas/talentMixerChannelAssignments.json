@@ -6,8 +6,7 @@
             "additionalProperties": false,
             "properties": {
                 "channelId": { "type": "number" },
-                "speakingThresholdDB": { "type": "number" },
-                "channelLevelExponent": { "type": "number" }
+                "speakingThresholdDB": { "type": "number" }
             },
             "required": ["channelId"]
         }

@@ -17,5 +17,4 @@ export interface TalentMixerChannelAssignments {
 export interface MixerChannelAssignment {
 	channelId: number;
 	speakingThresholdDB?: number;
-	channelLevelExponent?: number;
 }
