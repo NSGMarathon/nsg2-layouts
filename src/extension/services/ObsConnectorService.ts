@@ -209,7 +209,7 @@ export class ObsConnectorService {
         try {
             const inputs = await this.socket.call('GetSceneItemList', { sceneName: videoInputsScene });
             return inputs.sceneItems
-                .filter(sceneItem => typeof sceneItem.inputKind === 'string' && !OBS_INPUT_KINDS_WITHOUT_VIDEO.includes(sceneItem.inputKind))
+                .filter(sceneItem => sceneItem.sourceType === 'OBS_SOURCE_TYPE_SCENE' || typeof sceneItem.inputKind === 'string' && !OBS_INPUT_KINDS_WITHOUT_VIDEO.includes(sceneItem.inputKind))
                 .map(sceneItem => ({
                     type: String(sceneItem.inputKind),
                     sourceName: String(sceneItem.sourceName),
