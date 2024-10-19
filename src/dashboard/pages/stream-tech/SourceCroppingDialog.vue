@@ -53,6 +53,7 @@
                         <div class="handle bottom left" />
                         <div class="handle bottom" />
                         <div class="handle bottom right" />
+                        <div class="crop-drag-box" />
                     </div>
                     <img
                         :src="sourceScreenshot"
@@ -198,10 +199,12 @@ let sceneItemTransform: ObsSceneItemTransform | null = null;
 const cropOutlineElem = ref<HTMLDivElement>();
 let sides: NodeListOf<HTMLElement> | null = null;
 let handles: NodeListOf<HTMLElement> | null = null;
+let dragBox: HTMLElement | null = null;
 watch(cropOutlineElem, newValue => {
     if (newValue) {
         sides = newValue.querySelectorAll('.side');
         handles = newValue.querySelectorAll('.handle');
+        dragBox = newValue.querySelector('.crop-drag-box');
     } else {
         sides = null;
         handles = null;
@@ -277,33 +280,33 @@ function onSourceScreenshotLoad() {
 function onCropOutlineClick(e: PointerEvent) {
     if (cropOutlineData == null) return;
     const classList = (e.target as HTMLElement).classList;
-    if (!classList.contains('handle')) return;
+    if (classList.contains('handle') || classList.contains('crop-drag-box')) {
+        croppingActive.value = true;
+        dragStartPosition = { y: e.clientY, x: e.clientX };
+        initialCropOutline = { ...cropOutlineData };
 
-    croppingActive.value = true;
-    dragStartPosition = { y: e.clientY, x: e.clientX };
-    initialCropOutline = { ...cropOutlineData };
+        if (classList.contains('right')) {
+            dragSideX = 'right';
+        } else if (classList.contains('left')) {
+            dragSideX = 'left';
+        } else {
+            dragSideX = null;
+        }
 
-    if (classList.contains('right')) {
-        dragSideX = 'right';
-    } else if (classList.contains('left')) {
-        dragSideX = 'left';
-    } else {
-        dragSideX = null;
-    }
+        if (classList.contains('top')) {
+            dragSideY = 'top';
+        } else if (classList.contains('bottom')) {
+            dragSideY = 'bottom';
+        } else {
+            dragSideY = null;
+        }
 
-    if (classList.contains('top')) {
-        dragSideY = 'top';
-    } else if (classList.contains('bottom')) {
-        dragSideY = 'bottom';
-    } else {
-        dragSideY = null;
-    }
-
-    const cropWrapper = (e.target as HTMLElement).parentElement?.parentElement;
-    if (cropWrapper != null) {
-        cropWrapperSize = { width: cropWrapper.clientWidth, height: cropWrapper.clientHeight };
-    } else {
-        cropWrapperSize = null;
+        const cropWrapper = (e.target as HTMLElement).parentElement?.parentElement;
+        if (cropWrapper != null) {
+            cropWrapperSize = { width: cropWrapper.clientWidth, height: cropWrapper.clientHeight };
+        } else {
+            cropWrapperSize = null;
+        }
     }
 }
 
@@ -320,7 +323,10 @@ function onWindowMouseMove(e: PointerEvent) {
 
     // i hate this logic with a passion but it _works_ so i won't touch it any further. i've got an event to run, maybe three...
 
-    if (aspectRatio == null) {
+    if (dragSideX == null && dragSideY == null) {
+        newCropOutline.left = Math.min(1 - newCropOutline.width, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
+        newCropOutline.top = Math.min(1 - newCropOutline.height, Math.max(0, newCropOutline.top - (dragStartPosition.y - e.clientY) / zoom.value / cropWrapperSize.height));
+    } else if (aspectRatio == null) {
         // handle dragging with no aspect ratio constraints
         if (dragSideX === 'right') {
             newCropOutline.width = Math.min(1 - newCropOutline.left, Math.max(0, newCropOutline.width - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
@@ -472,6 +478,7 @@ function updateCropOutlineRef() {
         }
     }
 
+    updateTransforms(dragBox!, { x: startX, y: startY }, { x: scaleX, y: scaleY });
     updateTransforms(sides[0], { x: startX, y: startY }, { x: scaleX, y: 1 });
     updateTransforms(sides[1], { x: endX, y: startY }, { x: 1, y: scaleY });
     updateTransforms(sides[2], { x: startX, y: endY }, { x: scaleX, y: 1 });
@@ -579,8 +586,14 @@ defineExpose({
         user-select: none;
         will-change: transform;
 
-        &.active > .handle {
-            opacity: 0.1;
+        &.active {
+            > .handle {
+                opacity: 0.1;
+            }
+
+            > .crop-drag-box {
+                cursor: grabbing;
+            }
         }
 
         .side {
@@ -602,6 +615,16 @@ defineExpose({
                 background-color: green;
             }
         }
+
+        .crop-drag-box {
+            width: 1px;
+            height: 1px;
+            cursor: grab;
+            transform-origin: top left;
+            z-index: 1;
+            position: absolute;
+            transform: translate3d(calc(var(--tx) * 1px), calc(var(--ty) * 1px), 0) scale(var(--sx), var(--sy));
+        }
     }
 
     .handle {
@@ -614,6 +637,7 @@ defineExpose({
         margin-top: calc((10px / var(--zoom-factor)) * -0.5);
         background-color: red;
         user-select: none;
+        z-index: 2;
         transform: translate3d(calc(var(--tx) * 1px), calc(var(--ty) * 1px), 0);
     }
     .handle.top {
