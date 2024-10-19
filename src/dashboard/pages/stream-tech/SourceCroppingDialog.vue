@@ -92,10 +92,16 @@
                     style="max-width: 850px; margin: 8px 0 auto;"
                 >
                     <ipl-button
+                        icon="rotate"
+                        async
+                        class="m-r-8"
+                        @click="loadSourceScreenshot"
+                    />
+                    <ipl-button
                         icon="magnifying-glass-plus"
                         @click="zoom = Math.min(10, zoom + 0.5)"
                     />
-                    <div class="m-l-8 m-t-8 text-center" style="min-width: 40px">{{ zoom }}x</div>
+                    <ipl-space color="secondary" class="m-l-8 text-center" style="min-width: 40px">{{ zoom }}x</ipl-space>
                     <ipl-button
                         icon="magnifying-glass-minus"
                         class="m-l-8"
@@ -129,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplDialog, IplMessage, IplRadio, IplSpinner } from '@iplsplatoon/vue-components';
+import { IplButton, IplDialog, IplMessage, IplRadio, IplSpace, IplSpinner } from '@iplsplatoon/vue-components';
 import { onUnmounted, ref, watch } from 'vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useObsStore } from 'client-shared/stores/ObsStore';
@@ -141,8 +147,9 @@ import { faLeftRight } from '@fortawesome/free-solid-svg-icons/faLeftRight';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { VideoInputAssignment } from 'types/schemas';
 import { ObsSceneItemTransform } from 'types/obs';
+import { faRotate } from '@fortawesome/free-solid-svg-icons/faRotate';
 
-library.add(faMagnifyingGlassPlus, faMagnifyingGlassMinus, faUpDown, faLeftRight);
+library.add(faMagnifyingGlassPlus, faMagnifyingGlassMinus, faUpDown, faLeftRight, faRotate);
 
 const props = defineProps<{
     selectedFeedIndex: number
@@ -238,39 +245,46 @@ function resetCrop() {
 }
 
 watch(isOpen, async (newValue) => {
-    const videoInputsScene = obsStore.obsConfig.gameLayoutVideoFeedScenes[props.selectedFeedIndex];
-    if (videoInputsScene != null && newValue && selectedSourceName.value != null && selectedSceneItemId.value != null) {
-        sourceScreenshot.value = '';
-        loadingScreenshot.value = true;
-        zoom.value = 1;
-        selectedAspectRatio.value = 'off';
-        try {
-            const sceneItemData = await Promise.all([
-                sendMessage('obs:getSourceScreenshot', { sourceName: selectedSourceName.value }),
-                sendMessage('obs:getSceneItemTransform', { sceneName: videoInputsScene, sceneItemId: selectedSceneItemId.value })
-            ]);
-            screenshotLoadingError.value = null;
-            sourceScreenshot.value = sceneItemData[0];
-            sceneItemTransform = sceneItemData[1];
-            cropOutlineData = {
-                width: ((sceneItemTransform!.sourceWidth - sceneItemTransform!.cropLeft - sceneItemTransform!.cropRight) / sceneItemTransform!.sourceWidth),
-                height: ((sceneItemTransform!.sourceHeight - sceneItemTransform!.cropTop - sceneItemTransform!.cropBottom) / sceneItemTransform!.sourceHeight),
-                left: (sceneItemTransform!.cropLeft / sceneItemTransform!.sourceWidth),
-                top: (sceneItemTransform!.cropTop / sceneItemTransform!.sourceHeight)
-            }
-            loadingScreenshot.value = false;
-        } catch (e) {
-            screenshotLoadingError.value = 'message' in e ? e.message : String(e);
-            loadingScreenshot.value = false;
-        }
-
+    if (newValue) {
         window.document.addEventListener('mouseup', onWindowMouseup);
         window.document.addEventListener('mousemove', onWindowMouseMove);
+        await loadSourceScreenshot();
     } else {
         window.document.removeEventListener('mouseup', onWindowMouseup);
         window.document.removeEventListener('mousemove', onWindowMouseMove);
     }
 });
+
+async function loadSourceScreenshot() {
+    sourceScreenshot.value = '';
+    loadingScreenshot.value = true;
+    zoom.value = 1;
+    selectedAspectRatio.value = 'off';
+    const videoInputsScene = obsStore.obsConfig.gameLayoutVideoFeedScenes[props.selectedFeedIndex];
+    if (videoInputsScene == null || selectedSourceName.value == null || selectedSceneItemId.value == null) {
+        isOpen.value = false;
+        return;
+    }
+    try {
+        const sceneItemData = await Promise.all([
+            sendMessage('obs:getSourceScreenshot', { sourceName: selectedSourceName.value }),
+            sendMessage('obs:getSceneItemTransform', { sceneName: videoInputsScene, sceneItemId: selectedSceneItemId.value })
+        ]);
+        screenshotLoadingError.value = null;
+        sourceScreenshot.value = sceneItemData[0];
+        sceneItemTransform = sceneItemData[1];
+        cropOutlineData = {
+            width: ((sceneItemTransform!.sourceWidth - sceneItemTransform!.cropLeft - sceneItemTransform!.cropRight) / sceneItemTransform!.sourceWidth),
+            height: ((sceneItemTransform!.sourceHeight - sceneItemTransform!.cropTop - sceneItemTransform!.cropBottom) / sceneItemTransform!.sourceHeight),
+            left: (sceneItemTransform!.cropLeft / sceneItemTransform!.sourceWidth),
+            top: (sceneItemTransform!.cropTop / sceneItemTransform!.sourceHeight)
+        }
+        loadingScreenshot.value = false;
+    } catch (e) {
+        screenshotLoadingError.value = 'message' in e ? e.message : String(e);
+        loadingScreenshot.value = false;
+    }
+}
 
 function onSourceScreenshotLoad() {
     if (cropWrapper.value != null) {
@@ -321,7 +335,7 @@ function onWindowMouseup() {
     croppingActive.value = false;
 }
 function onWindowMouseMove(e: PointerEvent) {
-    if (dragStartPosition == null || cropWrapperSize == null || initialCropOutline == null || sceneItemTransform == null) return;
+    if (loadingScreenshot.value || dragStartPosition == null || cropWrapperSize == null || initialCropOutline == null || sceneItemTransform == null) return;
     const aspectRatio = getNumericAspectRatio();
     const newCropOutline = { ...initialCropOutline };
 
