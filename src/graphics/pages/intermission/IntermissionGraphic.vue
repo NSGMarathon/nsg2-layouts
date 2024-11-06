@@ -242,8 +242,8 @@ const hostSpeaking = computed(() => {
 }
 
 .charity-logo {
-    height: 129px;
-    margin: -8px 0;
+    height: 100px;
+    margin: 4px 0 4px 4px;
 }
 
 .host-name-display {

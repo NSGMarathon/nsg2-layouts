@@ -7,7 +7,7 @@
             >
                 <opacity-swap-transition mode="default">
                     <span v-if="slides.activeComponent.value === 'donationReminder1'">You are watching <span class="emphasis">{{ eventName }}</span></span>
-                    <span v-else>In support of the NABP - <span class="emphasis">{{ donationUrl }}</span></span>
+                    <span v-else>In support of Project Hope - <span class="emphasis">{{ donationUrl }}</span></span>
                 </opacity-swap-transition>
             </div>
             <div
@@ -30,7 +30,7 @@
                             v-if="slides.activeComponent.value === 'fallback'"
                             class="no-slide-placeholder max-height"
                         >
-                            Benefiting Norges Blindeforbund
+                            Benefiting Project Hope
                         </div>
                         <omnibar-schedule-item-display
                             v-else-if="slides.activeComponent.value === 'nextUp'"
