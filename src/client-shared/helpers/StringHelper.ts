@@ -18,24 +18,6 @@ export function addDots(value: string | undefined | null, maxLength = 48): strin
     return value;
 }
 
-export function isBlank(value: unknown): boolean {
-    return typeof value !== 'string' || value.trim() === '';
-}
-
-export function prettyPrintList(arr: Array<string>): string {
-    return arr.reduce((result, item, index) => {
-        result += item;
-
-        if (index === arr.length - 2) {
-            result += ' & ';
-        } else if (index !== arr.length - 1) {
-            result += ', ';
-        }
-
-        return result;
-    }, '');
-}
-
 export function formatScheduleItemEstimate(scheduleItem: ScheduleItem): string {
     const estimate = Duration.fromISO(scheduleItem.estimate);
     // If a schedule item has a zero-second estimate, try using the setup time instead

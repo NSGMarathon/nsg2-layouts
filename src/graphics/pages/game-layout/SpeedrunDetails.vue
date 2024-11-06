@@ -30,7 +30,7 @@
 import VfdPixelText from 'components/VfdPixelText.vue';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { computed } from 'vue';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import SpeedrunEstimateDisplay from 'components/SpeedrunEstimateDisplay.vue';
 
 const scheduleStore = useScheduleStore();

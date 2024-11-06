@@ -1,6 +1,6 @@
 import { App } from 'vue';
-import { isBlank } from '@iplsplatoon/vue-components';
 import { addDots } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 
 export function installCommonHelpers(app: App, isGraphic = true): void {
     if (!window.obsstudio && isGraphic) {

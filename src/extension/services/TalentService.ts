@@ -4,7 +4,7 @@ import { v4 as uuidV4 } from 'uuid';
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import { ScheduleItem, TalentItem } from 'types/ScheduleHelpers';
-import { isBlank, prettyPrintList } from '../../client-shared/helpers/StringHelper';
+import { isBlank, prettyPrintList } from 'shared/StringHelper';
 
 export class TalentService {
     private readonly logger: NodeCG.Logger;

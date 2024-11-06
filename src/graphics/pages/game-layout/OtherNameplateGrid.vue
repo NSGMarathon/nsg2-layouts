@@ -50,7 +50,7 @@ import chunk from 'lodash/chunk';
 import { TalentItem } from 'types/ScheduleHelpers';
 import FittedContent from 'components/FittedContent.vue';
 import CountryFlag from 'components/CountryFlag.vue';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import Badge from 'components/Badge.vue';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 

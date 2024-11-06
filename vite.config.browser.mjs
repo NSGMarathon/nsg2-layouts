@@ -18,6 +18,7 @@ export default defineConfig({
         alias: {
             types: resolve(__dirname, 'src/types'),
             'client-shared': resolve(__dirname, 'src/client-shared'),
+            'shared': resolve(__dirname, 'src/shared'),
             components: resolve(__dirname, 'src/graphics/components')
         }
     }

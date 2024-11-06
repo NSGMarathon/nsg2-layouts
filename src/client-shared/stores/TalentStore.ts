@@ -1,7 +1,7 @@
 import { CurrentHostId, Talent } from 'types/schemas';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
-import { prettyPrintList } from 'client-shared/helpers/StringHelper';
+import { prettyPrintList } from 'shared/StringHelper';
 
 const talent = nodecg.Replicant<Talent>('talent');
 const currentHostId = nodecg.Replicant<CurrentHostId>('currentHostId');

@@ -1,4 +1,4 @@
-import { isBlank } from '@iplsplatoon/vue-components';
+import { isBlank } from 'shared/StringHelper';
 
 export async function loadAndCheckIfImageExists(src: string): Promise<boolean> {
     return new Promise(resolve => {

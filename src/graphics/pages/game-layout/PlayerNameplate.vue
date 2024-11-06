@@ -88,7 +88,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons/faYoutube';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 
 library.add(faTwitch, faYoutube);
 

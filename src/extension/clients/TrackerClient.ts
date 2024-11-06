@@ -5,7 +5,7 @@ import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import axios, { isAxiosError } from 'axios';
 import cookie from 'cookie';
 import { URLSearchParams } from 'url';
-import { isBlank } from '../../client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import { DateTime } from 'luxon';
 
 interface TrackerEventIndexResponse {

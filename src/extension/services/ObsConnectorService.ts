@@ -8,7 +8,7 @@ import {
     ObsVideoInputPositions, VideoInputAssignment
 } from 'types/schemas';
 import { EventTypes, OBSWebSocketError, OBSWebSocket } from 'obs-websocket-js';
-import { isBlank } from '../../client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import cloneDeep from 'lodash/cloneDeep';
 import { ObsSceneItem, ObsSceneItemTransform } from 'types/obs';
 

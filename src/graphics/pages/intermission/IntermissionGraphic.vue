@@ -118,7 +118,7 @@ import {
 import FittedContent from 'components/FittedContent.vue';
 import VfdPixelText from 'components/VfdPixelText.vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import Badge from 'components/Badge.vue';
 import CountryFlag from 'components/CountryFlag.vue';
 import { useMusicStore } from 'client-shared/stores/MusicStore';

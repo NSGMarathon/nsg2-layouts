@@ -109,8 +109,9 @@ import {
     IplInput,
     IplSpace
 } from '@iplsplatoon/vue-components';
-import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
-import { formatScheduleItemEstimate, isBlank } from 'client-shared/helpers/StringHelper';
+import { computed, inject, onUnmounted, ref, watch } from 'vue';
+import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';

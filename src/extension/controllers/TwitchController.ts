@@ -2,7 +2,7 @@ import { BaseController } from './BaseController';
 import type NodeCG from '@nodecg/types';
 import type { Configschema } from 'types/schemas';
 import { TwitchService } from '../services/TwitchService';
-import { isBlank } from '../../client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 
 export class TwitchController extends BaseController {
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, twitchService: TwitchService) {
