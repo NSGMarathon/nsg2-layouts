@@ -31,6 +31,7 @@ const OBS_INPUT_KINDS_WITHOUT_VIDEO = [
 
 export class ObsConnectorService {
     private readonly nodecg: NodeCG.ServerAPI;
+    private readonly logger: NodeCG.Logger;
     private readonly socket: OBSWebSocket;
     private readonly sceneDataInTransitionEvents: boolean;
     private obsConnectionInfo: NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
@@ -44,6 +45,7 @@ export class ObsConnectorService {
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         this.nodecg = nodecg;
+        this.logger = new nodecg.Logger(`${nodecg.bundleName}:ObsConnectorService`);
         this.obsState = nodecg.Replicant('obsState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsState>;
         this.obsConnectionInfo = nodecg.Replicant('obsConnectionInfo') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
         this.obsConfig = nodecg.Replicant('obsConfig') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConfig>;
@@ -61,7 +63,7 @@ export class ObsConnectorService {
             .on('ConnectionOpened', () => this.handleOpening())
             .on('Identified', () => {
                 this.handleIdentification().catch(e => {
-                    this.nodecg.log.error('Error loading OBS data:', e);
+                    this.logger.error('Error loading OBS data:', e);
                 });
             })
             .on('CurrentProgramSceneChanged', e => this.handleProgramSceneChange(e))
@@ -100,7 +102,7 @@ export class ObsConnectorService {
     private handleClosure(event: EventTypes['ConnectionClosed']): void {
         if (this.obsState.value.status === 'CONNECTED') {
             if (event.code !== 1000) {
-                this.nodecg.log.error(`OBS websocket closed with message: ${event.message}`);
+                this.logger.error(`OBS websocket closed with message: ${event.message}`);
             }
             this.obsState.value.status = 'NOT_CONNECTED';
             if (this.obsState.value.enabled) {
@@ -133,7 +135,7 @@ export class ObsConnectorService {
 
     private handleSceneCollectionChange(event: EventTypes['CurrentSceneCollectionChanged']): void {
         this.loadState(event.sceneCollectionName).catch(e => {
-            this.nodecg.log.error('Error loading OBS data after scene collection change:', e);
+            this.logger.error('Error loading OBS data after scene collection change:', e);
         });
     }
 
@@ -155,7 +157,7 @@ export class ObsConnectorService {
     }
 
     private handleOpening(): void {
-        this.nodecg.log.info('OBS websocket is open.');
+        this.logger.info('OBS websocket is open.');
         this.obsState.value.status = 'CONNECTED';
         this.stopReconnecting();
     }
@@ -204,19 +206,29 @@ export class ObsConnectorService {
     private async getVideoInputs(): Promise<ObsState['videoInputs']> {
         const videoInputsScene = this.obsConfig.value.videoInputsScene;
         if (videoInputsScene == null) return [];
-        const inputs = await this.socket.call('GetSceneItemList', { sceneName: videoInputsScene });
-        return inputs.sceneItems
-            .filter(sceneItem => typeof sceneItem.inputKind === 'string' && !OBS_INPUT_KINDS_WITHOUT_VIDEO.includes(sceneItem.inputKind))
-            .map(sceneItem => ({
-                type: String(sceneItem.inputKind),
-                sourceName: String(sceneItem.sourceName),
-                sourceUuid: typeof sceneItem.sourceUuid === 'string' ? sceneItem.sourceUuid : null
-            }));
+        try {
+            const inputs = await this.socket.call('GetSceneItemList', { sceneName: videoInputsScene });
+            return inputs.sceneItems
+                .filter(sceneItem => typeof sceneItem.inputKind === 'string' && !OBS_INPUT_KINDS_WITHOUT_VIDEO.includes(sceneItem.inputKind))
+                .map(sceneItem => ({
+                    type: String(sceneItem.inputKind),
+                    sourceName: String(sceneItem.sourceName),
+                    sourceUuid: typeof sceneItem.sourceUuid === 'string' ? sceneItem.sourceUuid : null
+                }));
+        } catch (e) {
+            this.logger.debug('Failed to get video inputs from OBS:', e);
+            return [];
+        }
     }
 
     private async getSceneItemList(sceneName: string): Promise<ObsSceneItem[]> {
-        const sceneItemListResponse = await this.socket.call('GetSceneItemList', { sceneName });
-        return sceneItemListResponse.sceneItems as ObsSceneItem[];
+        try {
+            const sceneItemListResponse = await this.socket.call('GetSceneItemList', { sceneName });
+            return sceneItemListResponse.sceneItems as ObsSceneItem[];
+        } catch (e) {
+            this.logger.debug('Error getting scene item list', e);
+            return [];
+        }
     }
 
     async setGameLayoutVideoFeedAssignments(type: 'game' | 'camera', assignments: (VideoInputAssignment | null)[]) {
@@ -249,7 +261,7 @@ export class ObsConnectorService {
         });
         this.obsVideoInputAssignments.value = newInputAssignments;
 
-        this.nodecg.log.debug(`Removing ${unusedSceneItems.length} unused scene items`);
+        this.logger.debug(`Removing ${unusedSceneItems.length} unused scene items`);
         for (const unusedSceneItem of unusedSceneItems) {
             await this.socket.call('RemoveSceneItem', {
                 sceneName: gameLayoutVideoFeedsScene,
@@ -272,12 +284,12 @@ export class ObsConnectorService {
         const boundsType = type === 'camera' ? 'OBS_BOUNDS_SCALE_OUTER' : 'OBS_BOUNDS_STRETCH';
         const sceneItemIds: (number | undefined)[] = [];
 
-        this.nodecg.log.debug(`Assigning ${capturePositions.length} ${type} capture(s)`);
+        this.logger.debug(`Assigning ${capturePositions.length} ${type} capture(s)`);
         for (let i = 0; i < capturePositions.length; i++) {
             const capture = capturePositions[i];
             const assignedFeed = typeAssignments[i] ?? null;
             if (assignedFeed == null || !this.obsState.value.videoInputs?.some(input => input.sourceName === assignedFeed?.sourceName)) {
-                this.nodecg.log.debug(`${type} ${i + 1} - Assigned input is missing`);
+                this.logger.debug(`${type} ${i + 1} - Assigned input is missing`);
                 sceneItemIds.push(undefined);
                 continue;
             }
@@ -296,7 +308,7 @@ export class ObsConnectorService {
 
             if (sceneItemIndex !== -1) {
                 const existingSceneItem = unusedSceneItems[sceneItemIndex];
-                this.nodecg.log.debug(`${type} ${i + 1} - Found existing scene item`);
+                this.logger.debug(`${type} ${i + 1} - Found existing scene item`);
                 if (
                     existingSceneItem.sceneItemTransform.boundsType !== boundsType
                     || existingSceneItem.sceneItemTransform.boundsHeight !== capture.height
@@ -305,7 +317,7 @@ export class ObsConnectorService {
                     || existingSceneItem.sceneItemTransform.positionX !== capture.x
                     || existingSceneItem.sceneItemTransform.positionY !== capture.y
                 ) {
-                    this.nodecg.log.debug(`${type} ${i + 1} - Correcting transform settings`);
+                    this.logger.debug(`${type} ${i + 1} - Correcting transform settings`);
                     await this.socket.call('SetSceneItemTransform', {
                         sceneName: gameLayoutVideoFeedsScene,
                         sceneItemId: existingSceneItem.sceneItemId,
@@ -322,7 +334,7 @@ export class ObsConnectorService {
                 unusedSceneItems.splice(sceneItemIndex, 1);
                 sceneItemIds.push(existingSceneItem.sceneItemId);
             } else {
-                this.nodecg.log.debug(`${type} ${i + 1} - Creating scene item for assigned input`);
+                this.logger.debug(`${type} ${i + 1} - Creating scene item for assigned input`);
                 const newSceneItem = await this.socket.call('CreateSceneItem', {
                     sceneName: gameLayoutVideoFeedsScene,
                     sourceName: assignedFeed.sourceName,
@@ -440,7 +452,7 @@ export class ObsConnectorService {
         this.reconnectionInterval = setInterval(() => {
             this.reconnectionCount++;
             if (this.reconnectionCount === 1) {
-                this.nodecg.log.info('Attempting to reconnect to OBS...');
+                this.logger.info('Attempting to reconnect to OBS...');
             }
             this.connect(false).catch(() => {
                 // ignore
