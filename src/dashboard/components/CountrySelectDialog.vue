@@ -41,7 +41,7 @@
 import { IplDialog, IplInput, IplSpace } from '@iplsplatoon/vue-components';
 import { computed, ref, watch } from 'vue';
 import regions from '../../../flags/regions.json';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 
 const isOpen = ref(false);
 const query = ref('');

@@ -62,7 +62,8 @@
 
 <script setup lang="ts">
 import { CurrentBids } from 'types/schemas';
-import { formatCurrencyAmount, isBlank } from 'client-shared/helpers/StringHelper';
+import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import FittedContent from 'components/FittedContent.vue';
 import { computed, inject } from 'vue';
 import {

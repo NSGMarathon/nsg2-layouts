@@ -1,7 +1,7 @@
 import { App } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { defineStore } from 'pinia';
-import { isBlank } from '@iplsplatoon/vue-components';
+import { isBlank } from 'shared/StringHelper';
 
 export const useErrorHandlerStore = defineStore('errorHandler', {
     state: () => ({

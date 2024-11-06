@@ -44,7 +44,7 @@
 import { IplBadge, IplButton, IplDialog, IplInput, IplSpace } from '@iplsplatoon/vue-components';
 import { computed, inject, ref, watch } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import { Talent } from 'types/schemas';
 import { TalentItemEditDialogInjectionKey } from '../helpers/Injections';
 

@@ -38,7 +38,7 @@
 import { IplButton, IplInput, IplSpace } from '@iplsplatoon/vue-components';
 import { computed, ref } from 'vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import { useOengusDataStore } from 'client-shared/stores/OengusDataStore';
 
 const oengusDataStore = useOengusDataStore();

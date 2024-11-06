@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { IplDialog, IplInput, IplMessage, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
 import { computed, ref, watch } from 'vue';
-import { isBlank } from 'client-shared/helpers/StringHelper';
+import { isBlank } from 'shared/StringHelper';
 import debounce from 'lodash/debounce';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useTwitchDataStore } from 'client-shared/stores/TwitchDataStore';

@@ -27,6 +27,9 @@
             "client-shared/*": [
                 "src/client-shared/*"
             ],
+            "shared/*": [
+                "src/shared/*"
+            ],
             "components/*": [
                 "src/graphics/components/*"
             ]
