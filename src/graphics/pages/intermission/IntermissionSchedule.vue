@@ -81,8 +81,10 @@ import { useTalentStore } from 'client-shared/stores/TalentStore';
 import SpeedrunEstimateDisplay from 'components/SpeedrunEstimateDisplay.vue';
 import { Duration } from 'luxon';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
+import { Configschema } from 'types/schemas';
 
-const maxScheduleItemCount = 4;
+const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
+const maxScheduleItemCount = addCameraSpace ? 4 : 6;
 
 const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();

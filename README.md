@@ -24,7 +24,8 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
 ```json
 {
   "intermission": {
-    "addVisualizerSpace": true
+    "addVisualizerSpace": true,
+    "addCameraSpace": true
   },
   "obs": {
     "sceneDataInTransitionEvents": false
@@ -101,10 +102,13 @@ nsg2-layouts can be used in conjunction with a [modified build of obs-websocket]
 to react to scene changes when a transition starts as opposed to when it completes. If this build is in use, set the
 `obs.sceneDataInTransitionEvents` property in the bundle configuration file to `true`. Otherwise, set it to `false`.
 
-#### Visualizer space
+#### Visualizer & Camera spaces
 
 Set `intermission.addVisualizerSpace` to `true` in the configuration file to add an empty space to the intermission 
 graphic, intended for an audio visualizer. This hasn't been used in any live NSG events.
+
+Set `intermission.addCameraSpace` to `false` in the configuration file to remove the cutout intended for a camera feed
+from the intermission graphic, useful for online events.
 
 ## Usage
 

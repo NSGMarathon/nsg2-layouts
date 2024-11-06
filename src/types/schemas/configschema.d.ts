@@ -8,6 +8,7 @@
 export interface Configschema {
 	intermission?: {
 		addVisualizerSpace?: boolean;
+		addCameraSpace?: boolean;
 		[k: string]: unknown;
 	};
 	obs?: {

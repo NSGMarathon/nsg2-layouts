@@ -1,7 +1,10 @@
 <template>
     <div
         class="intermission-layout"
-        :class="{ 'with-visualizer-space': addVisualizerSpace }"
+        :class="{
+            'with-visualizer-space': addVisualizerSpace,
+            'with-camera-space': addCameraSpace
+        }"
     >
         <div class="bg-panel">
             <div class="layout horizontal logos">
@@ -88,7 +91,10 @@
         <large-separator direction="vertical" />
         <div class="bg-panel right-panel">
             <intermission-schedule />
-            <div class="bg-inset camera-border" />
+            <div
+                v-if="addCameraSpace"
+                class="bg-inset camera-border"
+            />
         </div>
     </div>
 </template>
@@ -116,6 +122,7 @@ import { defaultSpeakingThreshold, disableVolumeMeters, useMixerStore } from 'cl
 import { Configschema } from 'types/schemas';
 
 const addVisualizerSpace = (nodecg.bundleConfig as Configschema).intermission?.addVisualizerSpace ?? false;
+const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
 
 provide(MaxOmnibarBidWarItemsInjectionKey, 3);
 provide(MaxOmnibarBidWarTitleWidthInjectionKey, 200);
@@ -146,8 +153,10 @@ const hostSpeaking = computed(() => {
         padding: 40px 50px;
         display: flex;
         flex-direction: column;
+    }
 
-        &.right-panel {
+    &.with-camera-space {
+        > .bg-panel.right-panel {
             $schedule-height: 723px;
             // Will explode if the schedule's height changes, but I don't foresee that.
             clip-path: polygon(0% 0%, 0% 100%, 53px 100%, 53px $schedule-height, calc(100% - 53px) $schedule-height, calc(100% - 53px) calc(100% - 53px), 50px calc(100% - 53px), 53px 100%, 100% 100%, 100% 0%);
@@ -157,6 +166,12 @@ const hostSpeaking = computed(() => {
                 margin-bottom: 10px;
                 height: 100%;
             }
+        }
+    }
+
+    &:not(.with-camera-space) {
+        > .bg-panel.right-panel {
+            justify-content: center;
         }
     }
 
