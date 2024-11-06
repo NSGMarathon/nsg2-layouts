@@ -3,15 +3,19 @@
         class="intermission-layout"
         :class="{
             'with-visualizer-space': addVisualizerSpace,
-            'with-camera-space': addCameraSpace
+            'with-camera-space': addCameraSpace,
+            'with-prizes': showPrizes
         }"
     >
-        <div class="bg-panel">
-            <div class="layout horizontal logos">
+        <div class="bg-panel left-panel">
+            <div class="layout horizontal logos grow">
                 <img src="../../assets/img/large-logo.png">
                 <media-box class="media-box" />
             </div>
-            <intermission-prize-display class="max-width prize-display" />
+            <intermission-prize-display
+                v-if="showPrizes"
+                class="max-width prize-display"
+            />
             <div class="bg-inset m-t-16 layout vertical center-horizontal">
                 <div class="m-b-8 layout horizontal center-vertical">
                     <donation-total class="donation-total" />
@@ -120,9 +124,13 @@ import CountryFlag from 'components/CountryFlag.vue';
 import { useMusicStore } from 'client-shared/stores/MusicStore';
 import { defaultSpeakingThreshold, disableVolumeMeters, useMixerStore } from 'client-shared/stores/MixerStore';
 import { Configschema } from 'types/schemas';
+import { useCurrentTrackerDataStore } from 'client-shared/stores/CurrentTrackerDataStore';
+
+const currentTrackerDataStore = useCurrentTrackerDataStore();
 
 const addVisualizerSpace = (nodecg.bundleConfig as Configschema).intermission?.addVisualizerSpace ?? false;
 const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
+const showPrizes = computed(() => currentTrackerDataStore.currentPrizes.length > 0);
 
 provide(MaxOmnibarBidWarItemsInjectionKey, 3);
 provide(MaxOmnibarBidWarTitleWidthInjectionKey, 200);
@@ -175,6 +183,18 @@ const hostSpeaking = computed(() => {
         }
     }
 
+    &:not(.with-prizes) {
+        .logos {
+            img {
+                width: 300px;
+            }
+        }
+
+        .left-panel > * {
+            margin-top: 24px;
+        }
+    }
+
     &.with-visualizer-space {
         .prize-display {
             height: 250px;
@@ -197,6 +217,7 @@ const hostSpeaking = computed(() => {
 
     img {
         width: 250px;
+        object-fit: contain;
     }
 
     .media-box {
