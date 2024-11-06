@@ -1,5 +1,9 @@
 import { Duration } from 'luxon';
 import { ScheduleItem } from 'types/ScheduleHelpers';
+import { Configschema } from 'types/schemas';
+
+export const CURRENCY_CODE = (nodecg.bundleConfig as Configschema).event?.currency?.code ?? 'NOK';
+export const CURRENCY_UNIT = (nodecg.bundleConfig as Configschema).event?.currency?.unit ?? 'kr';
 
 export function addDots(value: string, maxLength?: number): string;
 export function addDots(value: string | undefined | null, maxLength?: number): string | undefined | null;
@@ -59,12 +63,12 @@ export function formatNumber(number: number): string {
     return new Intl.NumberFormat('et-EE', { maximumFractionDigits: 0 }).format(Math.floor(number));
 }
 
-export function formatCurrencyAmount(number: number, alwaysShowDecimals = false): string {
+export function formatCurrencyAmount(number: number, alwaysShowDecimals = false, addCurrencyUnit = true): string {
     // i don't like this solution, but it works how i want it to
     if (alwaysShowDecimals || number % 1 !== 0) {
-        return new Intl.NumberFormat('et-EE', { useGrouping: 'min2', minimumFractionDigits: 2 }).format(number).replaceAll(',', '.');
+        return new Intl.NumberFormat('et-EE', { useGrouping: 'min2', minimumFractionDigits: 2 }).format(number).replaceAll(',', '.') + (addCurrencyUnit ? CURRENCY_UNIT : '');
     } else {
-        return new Intl.NumberFormat('et-EE', { useGrouping: 'min2', minimumFractionDigits: 0 }).format(number);
+        return new Intl.NumberFormat('et-EE', { useGrouping: 'min2', minimumFractionDigits: 0 }).format(number) + (addCurrencyUnit ? CURRENCY_UNIT : '');
     }
 }
 

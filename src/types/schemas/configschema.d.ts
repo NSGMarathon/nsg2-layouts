@@ -18,6 +18,11 @@ export interface Configschema {
 		timezone: string;
 		name?: string;
 		donationUrl?: string;
+		currency?: {
+			code?: string;
+			unit?: string;
+			[k: string]: unknown;
+		};
 		[k: string]: unknown;
 	};
 	oengus?: {

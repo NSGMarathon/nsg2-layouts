@@ -32,7 +32,11 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
   "event": {
     "timezone": "Europe/Oslo",
     "name": "NSG Fall 2024",
-    "donationUrl": "donate.nsgmarathon.com"
+    "donationUrl": "donate.nsgmarathon.com",
+    "currency": {
+      "code": "NOK",
+      "unit": " kr"
+    }
   },
   "oengus": {
     "useSandbox": false

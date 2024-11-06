@@ -13,6 +13,7 @@ import { initAssetStore } from 'client-shared/stores/AssetStore';
 import { initMusicStore } from 'client-shared/stores/MusicStore';
 import { initMixerStore } from 'client-shared/stores/MixerStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
+import { initAllTrackerDataStore } from 'client-shared/stores/AllTrackerDataStore';
 
 (async () => {
     const app = createApp(IntermissionGraphic);
@@ -23,6 +24,7 @@ import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
         initTalentStore(),
         initDonationStore(),
         initCurrentTrackerDataStore(),
+        initAllTrackerDataStore(),
         initTimerStore(),
         initAssetStore(),
         initMusicStore(),

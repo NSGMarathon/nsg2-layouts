@@ -4,7 +4,7 @@
             <fitted-content class="milestone-name m-r-8">
                 {{ props.milestone.name }}
             </fitted-content>
-            <div>{{ formatNumber(donationStore.donationTotal) }}/<span class="milestone-total">{{ formatNumber(props.milestone.amount) }}kr</span></div>
+            <div>{{ formatCurrencyAmount(donationStore.donationTotal, false, false) }}/<span class="milestone-total">{{ formatCurrencyAmount(props.milestone.amount) }}</span></div>
         </div>
         <vfd-pixel-text
             :font-size="24"
@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import VfdPixelText from 'components/VfdPixelText.vue';
 import { Milestones } from 'types/schemas';
-import { formatNumber } from '../../../client-shared/helpers/StringHelper';
+import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
 import { useDonationStore } from 'client-shared/stores/DonationStore';
 import FittedContent from 'components/FittedContent.vue';
 

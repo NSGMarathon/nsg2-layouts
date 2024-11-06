@@ -2,7 +2,7 @@
     <ipl-space color="secondary">
         <div class="prize-name">{{ props.prize.name }}</div>
         <div>{{ availability }}</div>
-        <div>{{ formatCurrencyAmount(props.prize.minimumBid) }}kr {{ props.prize.sumDonations ? 'total donations' : 'minimum donation' }}</div>
+        <div>{{ formatCurrencyAmount(props.prize.minimumBid) }} {{ props.prize.sumDonations ? 'total donations' : 'minimum donation' }}</div>
     </ipl-space>
 </template>
 

@@ -7,7 +7,7 @@
         />
         <div class="currency-label">
             <div>USD</div>
-            <div>NOK</div>
+            <div>{{ CURRENCY_CODE }}</div>
         </div>
     </div>
 </template>
@@ -16,6 +16,7 @@
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { useTweenedNumber } from '../helpers/useTweenedNumber';
 import { useDonationStore } from 'client-shared/stores/DonationStore';
+import { CURRENCY_CODE } from 'client-shared/helpers/StringHelper';
 
 const donationStore = useDonationStore();
 const tweenedTotal = useTweenedNumber(() => Math.floor(donationStore.donationTotal));

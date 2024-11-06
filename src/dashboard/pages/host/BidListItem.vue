@@ -5,10 +5,10 @@
             :class="{ 'goal-met': props.bid.goal != null && props.bid.total >= props.bid.goal }"
         >
             <template v-if="props.bid.goal != null">
-                {{ formatCurrencyAmount(props.bid.total) }}/{{ formatCurrencyAmount(props.bid.goal) }}kr
+                {{ formatCurrencyAmount(props.bid.total) }}/{{ formatCurrencyAmount(props.bid.goal) }}
             </template>
             <template v-else>
-                {{ formatCurrencyAmount(props.bid.total) }}kr
+                {{ formatCurrencyAmount(props.bid.total) }}
             </template>
         </div>
         <ipl-badge
@@ -40,7 +40,7 @@
                 :key="option.id"
                 class="m-t-2"
             >
-                <div style="float: right">{{ formatCurrencyAmount(option.total) }}kr ({{ props.bid.total === 0 ? 0 : Math.round((option.total / props.bid.total) * 100) }}%)</div>
+                <div style="float: right">{{ formatCurrencyAmount(option.total) }} ({{ props.bid.total === 0 ? 0 : Math.round((option.total / props.bid.total) * 100) }}%)</div>
                 <div>{{ option.name }}</div>
                 <div>{{ option.description }}</div>
             </div>

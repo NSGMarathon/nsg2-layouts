@@ -30,7 +30,7 @@
             >
                 <div class="option-numbers">
                     <div class="percentage">{{ props.bidWar.total === 0 ? 0 : Math.round((option.total / props.bidWar.total) * 100) }}%</div>
-                    <div class="total">{{ formatNumber(option.total) }}kr</div>
+                    <div class="total">{{ formatCurrencyAmount(option.total) }}</div>
                 </div>
                 <fitted-content align="center" class="option-name">{{ option.name }}</fitted-content>
             </div>
@@ -48,7 +48,7 @@
                 <fitted-content class="option-name">
                     {{ option.name }}
                 </fitted-content>
-                <div class="option-total">{{ formatNumber(option.total) }}kr</div>
+                <div class="option-total">{{ formatCurrencyAmount(option.total) }}</div>
             </div>
             <div
                 v-if="(props.bidWar.options?.length ?? 0) > maxOptions"
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { CurrentBids } from 'types/schemas';
-import { formatNumber, isBlank } from 'client-shared/helpers/StringHelper';
+import { formatCurrencyAmount, formatNumber, isBlank } from 'client-shared/helpers/StringHelper';
 import FittedContent from 'components/FittedContent.vue';
 import { computed, inject } from 'vue';
 import {
@@ -156,6 +156,7 @@ const maxTitleWidth = inject(MaxOmnibarBidWarTitleWidthInjectionKey, 275);
         padding-right: 6px;
         padding-left: 4px;
         height: 100%;
+        white-space: nowrap;
 
         .percentage {
             font-weight: 700;

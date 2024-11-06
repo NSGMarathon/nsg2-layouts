@@ -29,7 +29,7 @@
                 {{ milestone.name }}
             </div>
             <div class="m-y-2">{{ milestone.description || milestone.shortDescription }}</div>
-            <div>{{ formatCurrencyAmount(milestone.amount) }}kr; starts at {{ formatCurrencyAmount(milestone.start) }}kr</div>
+            <div>{{ formatCurrencyAmount(milestone.amount) }}; starts at {{ formatCurrencyAmount(milestone.start) }}</div>
         </ipl-space>
     </ipl-expanding-space>
 </template>

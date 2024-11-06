@@ -23,7 +23,7 @@
                             />
                             <div class="currency-label">
                                 <div class="unlit">USD</div>
-                                <div>NOK</div>
+                                <div>{{ CURRENCY_CODE }}</div>
                             </div>
                             <div class="donation-type">
                                 <template v-if="activePrize.sumDonations">
@@ -52,6 +52,7 @@ import prizeImagePlaceholder from '../../assets/img/prize-image-placeholder.png'
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import OpacitySwapTransition from 'components/OpacitySwapTransition.vue';
 import FittedContent from 'components/FittedContent.vue';
+import { CURRENCY_CODE } from 'client-shared/helpers/StringHelper';
 
 const currentTrackerDataStore = useCurrentTrackerDataStore();
 

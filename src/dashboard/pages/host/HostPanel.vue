@@ -12,7 +12,7 @@
         </div>
         <div>
             <ipl-space class="text-center donation-total">
-                {{ formatCurrencyAmount(donationStore.donationTotal, true) }} kr
+                {{ formatCurrencyAmount(donationStore.donationTotal, true) }}
             </ipl-space>
             <host-active-run-display class="m-t-8" />
         </div>

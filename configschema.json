@@ -34,7 +34,14 @@
             "properties": {
                 "timezone": { "type": "string" },
                 "name": { "type": "string" },
-                "donationUrl": { "type": "string" }
+                "donationUrl": { "type": "string" },
+                "currency": {
+                    "type": "object",
+                    "properties": {
+                        "code": { "type": "string" },
+                        "unit": { "type": "string" }
+                    }
+                }
             }
         },
         "oengus": {

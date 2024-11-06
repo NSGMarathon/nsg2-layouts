@@ -4,7 +4,7 @@
             <fitted-content class="incentive-name m-r-8">
                 <span v-if="!$helpers.isBlank(props.incentive.speedrunName)" class="speedrun-name">{{ props.incentive.speedrunName }} - </span>{{ props.incentive.name }}
             </fitted-content>
-            <div>{{ formatNumber(props.incentive.total) }}/<span class="incentive-total">{{ props.incentive.goal == null ? '-' : formatNumber(props.incentive.goal) }}kr</span></div>
+            <div>{{ formatCurrencyAmount(props.incentive.total, false, false) }}/<span class="incentive-total">{{ props.incentive.goal == null ? '-' : formatCurrencyAmount(props.incentive.goal) }}</span></div>
         </div>
         <vfd-pixel-text
             :font-size="24"
@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import VfdPixelText from 'components/VfdPixelText.vue';
 import { CurrentBids } from 'types/schemas';
-import { formatNumber } from 'client-shared/helpers/StringHelper';
+import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
 import FittedContent from 'components/FittedContent.vue';
 
 const props = defineProps<{
@@ -42,6 +42,7 @@ const props = defineProps<{
     justify-content: space-between;
     color: colors.$vfd-teal;
     font-size: 25px;
+    white-space: nowrap;
 }
 
 .incentive-total, .incentive-name {
