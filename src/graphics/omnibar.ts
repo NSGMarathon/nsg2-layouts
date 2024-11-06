@@ -9,7 +9,6 @@ import { initTalentStore } from 'client-shared/stores/TalentStore';
 import { initDonationStore } from 'client-shared/stores/DonationStore';
 import { initCurrentTrackerDataStore } from 'client-shared/stores/CurrentTrackerDataStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
-import { initAllTrackerDataStore } from 'client-shared/stores/AllTrackerDataStore';
 
 (async () => {
     const app = createApp(OmnibarGraphic);
@@ -19,8 +18,7 @@ import { initAllTrackerDataStore } from 'client-shared/stores/AllTrackerDataStor
         initScheduleStore(),
         initTalentStore(),
         initDonationStore(),
-        initCurrentTrackerDataStore(),
-        initAllTrackerDataStore()
+        initCurrentTrackerDataStore()
     ]);
     initTextScrollEventBus(app);
     app.mount('#app');

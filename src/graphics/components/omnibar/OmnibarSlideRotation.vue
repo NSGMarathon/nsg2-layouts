@@ -86,7 +86,6 @@ import OmnibarBidWarDisplay from 'components/omnibar/OmnibarBidWarDisplay.vue';
 import OmnibarScheduleItemDisplay from 'components/omnibar/OmnibarScheduleItemDisplay.vue';
 import OmnibarIncentiveDisplay from 'components/omnibar/OmnibarIncentiveDisplay.vue';
 import OmnibarMilestoneDisplay from 'components/omnibar/OmnibarMilestoneDisplay.vue';
-import { useAllTrackerDataStore } from 'client-shared/stores/AllTrackerDataStore';
 
 const props = withDefaults(defineProps<{
     withoutDonationReminder?: boolean
@@ -105,7 +104,6 @@ const showDonationReminder = computed(() => donationUrl != null && !props.withou
 const donationStore = useDonationStore();
 const scheduleStore = useScheduleStore();
 const currentTrackerDataStore = useCurrentTrackerDataStore();
-const allTrackerDataStore = useAllTrackerDataStore();
 
 // Grab the next items on the schedule. If the next two items are interstitials, also show the next speedrun.
 const interstitialsBeforeActiveRun = computed(() => props.withoutScheduleItems ? [] : scheduleStore.interstitialsBeforeActiveRun.filter(interstitial => !interstitial.completed));
@@ -177,11 +175,11 @@ const {
     enabled: incentivesEnabled,
     beforeShow: beforeIncentiveShow
 } = useRotatingList(() => {
-    const allIncentives = allTrackerDataStore.allBids.filter(bid => (bid.options == null || bid.options.length === 0) && bid.goal != null);
-    // const pinnedIncentives = allIncentives.filter(incentive => incentive.pinned);
-    // if (pinnedIncentives.length > 0 || anyBidsPinned.value) {
-    //     return pinnedIncentives;
-    // }
+    const allIncentives = currentTrackerDataStore.currentBids.filter(bid => (bid.options == null || bid.options.length === 0) && bid.goal != null);
+    const pinnedIncentives = allIncentives.filter(incentive => incentive.pinned);
+    if (pinnedIncentives.length > 0 || anyBidsPinned.value) {
+        return pinnedIncentives;
+    }
     return allIncentives;
 });
 
@@ -190,11 +188,11 @@ const {
     enabled: bidWarsEnabled,
     beforeShow: beforeBidWarShow
 } = useRotatingList(() => {
-    const allBids = allTrackerDataStore.allBids.filter(bid => bid.options != null && (bid.userOptionsAllowed || bid.options.length > 0));
-    // const pinnedBids = allBids.filter(bid => bid.pinned);
-    // if (pinnedBids.length > 0 || anyBidsPinned.value) {
-    //     return pinnedBids;
-    // }
+    const allBids = currentTrackerDataStore.currentBids.filter(bid => bid.options != null && (bid.userOptionsAllowed || bid.options.length > 0));
+    const pinnedBids = allBids.filter(bid => bid.pinned);
+    if (pinnedBids.length > 0 || anyBidsPinned.value) {
+        return pinnedBids;
+    }
     return allBids;
 });
 
@@ -213,14 +211,14 @@ const slides = useSlides(() => {
             { component: 'donationReminder2', enabled: showDonationReminder, duration: 10 });
     } else {
         result.push(
-            // { component: 'nextUp', enabled: computed(() => nextScheduleItem.value != null), duration: null },
-            // { component: 'later', enabled: computed(() => scheduleItemAfterNext.value != null), duration: null },
-            // { component: 'nextSpeedrun', enabled: computed(() => nextSpeedrun.value != null), duration: null },
-            // { component: 'milestone', enabled: milestonesEnabled, beforeChange: beforeMilestoneShow, duration: 30 },
-            { component: 'incentive', enabled: incentivesEnabled, beforeChange: beforeIncentiveShow, duration: 3 },
-            { component: 'bidwar', enabled: bidWarsEnabled, beforeChange: beforeBidWarShow, duration: 3 });
-            // { component: 'donationReminder1', enabled: showDonationReminder, duration: 10 },
-            // { component: 'donationReminder2', enabled: showDonationReminder, duration: 10 });
+            { component: 'nextUp', enabled: computed(() => nextScheduleItem.value != null), duration: null },
+            { component: 'later', enabled: computed(() => scheduleItemAfterNext.value != null), duration: null },
+            { component: 'nextSpeedrun', enabled: computed(() => nextSpeedrun.value != null), duration: null },
+            { component: 'milestone', enabled: milestonesEnabled, beforeChange: beforeMilestoneShow, duration: 30 },
+            { component: 'incentive', enabled: incentivesEnabled, beforeChange: beforeIncentiveShow, duration: 30 },
+            { component: 'bidwar', enabled: bidWarsEnabled, beforeChange: beforeBidWarShow, duration: 30 },
+            { component: 'donationReminder1', enabled: showDonationReminder, duration: 10 },
+            { component: 'donationReminder2', enabled: showDonationReminder, duration: 10 });
     }
 
     return result;
