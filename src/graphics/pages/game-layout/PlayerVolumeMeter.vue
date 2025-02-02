@@ -14,11 +14,14 @@ import { colors } from '../../styles/colors';
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import Badge from 'components/Badge.vue';
 import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
+import { MixerChannelAssignment } from 'types/schemas';
+import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 
 const mixerStore = useMixerStore();
+const scheduleStore = useScheduleStore();
 
 const props = defineProps<{
-    talentId: string
+    talentId?: string
     teamId?: string
     index: number
 }>();
@@ -63,13 +66,83 @@ onMounted(() => {
     let currentLevel = 0;
     let targetLevel = 0;
 
-    watch(() => {
-        const assignment = mixerStore.talentMixerChannelAssignments.speedrunTalent[props.talentId] ?? (props.teamId == null ? null : mixerStore.talentMixerChannelAssignments.speedrunTeams[props.teamId]);
-        if (assignment == null) return [-90, defaultSpeakingThreshold];
-        return [mixerStore.mixerChannelLevels[assignment.channelId] ?? -90, assignment.speakingThresholdDB ?? defaultSpeakingThreshold, CHANNEL_LEVEL_EXPONENT];
-    }, ([channelLevel, speakingThreshold, channelLevelExponent]) => {
-        targetLevel = channelLevel > speakingThreshold ? ((channelLevel + 90) / 100) ** (1 / channelLevelExponent) : 0;
+    // If the volume meter is assigned to a player, look for the player's mixer channel then the team's channel
+    // If the volume meter is only assigned to a team, look for the team's channel then try to get the highest level out of all team players
+    const assignmentData = ref<{
+        channelIds: number[]
+        speakingThresholdDB: number
+    }>({
+        channelIds: [],
+        speakingThresholdDB: defaultSpeakingThreshold
     });
+
+    watch(() => [
+        props.talentId,
+        props.teamId,
+        mixerStore.talentMixerChannelAssignments,
+        scheduleStore.activeSpeedrun?.teams
+    ], () => {
+        let assignments: MixerChannelAssignment[] | undefined = undefined;
+
+        if (props.talentId != null) {
+            const talentAssignment = mixerStore.talentMixerChannelAssignments.speedrunTalent[props.talentId];
+            if (talentAssignment != null) {
+                assignments = [talentAssignment];
+            }
+        }
+
+        if (assignments == null && props.teamId != null) {
+            const teamAssignment = mixerStore.talentMixerChannelAssignments.speedrunTeams[props.teamId];
+            if (teamAssignment != null) {
+                assignments = [teamAssignment];
+            }
+
+            if (assignments == null && props.talentId == null) {
+                const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === props.teamId);
+                if (team != null) {
+                    assignments = team.playerIds
+                        .map(playerId => mixerStore.talentMixerChannelAssignments.speedrunTalent[playerId.id])
+                        .filter(assignment => assignment != null);
+                }
+            }
+        }
+
+        if (assignments == null || assignments.length === 0) {
+            assignmentData.value = {
+                channelIds: [],
+                speakingThresholdDB: defaultSpeakingThreshold
+            };
+        } else if (assignments.length === 1) {
+            assignmentData.value = {
+                channelIds: [assignments[0].channelId],
+                speakingThresholdDB: assignments[0].speakingThresholdDB ?? defaultSpeakingThreshold
+            };
+        } else {
+            const highestSpeakingThreshold = Math.max(...assignments.map(assignment => assignment.speakingThresholdDB ?? defaultSpeakingThreshold));
+            assignmentData.value = {
+                channelIds: assignments.map(assignment => assignment.channelId),
+                speakingThresholdDB: highestSpeakingThreshold
+            };
+        }
+    }, { immediate: true });
+
+    watch(() => {
+        if (assignmentData.value.channelIds.length === 0) {
+            return [-90, assignmentData.value.speakingThresholdDB];
+        } else if (assignmentData.value.channelIds.length === 1) {
+            return [
+                mixerStore.mixerChannelLevels[assignmentData.value.channelIds[0]] ?? -90,
+                assignmentData.value.speakingThresholdDB
+            ];
+        } else {
+            return [
+                Math.max(...assignmentData.value.channelIds.map(channelId => mixerStore.mixerChannelLevels[channelId] ?? -90)),
+                assignmentData.value.speakingThresholdDB
+            ];
+        }
+    }, ([channelLevel, speakingThreshold]) => {
+        targetLevel = channelLevel > speakingThreshold ? ((channelLevel + 90) / 100) ** (1 / CHANNEL_LEVEL_EXPONENT) : 0;
+    }, { immediate: true });
 
     const redraw = (time: number) => {
         if (!alive) {

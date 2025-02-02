@@ -3,16 +3,39 @@
         class="player-nameplate"
         :data-nameplate-index="props.index"
         :style="{
-            minHeight: props.fixedHeight ? undefined : `${Math.max(80, Math.min(props.maxConcurrentPlayers, assignmentData?.talent.length ?? 0) * 60 + 16)}px`,
+            minHeight,
             height: props.fixedHeight ? '80px' : undefined
         }"
     >
         <opacity-swap-transition mode="default">
             <div :key="talentListSlides.activeComponent.value ?? '-1'">
                 <div
+                    v-if="assignmentData?.teamName != null && assignmentData?.talent.length === 0"
+                    class="talent-item team-name"
+                    :class="{ 'is-compact': useCompactTalentItems }"
+                    key="team-name"
+                >
+                    <div class="talent-details-anchor">
+                        <div class="talent-details">
+                            <fitted-content
+                                align="center"
+                                class="talent-name"
+                            >
+                                {{ assignmentData.teamName }}
+                            </fitted-content>
+                        </div>
+                    </div>
+                    <player-volume-meter
+                        v-if="!disableVolumeMeters && !useCompactTalentItems"
+                        :index="baseIndex + 1"
+                        :team-id="assignmentData?.teamId"
+                        class="volume-meter"
+                    />
+                </div>
+                <div
                     v-for="(talent, i) in chunkedTalentList[Number(talentListSlides.activeComponent.value)]"
                     class="talent-item"
-                    :class="{ 'is-compact': useCompactVolumeMeters }"
+                    :class="{ 'is-compact': useCompactTalentItems }"
                     :key="talent.id"
                 >
                     <div class="talent-details-anchor">
@@ -22,18 +45,24 @@
                                 :key="getVisibleName(i).type"
                             >
                                 <badge
-                                    v-if="disableVolumeMeters || useCompactVolumeMeters"
+                                    v-if="disableVolumeMeters || useCompactTalentItems"
                                     class="talent-index"
                                 >
                                     {{ baseIndex + i + 1 + Number(talentListSlides.activeComponent.value) * props.maxConcurrentPlayers }}
                                 </badge>
                                 <compact-player-speaking-indicator
-                                    v-if="useCompactVolumeMeters"
+                                    v-if="useCompactTalentItems"
                                     :player-id="talent.id"
                                     :team-id="assignmentData?.teamId"
                                     class="compact-speaking-indicator"
                                 />
                                 <fitted-content align="center">
+                                    <span
+                                        v-if="assignmentData?.teamName != null"
+                                        class="talent-team-name"
+                                    >
+                                        {{ assignmentData.teamName }}:
+                                    </span>
                                     <font-awesome-icon
                                         v-if="getVisibleName(i).type !== 'name'"
                                         :icon="getVisibleName(i).type === 'twitch' ? ['fab', 'twitch'] : ['fab', 'youtube']"
@@ -56,10 +85,9 @@
                         </opacity-swap-transition>
                     </div>
                     <player-volume-meter
-                        v-if="!disableVolumeMeters && !useCompactVolumeMeters"
+                        v-if="!disableVolumeMeters && !useCompactTalentItems"
                         :talent-id="talent.id"
                         :index="baseIndex + i + 1 + Number(talentListSlides.activeComponent.value) * props.maxConcurrentPlayers"
-                        :compact="useCompactVolumeMeters"
                         :team-id="assignmentData?.teamId"
                         class="volume-meter"
                     />
@@ -104,14 +132,42 @@ const props = withDefaults(defineProps<{
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 
-const assignmentData = computed<{ teamId?: string, talent: Talent } | null>(() => {
+const assignmentData = computed<{ teamId?: string, teamName?: string, talent: Talent } | null>(() => {
     const assignments = scheduleStore.playerNameplateAssignments[props.index];
     if (assignments == null) return null;
+    const assignedTeam = assignments.teamId == null ? null : scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId);
+    if (!isBlank(assignedTeam?.name)) {
+        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments.filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
+
+        return {
+            teamId: assignedTeam!.id,
+            teamName: assignedTeam!.name,
+            talent: scheduleStore.activeSpeedrun?.relay || multipleNameplatesAssignedToTeam
+                ? assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null)
+                : []
+        };
+    }
     return {
         teamId: assignments.teamId,
         talent: assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null)
     };
 });
+
+const useCompactTalentItems = computed(() => {
+    if (!props.fixedHeight) return false;
+    return (chunkedTalentList.value[Number(talentListSlides.activeComponent.value)]?.length ?? 0) > 1;
+});
+
+const minHeight = computed(() => {
+    if (props.fixedHeight) return undefined;
+
+    if (assignmentData.value?.teamName != null) {
+        return '80px';
+    } else {
+        return `${Math.max(80, Math.min(props.maxConcurrentPlayers, assignmentData.value?.talent.length ?? 0) * 60 + 16)}px`;
+    }
+});
+
 const chunkedTalentList = computed<Talent[]>(() => assignmentData.value == null ? [] : chunk(assignmentData.value.talent, props.maxConcurrentPlayers));
 
 type VisibleTalentName = { talentId: string, visibleName: string, type: 'name' | 'twitch' | 'youtube', isFirstDisplay: boolean };
@@ -161,11 +217,19 @@ const talentListSlides = useSlides(() => chunkedTalentList.value.map((_, i) => (
 const baseIndex = computed(() => scheduleStore.playerNameplateAssignments
     .slice(0, props.index)
     .reduce((result, assignments) => {
-        result += assignments.playerIds.length;
+        // If a named team only has a single nameplate, that nameplate displays only one name.
+        // Otherwise, each member of the team is shown individually.
+        if (
+            assignments.teamId != null
+            && !isBlank(scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId)?.name)
+            && scheduleStore.playerNameplateAssignments.filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
+        ) {
+            result += 1;
+        } else {
+            result += assignments.playerIds.length;
+        }
         return result;
     }, 0));
-
-const useCompactVolumeMeters = computed(() => props.fixedHeight && (assignmentData.value?.talent.length ?? 0) > 1);
 </script>
 
 <style scoped lang="scss">
@@ -204,12 +268,19 @@ const useCompactVolumeMeters = computed(() => props.fixedHeight && (assignmentDa
     grid-auto-rows: 1fr;
     height: 60px;
 
+    &.team-name {
+        font-weight: 600;
+    }
+
     &.is-compact {
         height: 36px;
     }
 
     > .talent-details-anchor {
         position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .talent-details {
@@ -234,6 +305,11 @@ const useCompactVolumeMeters = computed(() => props.fixedHeight && (assignmentDa
             position: absolute;
             height: 25px;
         }
+    }
+
+    .talent-team-name {
+        font-weight: 500;
+        font-family: 'Roboto Condensed', sans-serif;
     }
 }
 
