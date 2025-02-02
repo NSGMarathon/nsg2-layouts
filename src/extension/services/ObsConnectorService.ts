@@ -74,14 +74,6 @@ export class ObsConnectorService {
                 nodecg.log.error('Error while connecting to OBS:', e.toString());
             });
         }
-
-        this.obsVideoInputPositions.on('change', async () => {
-            try {
-                await this.setGameLayoutVideoFeedPositions(this.obsVideoInputAssignments.value);
-            } catch (e) {
-                nodecg.log.error('Error updating capture positions:', e);
-            }
-        });
     }
 
     // We can use a slightly modified build of obs-websocket to know when the program scene changes when the transition
@@ -122,7 +114,7 @@ export class ObsConnectorService {
     private async handleIdentification(): Promise<void> {
         const sceneCollections = await this.socket.call('GetSceneCollectionList');
         await this.loadState(sceneCollections.currentSceneCollectionName);
-        await this.setGameLayoutVideoFeedPositions(this.obsVideoInputAssignments.value);
+        await Promise.all(this.obsVideoInputAssignments.value.map((assignments, i) => this.setGameLayoutVideoFeedPositions(assignments, i)));
 
         this.socket
             .on('SceneCreated', this.handleSceneCreation.bind(this))
@@ -195,12 +187,12 @@ export class ObsConnectorService {
         if (this.obsState.value.videoInputs != null) {
             this.obsState.value.videoInputs = this.obsState.value.videoInputs.map(input => ({ ...input, sourceName: event.oldInputName === input.sourceName ? event.inputName : input.sourceName }));
         }
-        this.obsVideoInputAssignments.value = {
-            gameCaptures: this.obsVideoInputAssignments.value.gameCaptures.map(assignment =>
+        this.obsVideoInputAssignments.value = this.obsVideoInputAssignments.value.map(feedAssignment => ({
+            gameCaptures: feedAssignment.gameCaptures.map(assignment =>
                 assignment?.sourceName === event.oldInputName ? { ...assignment, sourceName: event.inputName } : assignment),
-            cameraCaptures: this.obsVideoInputAssignments.value.cameraCaptures.map(assignment =>
+            cameraCaptures: feedAssignment.cameraCaptures.map(assignment =>
                 assignment?.sourceName === event.oldInputName ? { ...assignment, sourceName: event.inputName } : assignment)
-        };
+        })) as ObsVideoInputAssignments;
     }
 
     private async getVideoInputs(): Promise<ObsState['videoInputs']> {
@@ -231,20 +223,20 @@ export class ObsConnectorService {
         }
     }
 
-    async setGameLayoutVideoFeedAssignments(type: 'game' | 'camera', assignments: (VideoInputAssignment | null)[]) {
-        const newInputAssignments = cloneDeep(this.obsVideoInputAssignments.value);
+    async setGameLayoutVideoFeedAssignments(type: 'game' | 'camera', assignments: (VideoInputAssignment | null)[], feedIndex: number) {
+        const newInputAssignments = cloneDeep(this.obsVideoInputAssignments.value[feedIndex]);
         newInputAssignments[type === 'game' ? 'gameCaptures' : 'cameraCaptures'] = assignments;
-        await this.setGameLayoutVideoFeedPositions(newInputAssignments);
+        await this.setGameLayoutVideoFeedPositions(newInputAssignments, feedIndex);
     }
 
-    private async setGameLayoutVideoFeedPositions(videoInputAssignments: ObsVideoInputAssignments) {
-        const gameLayoutVideoFeedsScene = this.obsConfig.value.gameLayoutVideoFeedsScene;
-        if (gameLayoutVideoFeedsScene == null || this.obsState.value.status !== 'CONNECTED') return;
+    async setGameLayoutVideoFeedPositions(videoInputAssignments: ObsVideoInputAssignments[number], feedIndex: number) {
+        const videoInputsScene = this.obsConfig.value.gameLayoutVideoFeedScenes[feedIndex];
+        if (videoInputsScene == null || this.obsState.value.status !== 'CONNECTED') return;
 
-        const unusedSceneItems = await this.getSceneItemList(gameLayoutVideoFeedsScene);
+        const unusedSceneItems = await this.getSceneItemList(videoInputsScene);
 
-        const cameraCaptureSceneItemIds = await this.assignCameraCaptures('camera', videoInputAssignments, unusedSceneItems);
-        const gameCaptureSceneItemIds = await this.assignCameraCaptures('game', videoInputAssignments, unusedSceneItems);
+        const cameraCaptureSceneItemIds = await this.assignCameraCaptures('camera', videoInputAssignments, unusedSceneItems, feedIndex);
+        const gameCaptureSceneItemIds = await this.assignCameraCaptures('game', videoInputAssignments, unusedSceneItems, feedIndex);
 
         const newInputAssignments = cloneDeep(videoInputAssignments);
         cameraCaptureSceneItemIds.forEach((sceneItemId, i) => {
@@ -259,28 +251,28 @@ export class ObsConnectorService {
                 existingAssignment.sceneItemId = sceneItemId;
             }
         });
-        this.obsVideoInputAssignments.value = newInputAssignments;
+        this.obsVideoInputAssignments.value[feedIndex] = newInputAssignments;
 
         this.logger.debug(`Removing ${unusedSceneItems.length} unused scene items`);
         for (const unusedSceneItem of unusedSceneItems) {
             await this.socket.call('RemoveSceneItem', {
-                sceneName: gameLayoutVideoFeedsScene,
+                sceneName: videoInputsScene,
                 sceneItemId: unusedSceneItem.sceneItemId
             });
         }
     }
 
-    private async assignCameraCaptures(type: 'game' | 'camera', inputAssignments: ObsVideoInputAssignments, unusedSceneItems: ObsSceneItem[]): Promise<(number | undefined)[]> {
-        const gameLayoutVideoFeedsScene = this.obsConfig.value.gameLayoutVideoFeedsScene;
-        if (gameLayoutVideoFeedsScene == null) return [];
+    private async assignCameraCaptures(type: 'game' | 'camera', inputAssignments: ObsVideoInputAssignments[number], unusedSceneItems: ObsSceneItem[], feedIndex: number): Promise<(number | undefined)[]> {
+        const videoInputsScene = this.obsConfig.value.gameLayoutVideoFeedScenes[feedIndex];
+        if (videoInputsScene == null) return [];
         const typeAssignments = inputAssignments[type === 'game' ? 'gameCaptures' : 'cameraCaptures'];
         const allAssignments = [
             ...inputAssignments.gameCaptures,
             ...inputAssignments.cameraCaptures
         ];
         const capturePositions = type === 'camera'
-            ? this.obsVideoInputPositions.value.cameraCaptures
-            : this.obsVideoInputPositions.value.gameCaptures;
+            ? this.obsVideoInputPositions.value[feedIndex].cameraCaptures
+            : this.obsVideoInputPositions.value[feedIndex].gameCaptures;
         const boundsType = type === 'camera' ? 'OBS_BOUNDS_SCALE_OUTER' : 'OBS_BOUNDS_STRETCH';
         const sceneItemIds: (number | undefined)[] = [];
 
@@ -319,7 +311,7 @@ export class ObsConnectorService {
                 ) {
                     this.logger.debug(`${type} ${i + 1} - Correcting transform settings`);
                     await this.socket.call('SetSceneItemTransform', {
-                        sceneName: gameLayoutVideoFeedsScene,
+                        sceneName: videoInputsScene,
                         sceneItemId: existingSceneItem.sceneItemId,
                         sceneItemTransform: {
                             boundsType,
@@ -336,12 +328,12 @@ export class ObsConnectorService {
             } else {
                 this.logger.debug(`${type} ${i + 1} - Creating scene item for assigned input`);
                 const newSceneItem = await this.socket.call('CreateSceneItem', {
-                    sceneName: gameLayoutVideoFeedsScene,
+                    sceneName: videoInputsScene,
                     sourceName: assignedFeed.sourceName,
                     sceneItemEnabled: false
                 });
                 await this.socket.call('SetSceneItemTransform', {
-                    sceneName: gameLayoutVideoFeedsScene,
+                    sceneName: videoInputsScene,
                     sceneItemId: newSceneItem.sceneItemId,
                     sceneItemTransform: {
                         boundsType,
@@ -353,7 +345,7 @@ export class ObsConnectorService {
                     }
                 });
                 await this.socket.call('SetSceneItemEnabled', {
-                    sceneName: gameLayoutVideoFeedsScene,
+                    sceneName: videoInputsScene,
                     sceneItemId: newSceneItem.sceneItemId,
                     sceneItemEnabled: true
                 });
@@ -388,10 +380,17 @@ export class ObsConnectorService {
         }
 
         const configUpdates: Partial<ObsConfig> = {};
-        (['videoInputsScene', 'gameLayoutVideoFeedsScene', 'gameplayScene', 'intermissionScene'] as (keyof ObsConfig)[]).forEach(configKey => {
+        (['videoInputsScene', 'gameplayScene', 'intermissionScene'] as (keyof ObsConfig)[]).forEach(configKey => {
             if (this.obsConfig.value[configKey] === event.oldSceneName) {
-                configUpdates[configKey] = event.sceneName;
+                (configUpdates[configKey] as string) = event.sceneName;
             }
+        });
+        configUpdates.gameLayoutVideoFeedScenes = this.obsConfig.value.gameLayoutVideoFeedScenes.map(scene => {
+            if (scene != null && scene === event.oldSceneName) {
+                return event.sceneName;
+            }
+
+            return scene;
         });
         if (Object.keys(configUpdates).length > 0) {
             this.obsConfig.value = {

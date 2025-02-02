@@ -13,7 +13,7 @@
                     <ipl-button
                         class="m-t-8"
                         :disabled="!allowCropping"
-                        @click="sourceCroppingDialog?.open(obsStore.obsVideoInputAssignments[selectedCapture.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.index]!, selectedCapture!)"
+                        @click="sourceCroppingDialog?.open(obsStore.obsVideoInputAssignments[selectedFeedIndex][selectedCapture.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.index]!, selectedCapture!)"
                     >
                         <font-awesome-icon icon="crop" />
                         Adjust crop
@@ -21,7 +21,7 @@
                     <ipl-space
                         v-for="input in obsStore.obsState.videoInputs ?? []"
                         :key="input.sourceName"
-                        :color="obsStore.obsVideoInputAssignments[selectedCapture.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.index]?.sourceName === input.sourceName ? 'blue' : 'secondary'"
+                        :color="obsStore.obsVideoInputAssignments[selectedFeedIndex][selectedCapture.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.index]?.sourceName === input.sourceName ? 'blue' : 'secondary'"
                         class="m-t-8"
                         clickable
                         @click="setVideoFeedAssignment(input.sourceName)"
@@ -41,7 +41,7 @@
                     :key="key"
                     class="layout-item"
                     clickable
-                    @click="obsStore.setActiveGameLayout(key)"
+                    @click="obsStore.setActiveGameLayout(selectedFeedIndex, key)"
                 >
                     <div class="layout-name">{{ layout.name }}</div>
                     <div class="layout-stats">
@@ -67,7 +67,7 @@
                     :style="{ gridArea: `cam-${i}` }"
                     :class="{
                         active: selectedCapture != null && selectedCapture.type === 'camera' && selectedCapture.index === i - 1,
-                        unassigned: !isAssignedInput(obsStore.obsVideoInputAssignments.cameraCaptures[i - 1])
+                        unassigned: !isAssignedInput(obsStore.obsVideoInputAssignments[selectedFeedIndex].cameraCaptures[i - 1])
                     }"
                     @click="selectCapture('camera', i - 1)"
                 >
@@ -79,7 +79,7 @@
                     :style="{ gridArea: `game-${i}` }"
                     :class="{
                         active: selectedCapture != null && selectedCapture.type === 'game' && selectedCapture.index === i - 1,
-                        unassigned: !isAssignedInput(obsStore.obsVideoInputAssignments.gameCaptures[i - 1])
+                        unassigned: !isAssignedInput(obsStore.obsVideoInputAssignments[selectedFeedIndex].gameCaptures[i - 1])
                     }"
                     @click="selectCapture('game', i - 1)"
                 >
@@ -87,16 +87,26 @@
                 </div>
             </div>
         </ipl-space>
+        <ipl-space class="layout vertical center-horizontal">
+            <ipl-radio
+                :model-value="String(selectedFeedIndex)"
+                label="Feed"
+                :options="feedOptions"
+                name="feed"
+                @update:model-value="selectedFeedIndex = Number($event)"
+            />
+        </ipl-space>
         <scene-switcher />
         <twitch-commercial-player />
         <source-cropping-dialog
             ref="sourceCroppingDialog"
+            :selected-feed-index="selectedFeedIndex"
         />
     </div>
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplSpace } from '@iplsplatoon/vue-components';
+import { IplButton, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
 import { layouts } from 'types/Layouts';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faVideo } from '@fortawesome/free-solid-svg-icons/faVideo';
@@ -119,9 +129,16 @@ const wrapper = ref<HTMLElement>();
 
 const obsStore = useObsStore();
 
+const selectedFeedIndex = ref(0);
+const feedOptions = [
+    { name: 'Main Feed', value: '0' },
+    { name: 'Feed 2', value: '1' },
+    { name: 'Feed 3', value: '2' }
+];
+
 const activeGameLayout = ref<keyof typeof layouts | ''>('');
 const selectedLayoutData = computed(() => activeGameLayout.value === '' ? null : layouts[activeGameLayout.value]);
-updateRefOnValueChange(() => obsStore.activeGameLayout, activeGameLayout);
+updateRefOnValueChange(() => obsStore.activeGameLayouts[selectedFeedIndex.value], activeGameLayout);
 
 const selectedCapture = ref<{ type: 'camera' | 'game', index: number } | null>(null);
 const captureAssignmentInProgress = ref(false);
@@ -157,8 +174,8 @@ function isAssignedInput(assignment: VideoInputAssignment | null) {
 async function setVideoFeedAssignment(sourceName: string) {
     if (selectedCapture.value == null || captureAssignmentInProgress.value) return;
     const newAssignments = cloneDeep(selectedCapture.value.type === 'game'
-        ? obsStore.obsVideoInputAssignments.gameCaptures
-        : obsStore.obsVideoInputAssignments.cameraCaptures);
+        ? obsStore.obsVideoInputAssignments[selectedFeedIndex.value].gameCaptures
+        : obsStore.obsVideoInputAssignments[selectedFeedIndex.value].cameraCaptures);
     const oldLength = newAssignments.length;
     if (newAssignments[selectedCapture.value.index]?.sourceName === sourceName) {
         newAssignments[selectedCapture.value.index] = null;
@@ -171,7 +188,7 @@ async function setVideoFeedAssignment(sourceName: string) {
 
     captureAssignmentInProgress.value = true;
     try {
-        await sendMessage('obs:setVideoInputAssignments', { type: selectedCapture.value.type, assignments: newAssignments });
+        await sendMessage('obs:setVideoInputAssignments', { type: selectedCapture.value.type, assignments: newAssignments, feedIndex: selectedFeedIndex.value });
     } finally {
         captureAssignmentInProgress.value = false;
     }
@@ -185,7 +202,7 @@ const allowCropping = computed(() => {
         || obsStore.obsState.videoInputs?.length === 0
         || selectedCapture.value == null
     ) return false;
-    const selectedInput = obsStore.obsVideoInputAssignments[selectedCapture.value.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.value.index];
+    const selectedInput = obsStore.obsVideoInputAssignments[selectedFeedIndex.value][selectedCapture.value.type === 'game' ? 'gameCaptures' : 'cameraCaptures'][selectedCapture.value.index];
     return selectedInput != null && selectedInput.sceneItemId != null && obsStore.obsState.videoInputs.some(input => input.sourceName === selectedInput.sourceName);
 });
 </script>

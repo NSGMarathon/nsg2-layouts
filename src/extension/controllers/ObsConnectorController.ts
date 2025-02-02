@@ -1,6 +1,12 @@
 import { BaseController } from './BaseController';
 import type NodeCG from '@nodecg/types';
-import type { Configschema, ObsConnectionInfo, ObsState } from 'types/schemas';
+import {
+    Configschema,
+    ObsConnectionInfo,
+    ObsState,
+    ObsVideoInputAssignments,
+    ObsVideoInputPositions
+} from 'types/schemas';
 import { ObsConnectorService } from '../services/ObsConnectorService';
 
 export class ObsConnectorController extends BaseController {
@@ -9,6 +15,8 @@ export class ObsConnectorController extends BaseController {
 
         const obsConnectionInfo = nodecg.Replicant('obsConnectionInfo') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
         const obsState = nodecg.Replicant('obsState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsState>;
+        const obsVideoInputPositions = nodecg.Replicant('obsVideoInputPositions') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputPositions>;
+        const obsVideoInputAssignments = nodecg.Replicant('obsVideoInputAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputAssignments>;
 
         this.listen('obs:connect', async (data) => {
             obsConnectionInfo.value = data;
@@ -33,7 +41,7 @@ export class ObsConnectorController extends BaseController {
         this.listen('obs:setConfig', async (data) => {
             if (
                 obsState.value.scenes == null
-                || [data.videoInputsScene, data.gameLayoutVideoFeedsScene].some(newScene => !!newScene && !obsState.value.scenes!.some(scene => scene === newScene))
+                || [data.videoInputsScene, ...data.gameLayoutVideoFeedScenes].some(newScene => newScene != null && !obsState.value.scenes!.some(scene => scene === newScene))
             ) {
                 throw new Error('Could not find one or more of the provided scenes');
             }
@@ -58,7 +66,12 @@ export class ObsConnectorController extends BaseController {
         });
 
         this.listen('obs:setVideoInputAssignments', async (data) => {
-            await obsConnectorService.setGameLayoutVideoFeedAssignments(data.type, data.assignments);
+            await obsConnectorService.setGameLayoutVideoFeedAssignments(data.type, data.assignments, data.feedIndex);
+        });
+
+        this.listen('obs:setVideoInputPositions', async (data) => {
+            obsVideoInputPositions.value[data.feedIndex] = data.positions;
+            await obsConnectorService.setGameLayoutVideoFeedPositions(obsVideoInputAssignments.value[data.feedIndex], data.feedIndex);
         });
     }
 }

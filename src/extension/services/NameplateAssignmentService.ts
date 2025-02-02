@@ -1,5 +1,5 @@
 import type NodeCG from '@nodecg/types';
-import type { ActiveGameLayout, ActiveSpeedrun, Configschema, PlayerNameplateAssignments } from 'types/schemas';
+import type { ActiveGameLayouts, ActiveSpeedrun, Configschema, PlayerNameplateAssignments } from 'types/schemas';
 import { layouts } from 'types/Layouts';
 import range from 'lodash/range';
 
@@ -7,22 +7,22 @@ export class NameplateAssignmentService {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly playerNameplateAssignments: NodeCG.ServerReplicantWithSchemaDefault<PlayerNameplateAssignments>;
-    private readonly activeGameLayout: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayout>;
+    private readonly activeGameLayouts: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         this.nodecg = nodecg;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.playerNameplateAssignments = nodecg.Replicant('playerNameplateAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<PlayerNameplateAssignments>;
-        this.activeGameLayout = nodecg.Replicant('activeGameLayout') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayout>;
+        this.activeGameLayouts = nodecg.Replicant('activeGameLayouts') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
 
         this.activeSpeedrun.on('change', newValue => {
-            const nameplateCount = layouts[this.activeGameLayout.value as keyof typeof layouts]?.playerNameplateCount ?? 0;
+            const nameplateCount = layouts[this.activeGameLayouts.value[0] as keyof typeof layouts]?.playerNameplateCount ?? 0;
             this.recalculateNameplateAssignments(nameplateCount, newValue);
         });
-        this.activeGameLayout.on('change', (newValue, oldValue) => {
+        this.activeGameLayouts.on('change', (newValue, oldValue) => {
             if (!oldValue) return;
-            const oldLayoutMeta = layouts[oldValue as keyof typeof layouts];
-            const newLayoutMeta = layouts[newValue as keyof typeof layouts];
+            const oldLayoutMeta = layouts[oldValue[0] as keyof typeof layouts];
+            const newLayoutMeta = layouts[newValue[0] as keyof typeof layouts];
             if (oldLayoutMeta?.playerNameplateCount !== newLayoutMeta?.playerNameplateCount) {
                 this.recalculateNameplateAssignments(newLayoutMeta?.playerNameplateCount ?? 0, this.activeSpeedrun.value);
             }

@@ -1,6 +1,6 @@
 import type NodeCG from '@nodecg/types';
 import type {
-    ActiveGameLayout,
+    ActiveGameLayouts,
     ActiveSpeedrun,
     Configschema,
     NextSpeedrun,
@@ -16,7 +16,7 @@ export class SpeedrunService {
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly nextSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<NextSpeedrun>;
-    private readonly activeGameLayout: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayout>;
+    private readonly activeGameLayouts: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
     private readonly scheduleService: ScheduleService;
     private readonly timerService: TimerService;
 
@@ -24,7 +24,7 @@ export class SpeedrunService {
         this.schedule = nodecg.Replicant('schedule') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.nextSpeedrun = nodecg.Replicant('nextSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<NextSpeedrun>;
-        this.activeGameLayout = nodecg.Replicant('activeGameLayout') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayout>;
+        this.activeGameLayouts = nodecg.Replicant('activeGameLayouts') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
         this.scheduleService = scheduleService;
         this.timerService = timerService;
 
@@ -101,7 +101,7 @@ export class SpeedrunService {
 
             // Ignore changes to layouts mid-run
             if (scheduleItem.layout != null && (layouts as Record<string, Layout>)[scheduleItem.layout] != null) {
-                this.activeGameLayout.value = scheduleItem.layout;
+                this.activeGameLayouts.value[0] = scheduleItem.layout;
             }
         }
         this.activeSpeedrun.value = cloneDeep(scheduleItem);

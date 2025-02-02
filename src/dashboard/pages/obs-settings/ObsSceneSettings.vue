@@ -6,8 +6,20 @@
             :options="sceneOptions"
         />
         <ipl-select
-            v-model="gameLayoutVideoFeedsScene"
-            label="Scene for game layout video feeds"
+            v-model="gameLayoutVideoFeedScenes[0]"
+            label="Main feed inputs scene"
+            :options="sceneOptions"
+            class="m-t-4"
+        />
+        <ipl-select
+            v-model="gameLayoutVideoFeedScenes[1]"
+            label="Inputs scene (Feed 2)"
+            :options="sceneOptions"
+            class="m-t-4"
+        />
+        <ipl-select
+            v-model="gameLayoutVideoFeedScenes[2]"
+            label="Inputs scene (Feed 3)"
             :options="sceneOptions"
             class="m-t-4"
         />
@@ -47,24 +59,24 @@ const sceneOptions = computed(() => obsStore.obsState.scenes?.map(scene => ({
 })) ?? []);
 
 const videoInputsScene = ref('');
-const gameLayoutVideoFeedsScene = ref('');
+const gameLayoutVideoFeedScenes = ref<(string | null)[]>([]);
 const gameplayScene = ref('');
 const intermissionScene = ref('');
 updateRefOnValueChange(() => obsStore.obsConfig.gameplayScene, gameplayScene);
 updateRefOnValueChange(() => obsStore.obsConfig.intermissionScene, intermissionScene);
 updateRefOnValueChange(() => obsStore.obsConfig.videoInputsScene, videoInputsScene);
-updateRefOnValueChange(() => obsStore.obsConfig.gameLayoutVideoFeedsScene, gameLayoutVideoFeedsScene);
+updateRefOnValueChange(() => obsStore.obsConfig.gameLayoutVideoFeedScenes, gameLayoutVideoFeedScenes);
 
 const isChanged = computed(() =>
     videoInputsScene.value !== obsStore.obsConfig.videoInputsScene
-    || gameLayoutVideoFeedsScene.value !== obsStore.obsConfig.gameLayoutVideoFeedsScene
+    || gameLayoutVideoFeedScenes.value.some((scene, i) => obsStore.obsConfig.gameLayoutVideoFeedScenes[i] !== scene)
     || intermissionScene.value !== obsStore.obsConfig.intermissionScene
     || gameplayScene.value !== obsStore.obsConfig.gameplayScene);
 
 async function update() {
     await sendMessage('obs:setConfig', {
         videoInputsScene: videoInputsScene.value,
-        gameLayoutVideoFeedsScene: gameLayoutVideoFeedsScene.value,
+        gameLayoutVideoFeedScenes: gameLayoutVideoFeedScenes.value,
         intermissionScene: intermissionScene.value,
         gameplayScene: gameplayScene.value
     });

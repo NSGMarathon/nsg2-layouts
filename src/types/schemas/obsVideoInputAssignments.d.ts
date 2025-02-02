@@ -5,10 +5,25 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface ObsVideoInputAssignments {
-	cameraCaptures: (VideoInputAssignment | null)[];
-	gameCaptures: (VideoInputAssignment | null)[];
-}
+/**
+ * @minItems 3
+ * @maxItems 3
+ */
+export type ObsVideoInputAssignments = [
+	{
+		cameraCaptures: (VideoInputAssignment | null)[];
+		gameCaptures: (VideoInputAssignment | null)[];
+	},
+	{
+		cameraCaptures: (VideoInputAssignment | null)[];
+		gameCaptures: (VideoInputAssignment | null)[];
+	},
+	{
+		cameraCaptures: (VideoInputAssignment | null)[];
+		gameCaptures: (VideoInputAssignment | null)[];
+	}
+];
+
 export interface VideoInputAssignment {
 	sourceName: string;
 	sceneItemId?: number;

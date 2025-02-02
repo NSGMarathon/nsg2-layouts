@@ -144,6 +144,10 @@ import { ObsSceneItemTransform } from 'types/obs';
 
 library.add(faMagnifyingGlassPlus, faMagnifyingGlassMinus, faUpDown, faLeftRight);
 
+const props = defineProps<{
+    selectedFeedIndex: number
+}>();
+
 type CropOutlineData = { width: number, height: number, top: number, left: number };
 
 const cropWrapper = ref<HTMLDataElement | null>();
@@ -234,8 +238,8 @@ function resetCrop() {
 }
 
 watch(isOpen, async (newValue) => {
-    const gameLayoutVideoFeedsScene = obsStore.obsConfig.gameLayoutVideoFeedsScene;
-    if (gameLayoutVideoFeedsScene != null && newValue && selectedSourceName.value != null && selectedSceneItemId.value != null) {
+    const videoInputsScene = obsStore.obsConfig.gameLayoutVideoFeedScenes[props.selectedFeedIndex];
+    if (videoInputsScene != null && newValue && selectedSourceName.value != null && selectedSceneItemId.value != null) {
         sourceScreenshot.value = '';
         loadingScreenshot.value = true;
         zoom.value = 1;
@@ -243,7 +247,7 @@ watch(isOpen, async (newValue) => {
         try {
             const sceneItemData = await Promise.all([
                 sendMessage('obs:getSourceScreenshot', { sourceName: selectedSourceName.value }),
-                sendMessage('obs:getSceneItemTransform', { sceneName: gameLayoutVideoFeedsScene, sceneItemId: selectedSceneItemId.value })
+                sendMessage('obs:getSceneItemTransform', { sceneName: videoInputsScene, sceneItemId: selectedSceneItemId.value })
             ]);
             screenshotLoadingError.value = null;
             sourceScreenshot.value = sceneItemData[0];
@@ -452,7 +456,7 @@ function updateCropOutlineRef() {
         && cropOutlineData.height > 0
         && selectedCapture.value != null
     ) {
-        const inputSlotPosition = obsStore.obsVideoInputPositions[`${selectedCapture.value.type}Captures`][selectedCapture.value.index];
+        const inputSlotPosition = obsStore.obsVideoInputPositions[props.selectedFeedIndex][`${selectedCapture.value.type}Captures`][selectedCapture.value.index];
         const inputAspectRatio = inputSlotPosition.width / inputSlotPosition.height;
         const cropAspectRatio = scaleX / scaleY;
         const fc = inputAspectRatio / cropAspectRatio;
@@ -512,13 +516,13 @@ function open(inputAssignment: VideoInputAssignment, selectedCaptureData: { type
 
 async function apply() {
     try {
-        const gameLayoutVideoFeedsScene = obsStore.obsConfig.gameLayoutVideoFeedsScene;
-        if (sceneItemTransform == null || cropOutlineData == null || gameLayoutVideoFeedsScene == null || selectedSceneItemId.value == null) return;
+        const videoInputsScene = obsStore.obsConfig.gameLayoutVideoFeedScenes[props.selectedFeedIndex];
+        if (sceneItemTransform == null || cropOutlineData == null || videoInputsScene == null || selectedSceneItemId.value == null) return;
         const height = sceneItemTransform.sourceHeight;
         const width = sceneItemTransform.sourceWidth;
         await sendMessage('obs:setSceneItemCrop', {
             sceneItemId: selectedSceneItemId.value,
-            sceneName: gameLayoutVideoFeedsScene,
+            sceneName: videoInputsScene,
             crop: {
                 cropTop: Math.round(cropOutlineData.top * height),
                 cropBottom: Math.round((1 - cropOutlineData.top - cropOutlineData.height) * height),

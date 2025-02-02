@@ -1,5 +1,5 @@
 import {
-    ActiveGameLayout,
+    ActiveGameLayouts,
     ObsConfig,
     ObsConnectionInfo,
     ObsState,
@@ -15,7 +15,7 @@ const obsConfig = nodecg.Replicant<ObsConfig>('obsConfig');
 const obsConnectionInfo = nodecg.Replicant<ObsConnectionInfo>('obsConnectionInfo');
 const obsVideoInputAssignments = nodecg.Replicant<ObsVideoInputAssignments>('obsVideoInputAssignments');
 const obsVideoInputPositions = nodecg.Replicant<ObsVideoInputPositions>('obsVideoInputPositions');
-const activeGameLayout = nodecg.Replicant<ActiveGameLayout>('activeGameLayout');
+const activeGameLayouts = nodecg.Replicant<ActiveGameLayouts>('activeGameLayouts');
 
 interface ObsStore {
     obsState: ObsState
@@ -23,7 +23,7 @@ interface ObsStore {
     obsConnectionInfo: ObsConnectionInfo
     obsVideoInputAssignments: ObsVideoInputAssignments
     obsVideoInputPositions: ObsVideoInputPositions
-    activeGameLayout: ActiveGameLayout
+    activeGameLayouts: ActiveGameLayouts
 }
 
 export const useObsStore = defineStore('obs', {
@@ -33,14 +33,14 @@ export const useObsStore = defineStore('obs', {
         obsConnectionInfo: null,
         obsVideoInputAssignments: null,
         obsVideoInputPositions: null,
-        activeGameLayout: null
+        activeGameLayouts: null
     } as unknown as ObsStore),
     actions: {
-        setVideoInputPositions(newValue: ObsVideoInputPositions) {
-            obsVideoInputPositions.value = newValue;
+        setVideoInputPositions(index: number, newValue: ObsVideoInputPositions[number]) {
+            obsVideoInputPositions.value![index] = newValue;
         },
-        setActiveGameLayout(newValue: keyof typeof layouts) {
-            activeGameLayout.value = newValue;
+        setActiveGameLayout(index: number, newValue: keyof typeof layouts) {
+            activeGameLayouts.value![index] = newValue;
         }
     }
 });
@@ -51,5 +51,5 @@ export const initObsStore = createReplicantStoreInitializer([
     obsConnectionInfo,
     obsVideoInputAssignments,
     obsVideoInputPositions,
-    activeGameLayout
+    activeGameLayouts
 ], useObsStore);

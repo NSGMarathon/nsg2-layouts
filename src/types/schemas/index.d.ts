@@ -2,7 +2,7 @@
 // @ts-ignore
 export * from './configschema';
 // @ts-ignore
-export * from './activeGameLayout';
+export * from './activeGameLayouts';
 // @ts-ignore
 export * from './activeSpeedrun';
 // @ts-ignore

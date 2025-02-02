@@ -35,7 +35,8 @@ export interface MessageInputMap {
     'obs:getSourceScreenshot': { sourceName: string }
     'obs:getSceneItemTransform': { sceneItemId: number, sceneName?: string }
     'obs:setSceneItemCrop': { sceneName: string, sceneItemId: number, crop: { cropTop: number, cropRight: number, cropBottom: number, cropLeft: number } }
-    'obs:setVideoInputAssignments': { type: 'game' | 'camera', assignments: (VideoInputAssignment | null)[] }
+    'obs:setVideoInputAssignments': { type: 'game' | 'camera', feedIndex: number, assignments: (VideoInputAssignment | null)[] }
+    'obs:setVideoInputPositions': { feedIndex: number, positions: ObsVideoInputPositions[number] }
 
     'tracker:newDonation': { amount: number, displayName: string | undefined | null }
 

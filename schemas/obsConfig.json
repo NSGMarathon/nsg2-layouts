@@ -4,9 +4,15 @@
     "additionalProperties": false,
     "properties": {
         "videoInputsScene": { "type": "string" },
-        "gameLayoutVideoFeedsScene": { "type": "string" },
+        "gameLayoutVideoFeedScenes": {
+            "type": "array",
+            "items": { "type": ["string", "null"] }
+        },
         "gameplayScene": { "type": "string" },
         "intermissionScene": { "type": "string" }
     },
-    "default": {}
+    "required": ["gameLayoutVideoFeedScenes"],
+    "default": {
+        "gameLayoutVideoFeedScenes": [null, null, null]
+    }
 }

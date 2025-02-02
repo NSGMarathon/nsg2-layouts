@@ -5,11 +5,28 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface ObsVideoInputPositions {
-	cameraCaptures: VideoInputPosition[];
-	gameCaptures: VideoInputPosition[];
-	[k: string]: unknown;
-}
+/**
+ * @minItems 3
+ * @maxItems 3
+ */
+export type ObsVideoInputPositions = [
+	{
+		cameraCaptures: VideoInputPosition[];
+		gameCaptures: VideoInputPosition[];
+		[k: string]: unknown;
+	},
+	{
+		cameraCaptures: VideoInputPosition[];
+		gameCaptures: VideoInputPosition[];
+		[k: string]: unknown;
+	},
+	{
+		cameraCaptures: VideoInputPosition[];
+		gameCaptures: VideoInputPosition[];
+		[k: string]: unknown;
+	}
+];
+
 export interface VideoInputPosition {
 	x: number;
 	y: number;

@@ -5,4 +5,8 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type ActiveGameLayout = string;
+/**
+ * @minItems 3
+ * @maxItems 3
+ */
+export type ActiveGameLayouts = [string, string, string];

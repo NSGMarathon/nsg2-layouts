@@ -1,14 +1,15 @@
 <template>
     <div class="game-layout-wrapper">
         <component
-            :is="gameLayoutComponentMap[obsStore.activeGameLayout as typeof layoutKeys[number]] ?? gameLayoutComponentMap['16x9-1g1c']"
+            v-if="feedIndex != null"
+            :is="gameLayoutComponentMap[obsStore.activeGameLayouts[feedIndex] as typeof layoutKeys[number]] ?? gameLayoutComponentMap['16x9-1g1c']"
         />
     </div>
 </template>
 
 <script setup lang="ts">
 import { layoutKeys, layouts } from 'types/Layouts';
-import { type Component, nextTick, onMounted, watch } from 'vue';
+import { type Component, nextTick, onMounted, watch, ref } from 'vue';
 import Layout_16x9_1g1c from './layouts/Layout_16x9_1g1c.vue';
 import Layout_16x9_2g1c from './layouts/Layout_16x9_2g1c.vue';
 import { useObsStore } from 'client-shared/stores/ObsStore';
@@ -39,53 +40,74 @@ const gameLayoutComponentMap: Record<typeof layoutKeys[number], Component> = {
     '4x3-2x1-sonic-gameworld': Layout_4x3_2x1_sonics_gameworld
 };
 
+const feedIndex = ref<number | null>(null);
+
 onMounted(() => {
     const params = new URLSearchParams(window.location.search);
+    feedIndex.value = getFeedIndex(params);
     if (params.has('is-layout-leader')) {
-        watch(() => obsStore.activeGameLayout, async (newValue) => {
-            await nextTick();
-            const layoutMeta = layouts[newValue as typeof layoutKeys[number]];
-            if (layoutMeta == null) return;
-
-            const capturePositions: ObsVideoInputPositions = {
-                gameCaptures: [],
-                cameraCaptures: []
-            }
-
-            const findCaptures = (type: 'game' | 'camera') => {
-                const captureCount = type === 'game' ? layoutMeta.gameCaptureCount : layoutMeta.cameraCaptureCount;
-                const captures = Array.from(document.querySelectorAll(type === 'game' ? '.game-capture' : '.camera-capture'));
-                range(captureCount).forEach(captureIndex => {
-                    const captureAtIndex = captures.find(capture => (capture as HTMLElement).dataset.captureIndex === String(captureIndex)) as HTMLElement | undefined;
-                    if (captureAtIndex == null) {
-                        sendMessage('log:warning', `Layout ${newValue} - Cannot find ${type} capture at index ${captureIndex}`);
-                        return;
-                    }
-                    const boundingRect = captureAtIndex.getBoundingClientRect();
-                    capturePositions[type === 'game' ? 'gameCaptures' : 'cameraCaptures'].push({
-                        x: boundingRect.x,
-                        y: boundingRect.y,
-                        width: captureAtIndex.clientWidth,
-                        height: captureAtIndex.clientHeight
-                    });
-                });
-            }
-
-            findCaptures('game');
-            findCaptures('camera');
-
-            const playerNameplates = Array.from(document.querySelectorAll('.player-nameplate'));
-            range(layoutMeta.playerNameplateCount).forEach(playerNameplateIndex => {
-                const nameplateAtIndex = playerNameplates.find(nameplate => (nameplate as HTMLElement).dataset.nameplateIndex === String(playerNameplateIndex));
-                if (nameplateAtIndex == null) {
-                    sendMessage('log:warning', `Layout ${newValue} - Cannot find nameplate at index ${playerNameplateIndex}`);
-                }
-            });
-
-            obsStore.setVideoInputPositions(capturePositions);
+        watch(() => obsStore.activeGameLayouts, async (newValue) => {
+            await calculateCapturePositions(newValue[feedIndex.value!], feedIndex.value!);
         }, { immediate: true });
     }
 });
+
+function getFeedIndex(params: URLSearchParams): number {
+    if (params.has('feed')) {
+        const parsedIndex = parseInt(params.get('feed')!);
+        if (!isNaN(parsedIndex) && parsedIndex >= 0 && parsedIndex <= 2) {
+            return parsedIndex;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+}
+
+async function calculateCapturePositions(activeGameLayout: string, feedIndex: number) {
+    await nextTick();
+    const layoutMeta = layouts[activeGameLayout as typeof layoutKeys[number]];
+    if (layoutMeta == null) return;
+
+    const capturePositions: ObsVideoInputPositions[number] = {
+        gameCaptures: [],
+        cameraCaptures: []
+    }
+
+    const findCaptures = (type: 'game' | 'camera') => {
+        const captureCount = type === 'game' ? layoutMeta.gameCaptureCount : layoutMeta.cameraCaptureCount;
+        const captures = Array.from(document.querySelectorAll(type === 'game' ? '.game-capture' : '.camera-capture'));
+        range(captureCount).forEach(captureIndex => {
+            const captureAtIndex = captures.find(capture => (capture as HTMLElement).dataset.captureIndex === String(captureIndex)) as HTMLElement | undefined;
+            if (captureAtIndex == null) {
+                sendMessage('log:warning', `Layout ${activeGameLayout} - Cannot find ${type} capture at index ${captureIndex}`);
+                return;
+            }
+            const boundingRect = captureAtIndex.getBoundingClientRect();
+            capturePositions[type === 'game' ? 'gameCaptures' : 'cameraCaptures'].push({
+                x: boundingRect.x,
+                y: boundingRect.y,
+                width: captureAtIndex.clientWidth,
+                height: captureAtIndex.clientHeight
+            });
+        });
+    }
+
+    findCaptures('game');
+    findCaptures('camera');
+
+    const playerNameplates = Array.from(document.querySelectorAll('.player-nameplate'));
+    range(layoutMeta.playerNameplateCount).forEach(playerNameplateIndex => {
+        const nameplateAtIndex = playerNameplates.find(nameplate => (nameplate as HTMLElement).dataset.nameplateIndex === String(playerNameplateIndex));
+        if (nameplateAtIndex == null) {
+            sendMessage('log:warning', `Layout ${activeGameLayout} - Cannot find nameplate at index ${playerNameplateIndex}`);
+        }
+    });
+
+    await sendMessage('obs:setVideoInputPositions', { feedIndex, positions: capturePositions });
+}
+
 </script>
 
 <style scoped lang="scss">

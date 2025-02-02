@@ -13,24 +13,39 @@
             "required": ["x", "y", "width", "height"]
         }
     },
-    "type": "object",
-    "properties": {
-        "cameraCaptures": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/videoInputPosition"
+    "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
+    "items": {
+        "type": "object",
+        "properties": {
+            "cameraCaptures": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/videoInputPosition"
+                }
+            },
+            "gameCaptures": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/videoInputPosition"
+                }
             }
         },
-        "gameCaptures": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/videoInputPosition"
-            }
-        }
+        "required": ["cameraCaptures", "gameCaptures"]
     },
-    "required": ["cameraCaptures", "gameCaptures"],
-    "default": {
-        "cameraCaptures": [],
-        "gameCaptures": []
-    }
+    "default": [
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        },
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        },
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        }
+    ]
 }

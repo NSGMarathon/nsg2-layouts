@@ -11,31 +11,46 @@
             "required": ["sourceName"]
         }
     },
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "cameraCaptures": {
-            "type": "array",
-            "items": {
-                "oneOf": [
-                    { "$ref": "#/definitions/videoInputAssignment" },
-                    { "type": "null" }
-                ]
+    "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
+    "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "cameraCaptures": {
+                "type": "array",
+                "items": {
+                    "oneOf": [
+                        { "$ref": "#/definitions/videoInputAssignment" },
+                        { "type": "null" }
+                    ]
+                }
+            },
+            "gameCaptures": {
+                "type": "array",
+                "items": {
+                    "oneOf": [
+                        { "$ref": "#/definitions/videoInputAssignment" },
+                        { "type": "null" }
+                    ]
+                }
             }
         },
-        "gameCaptures": {
-            "type": "array",
-            "items": {
-                "oneOf": [
-                    { "$ref": "#/definitions/videoInputAssignment" },
-                    { "type": "null" }
-                ]
-            }
-        }
+        "required": ["gameCaptures", "cameraCaptures"]
     },
-    "required": ["gameCaptures", "cameraCaptures"],
-    "default": {
-        "cameraCaptures": [],
-        "gameCaptures": []
-    }
+    "default": [
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        },
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        },
+        {
+            "cameraCaptures": [],
+            "gameCaptures": []
+        }
+    ]
 }
