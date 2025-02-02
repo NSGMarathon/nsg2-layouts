@@ -13,6 +13,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { colors } from '../../styles/colors';
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import Badge from 'components/Badge.vue';
+import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
 
 const mixerStore = useMixerStore();
 
@@ -65,7 +66,7 @@ onMounted(() => {
     watch(() => {
         const assignment = mixerStore.talentMixerChannelAssignments.speedrunTalent[props.talentId] ?? (props.teamId == null ? null : mixerStore.talentMixerChannelAssignments.speedrunTeams[props.teamId]);
         if (assignment == null) return [-90, defaultSpeakingThreshold];
-        return [mixerStore.mixerChannelLevels[assignment.channelId] ?? -90, assignment.speakingThresholdDB ?? defaultSpeakingThreshold, assignment.channelLevelExponent ?? 1];
+        return [mixerStore.mixerChannelLevels[assignment.channelId] ?? -90, assignment.speakingThresholdDB ?? defaultSpeakingThreshold, CHANNEL_LEVEL_EXPONENT];
     }, ([channelLevel, speakingThreshold, channelLevelExponent]) => {
         targetLevel = channelLevel > speakingThreshold ? ((channelLevel + 90) / 100) ** (1 / channelLevelExponent) : 0;
     });
