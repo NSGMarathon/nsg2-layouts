@@ -1,0 +1,1 @@
+export const CHANNEL_LEVEL_EXPONENT = 1.5;
