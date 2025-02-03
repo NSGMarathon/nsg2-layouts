@@ -4,6 +4,8 @@ export * from './configschema';
 // @ts-ignore
 export * from './activeGameLayouts';
 // @ts-ignore
+export * from './activeRelayPlayers';
+// @ts-ignore
 export * from './activeSpeedrun';
 // @ts-ignore
 export * from './allBids';

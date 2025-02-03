@@ -24,7 +24,7 @@ import Layout_3x2_1g1c from './layouts/Layout_3x2_1g1c.vue';
 import Layout_16x9_4g1c from './layouts/Layout_16x9_4g1c.vue';
 import Layout_16x9_3g1c from './layouts/Layout_16x9_3g1c.vue';
 import Layout_4x3_2x1_sonics_gameworld from './layouts/Layout_4x3_2x1_sonics_gameworld.vue';
-import { PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
+import { GameLayoutFeedIndexInjectionKey, PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
 
 const obsStore = useObsStore();
 
@@ -41,14 +41,14 @@ const gameLayoutComponentMap: Record<typeof layoutKeys[number], Component> = {
     '4x3-2x1-sonic-gameworld': Layout_4x3_2x1_sonics_gameworld
 };
 
-const feedIndex = ref<number | null>(null);
+const params = new URLSearchParams(window.location.search);
+const feedIndex = getFeedIndex(params);
+provide(GameLayoutFeedIndexInjectionKey, feedIndex);
 
 onMounted(() => {
-    const params = new URLSearchParams(window.location.search);
-    feedIndex.value = getFeedIndex(params);
     if (params.has('is-layout-leader')) {
         watch(() => obsStore.activeGameLayouts, async (newValue) => {
-            await calculateCapturePositions(newValue[feedIndex.value!], feedIndex.value!);
+            await calculateCapturePositions(newValue[feedIndex], feedIndex);
         }, { immediate: true });
     }
 });

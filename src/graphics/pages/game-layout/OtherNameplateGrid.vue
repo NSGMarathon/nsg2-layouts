@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import chunk from 'lodash/chunk';
 import { TalentItem } from 'types/ScheduleHelpers';
@@ -53,6 +53,7 @@ import CountryFlag from 'components/CountryFlag.vue';
 import { isBlank } from 'shared/StringHelper';
 import Badge from 'components/Badge.vue';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
+import { GameLayoutFeedIndexInjectionKey } from '../../helpers/Injections';
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
@@ -60,8 +61,9 @@ const mixerStore = useMixerStore();
 
 const columnCount = 2;
 const rowCount = 2;
+const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
-const nameplatePlayerCount = computed(() => scheduleStore.playerNameplateAssignments.reduce((result, assignment) => {
+const nameplatePlayerCount = computed(() => scheduleStore.playerNameplateAssignments[feedIndex].reduce((result, assignment) => {
     result += assignment.playerIds.length;
     return result;
 }, 0));

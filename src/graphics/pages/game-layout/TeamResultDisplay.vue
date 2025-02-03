@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { formatTimer } from 'client-shared/helpers/TimerHelper';
@@ -42,6 +42,7 @@ import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFlagCheckered } from '@fortawesome/free-solid-svg-icons/faFlagCheckered';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { GameLayoutFeedIndexInjectionKey } from '../../helpers/Injections';
 
 library.add(faFlagCheckered);
 
@@ -57,9 +58,11 @@ const props = withDefaults(defineProps<{
     animationDirection: 'y'
 });
 
+const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
+
 const result = computed(() => {
     if ((scheduleStore.activeSpeedrun?.teams.length ?? 0) <= 1) return null;
-    const assignment = scheduleStore.playerNameplateAssignments[props.nameplateIndex];
+    const assignment = scheduleStore.playerNameplateAssignments[props.nameplateIndex][feedIndex];
     if (assignment == null || assignment.teamId == null) return null;
     return timerStore.timer.teamResults[assignment.teamId];
 });

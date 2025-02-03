@@ -1,17 +1,26 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "type": "array",
+    "minItems": 3,
+    "maxItems": 3,
     "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-            "teamId": { "type": "string" },
-            "playerIds": {
-                "type": "array",
-                "items": { "type": "string" }
-            }
-        },
-        "required": ["playerIds"]
+        "type": "array",
+        "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "teamId": { "type": "string" },
+                "playerIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                }
+            },
+            "required": ["playerIds"]
+        }
     },
-    "default": []
+    "default": [
+        [],
+        [],
+        []
+    ]
 }

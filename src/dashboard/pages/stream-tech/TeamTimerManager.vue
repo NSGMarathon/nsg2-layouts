@@ -130,24 +130,18 @@ async function stopUndoTeamTimer() {
     }
 }
 
-const assignedPlayers = computed(() => {
-    if (!scheduleStore.activeSpeedrun?.relay) return [];
-    return scheduleStore.playerNameplateAssignments.reduce((result, nameplate) => {
-        if (nameplate.teamId === props.team.id) {
-            result.push(...nameplate.playerIds.map(playerId => ({ id: playerId })));
-        }
-        return result;
-    }, [] as { id: string }[])
-});
-
 const nameplateAssignment = computed(() => {
     if (!scheduleStore.activeSpeedrun?.relay) return null;
-    return scheduleStore.playerNameplateAssignments.find(nameplate => nameplate.teamId === props.team.id);
+    return scheduleStore.activeRelayPlayers.find(activePlayer => activePlayer.teamId === props.team.id);
+});
+
+const assignedPlayers = computed(() => {
+    if (!scheduleStore.activeSpeedrun?.relay) return [];
+    return (nameplateAssignment.value?.playerIds ?? []).map(playerId => ({ id: playerId }));
 });
 
 const activeRelayPlayerIndex = computed(() => {
     if (!scheduleStore.activeSpeedrun?.relay) return -1;
-    // todo: breaks on 2v2 relay but i don't expect that to happen
     if (nameplateAssignment.value == null || nameplateAssignment.value.playerIds.length !== 1) return -1;
     return props.team.playerIds.findIndex(playerId => playerId.id === nameplateAssignment.value!.playerIds[0]);
 });

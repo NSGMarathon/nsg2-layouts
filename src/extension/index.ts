@@ -43,7 +43,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService);
     scheduleService.init(speedrunService);
     const obsConnectorService = new ObsConnectorService(nodecg);
-    new NameplateAssignmentService(nodecg);
+    const nameplateAssignmentService = new NameplateAssignmentService(nodecg);
     new TrackerService(nodecg);
     const twitchService = new TwitchService(nodecg, twitchOauthClient, twitchClient, talentService, scheduleService);
     new MusicService(nodecg, obsConnectorService);
@@ -57,7 +57,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new TimerController(nodecg, timerService);
     new ObsConnectorController(nodecg, obsConnectorService);
     new LogController(nodecg);
-    new NameplateAssignmentController(nodecg);
+    new NameplateAssignmentController(nodecg, nameplateAssignmentService);
     new TwitchController(nodecg, twitchService);
     new OengusController(nodecg, oengusService);
     new IgdbController(nodecg, igdbService);

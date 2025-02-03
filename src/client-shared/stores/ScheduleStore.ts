@@ -1,4 +1,11 @@
-import { ActiveSpeedrun, NextSpeedrun, OtherScheduleItem, PlayerNameplateAssignments, Schedule } from 'types/schemas';
+import {
+    ActiveRelayPlayers,
+    ActiveSpeedrun,
+    NextSpeedrun,
+    OtherScheduleItem,
+    PlayerNameplateAssignments,
+    Schedule
+} from 'types/schemas';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { ScheduleItem, ScheduleItemType } from 'types/ScheduleHelpers';
@@ -7,12 +14,14 @@ const schedule = nodecg.Replicant<Schedule>('schedule');
 const activeSpeedrun = nodecg.Replicant<ActiveSpeedrun>('activeSpeedrun');
 const nextSpeedrun = nodecg.Replicant<NextSpeedrun>('nextSpeedrun');
 const playerNameplateAssignments = nodecg.Replicant<PlayerNameplateAssignments>('playerNameplateAssignments');
+const activeRelayPlayers = nodecg.Replicant<ActiveRelayPlayers>('activeRelayPlayers');
 
 interface ScheduleStore {
     schedule: Schedule
     activeSpeedrun: ActiveSpeedrun
     nextSpeedrun: NextSpeedrun
     playerNameplateAssignments: PlayerNameplateAssignments
+    activeRelayPlayers: ActiveRelayPlayers
 }
 
 export const useScheduleStore = defineStore('schedule', {
@@ -20,7 +29,8 @@ export const useScheduleStore = defineStore('schedule', {
         schedule: null,
         activeSpeedrun: null,
         nextSpeedrun: null,
-        playerNameplateAssignments: null
+        playerNameplateAssignments: null,
+        activeRelayPlayers: null
     } as unknown as ScheduleStore),
     getters: {
         activeSpeedrunIndex: state => state.activeSpeedrun == null ? -1 : state.schedule.items.findIndex(scheduleItem => scheduleItem.id === state.activeSpeedrun!.id),
@@ -77,5 +87,6 @@ export const initScheduleStore = createReplicantStoreInitializer([
     schedule,
     activeSpeedrun,
     nextSpeedrun,
-    playerNameplateAssignments
+    playerNameplateAssignments,
+    activeRelayPlayers
 ], useScheduleStore);

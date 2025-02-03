@@ -5,21 +5,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-/**
- * @minItems 3
- * @maxItems 3
- */
-export type PlayerNameplateAssignments = [
-	{
-		teamId?: string;
-		playerIds: string[];
-	}[],
-	{
-		teamId?: string;
-		playerIds: string[];
-	}[],
-	{
-		teamId?: string;
-		playerIds: string[];
-	}[]
-];
+export type ActiveRelayPlayers = {
+	teamId: string;
+	playerIds: string[];
+}[];

@@ -120,7 +120,7 @@ import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons/faYoutube';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { isBlank } from 'shared/StringHelper';
-import { PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
+import { GameLayoutFeedIndexInjectionKey, PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
 
 library.add(faTwitch, faYoutube);
 
@@ -135,6 +135,8 @@ const props = withDefaults(defineProps<{
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
+
+const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
 type NormalizedTalentList = { id: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null }[];
 
@@ -164,11 +166,11 @@ function normalizeTalentList(talent: Talent): NormalizedTalentList {
 }
 
 const assignmentData = computed<{ teamId?: string, teamName?: string, talent: NormalizedTalentList } | null>(() => {
-    const assignments = scheduleStore.playerNameplateAssignments[props.index];
+    const assignments = scheduleStore.playerNameplateAssignments[feedIndex][props.index];
     if (assignments == null) return null;
     const assignedTeam = assignments.teamId == null ? null : scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId);
     if (!isBlank(assignedTeam?.name)) {
-        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments.filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
+        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments[feedIndex].filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
 
         return {
             teamId: assignedTeam!.id,
@@ -208,7 +210,7 @@ watch(chunkedTalentList, (newValue, oldValue) => {
         activeTalentListChunk.value = 0;
     }
 });
-watch(() => scheduleStore.playerNameplateAssignments, (newValue, oldValue) => {
+watch(() => scheduleStore.playerNameplateAssignments[feedIndex], (newValue, oldValue) => {
     if (
         newValue.length !== oldValue.length
         || newValue.some((assignment, i) => oldValue[i].playerIds.length !== assignment.playerIds.length)
@@ -222,7 +224,7 @@ watch(playerNameplateMode, newValue => {
     }
 });
 
-const baseIndex = computed(() => scheduleStore.playerNameplateAssignments
+const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIndex]
     .slice(0, props.index)
     .reduce((result, assignments) => {
         // If a named team only has a single nameplate, that nameplate displays only one name.
@@ -230,7 +232,7 @@ const baseIndex = computed(() => scheduleStore.playerNameplateAssignments
         if (
             assignments.teamId != null
             && !isBlank(scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId)?.name)
-            && scheduleStore.playerNameplateAssignments.filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
+            && scheduleStore.playerNameplateAssignments[feedIndex].filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
         ) {
             result += 1;
         } else {
