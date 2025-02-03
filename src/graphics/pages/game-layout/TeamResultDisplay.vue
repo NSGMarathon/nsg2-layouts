@@ -62,7 +62,7 @@ const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
 const result = computed(() => {
     if ((scheduleStore.activeSpeedrun?.teams.length ?? 0) <= 1) return null;
-    const assignment = scheduleStore.playerNameplateAssignments[props.nameplateIndex][feedIndex];
+    const assignment = scheduleStore.playerNameplateAssignments[feedIndex].assignments[props.nameplateIndex];
     if (assignment == null || assignment.teamId == null) return null;
     return timerStore.timer.teamResults[assignment.teamId];
 });

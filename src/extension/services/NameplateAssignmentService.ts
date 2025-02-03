@@ -24,11 +24,12 @@ export class NameplateAssignmentService {
         this.activeGameLayouts = nodecg.Replicant('activeGameLayouts') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
         this.activeRelayPlayers = nodecg.Replicant('activeRelayPlayers') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveRelayPlayers>;
 
-        this.activeSpeedrun.on('change', newValue => {
+        this.activeSpeedrun.on('change', (newValue, oldValue) => {
             this.recalculateActiveRelayPlayers(newValue);
+            const speedrunChanging = oldValue != null && newValue != null && newValue.id !== oldValue.id;
             this.activeGameLayouts.value.forEach((layout, i) => {
                 const nameplateCount = layouts[layout as keyof typeof layouts]?.playerNameplateCount ?? 0;
-                this.recalculateNameplateAssignments(i, nameplateCount, newValue);
+                this.recalculateNameplateAssignments(i, nameplateCount, newValue, speedrunChanging);
             });
         });
         this.activeGameLayouts.on('change', (newValue, oldValue) => {
@@ -94,49 +95,78 @@ export class NameplateAssignmentService {
         });
     }
 
-    private recalculateNameplateAssignments(feedIndex: number, playerNameplateCount: number, activeSpeedrun: ActiveSpeedrun) {
+    private recalculateNameplateAssignments(feedIndex: number, playerNameplateCount: number, activeSpeedrun: ActiveSpeedrun, speedrunChanging = false) {
         if (activeSpeedrun == null || playerNameplateCount === 0) {
-            this.playerNameplateAssignments.value[feedIndex] = [];
+            this.playerNameplateAssignments.value[feedIndex].assignments = [];
             return;
         }
 
-        // todo: manual overrides
-        this.playerNameplateAssignments.value[feedIndex] = range(playerNameplateCount).map(nameplateIndex => {
-            if (activeSpeedrun.relay) {
-                const activePlayers = this.activeRelayPlayers.value[nameplateIndex];
-                if (activePlayers == null) {
-                    return {
-                        teamId: undefined,
-                        playerIds: []
-                    };
-                }
+        const existingFeedAssignment = this.playerNameplateAssignments.value[feedIndex];
+        if (existingFeedAssignment.doAutomaticAssignments || speedrunChanging) {
+            this.playerNameplateAssignments.value[feedIndex] = {
+                doAutomaticAssignments: true,
+                assignments: range(playerNameplateCount).map(nameplateIndex => {
+                    if (activeSpeedrun.relay) {
+                        const activePlayers = this.activeRelayPlayers.value[nameplateIndex];
+                        if (activePlayers == null) {
+                            return {
+                                teamId: undefined,
+                                playerIds: []
+                            };
+                        }
 
-                return {
-                    teamId: activePlayers.teamId,
-                    playerIds: cloneDeep(activePlayers.playerIds)
-                };
-            } else if (activeSpeedrun.teams.length === 1) {
-                const team = activeSpeedrun.teams[0];
-                if (playerNameplateCount === 1) {
-                    return {
-                        teamId: team.id,
-                        playerIds: team.playerIds.map(player => player.id)
-                    };
-                } else {
-                    const player = team.playerIds[nameplateIndex];
-                    return {
-                        teamId: player == null ? undefined : team.id,
-                        playerIds: player == null ? [] : [player.id]
-                    };
-                }
-            } else {
-                const team = activeSpeedrun.teams[nameplateIndex];
-                return {
-                    teamId: team?.id,
-                    playerIds: team == null ? [] : team.playerIds.map(player => player.id)
-                };
+                        return {
+                            teamId: activePlayers.teamId,
+                            playerIds: cloneDeep(activePlayers.playerIds)
+                        };
+                    } else if (activeSpeedrun.teams.length === 1) {
+                        const team = activeSpeedrun.teams[0];
+                        if (playerNameplateCount === 1) {
+                            return {
+                                teamId: team.id,
+                                playerIds: team.playerIds.map(player => player.id)
+                            };
+                        } else {
+                            const player = team.playerIds[nameplateIndex];
+                            return {
+                                teamId: player == null ? undefined : team.id,
+                                playerIds: player == null ? [] : [player.id]
+                            };
+                        }
+                    } else {
+                        const team = activeSpeedrun.teams[nameplateIndex];
+                        return {
+                            teamId: team?.id,
+                            playerIds: team == null ? [] : team.playerIds.map(player => player.id)
+                        };
+                    }
+                })
             }
-        });
-        this.nodecg.log.debug(`[Feed #${feedIndex + 1}] Reassigned player nameplates`);
+        } else {
+            const playerIdSet = new Set<string>();
+            activeSpeedrun.teams.forEach(team => {
+                team.playerIds.forEach(player => {
+                    playerIdSet.add(player.id);
+                });
+            });
+            this.playerNameplateAssignments.value[feedIndex] = {
+                doAutomaticAssignments: false,
+                assignments: range(playerNameplateCount).map(nameplateIndex => {
+                    const existingAssignment = existingFeedAssignment.assignments[nameplateIndex];
+                    if (existingAssignment == null) {
+                        return {
+                            teamId: undefined,
+                            playerIds: []
+                        };
+                    } else {
+                        return {
+                            teamId: existingAssignment.teamId,
+                            playerIds: existingAssignment.playerIds.filter(assignedPlayerId => playerIdSet.has(assignedPlayerId))
+                        };
+                    }
+                })
+            };
+        }
+        this.nodecg.log.debug(`[Feed #${feedIndex + 1}] Recalculated player nameplates`);
     }
 }

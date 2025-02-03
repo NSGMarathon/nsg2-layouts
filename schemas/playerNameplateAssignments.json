@@ -4,23 +4,31 @@
     "minItems": 3,
     "maxItems": 3,
     "items": {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "teamId": { "type": "string" },
-                "playerIds": {
-                    "type": "array",
-                    "items": { "type": "string" }
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "doAutomaticAssignments": { "type": "boolean" },
+            "assignments": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "teamId": { "type": "string" },
+                        "playerIds": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                        }
+                    },
+                    "required": ["playerIds"]
                 }
-            },
-            "required": ["playerIds"]
-        }
+            }
+        },
+        "required": ["doAutomaticAssignments", "assignments"]
     },
     "default": [
-        [],
-        [],
-        []
+        { "doAutomaticAssignments": true, "assignments": [] },
+        { "doAutomaticAssignments": true, "assignments": [] },
+        { "doAutomaticAssignments": true, "assignments": [] }
     ]
 }

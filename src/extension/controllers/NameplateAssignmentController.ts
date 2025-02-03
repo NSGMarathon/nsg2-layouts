@@ -1,6 +1,6 @@
 import { BaseController } from './BaseController';
 import type NodeCG from '@nodecg/types';
-import type { ActiveSpeedrun, Configschema, PlayerNameplateAssignments } from 'types/schemas';
+import type { Configschema } from 'types/schemas';
 import { NameplateAssignmentService } from '../services/NameplateAssignmentService';
 
 export class NameplateAssignmentController extends BaseController {

@@ -166,11 +166,11 @@ function normalizeTalentList(talent: Talent): NormalizedTalentList {
 }
 
 const assignmentData = computed<{ teamId?: string, teamName?: string, talent: NormalizedTalentList } | null>(() => {
-    const assignments = scheduleStore.playerNameplateAssignments[feedIndex][props.index];
+    const assignments = scheduleStore.playerNameplateAssignments[feedIndex].assignments[props.index];
     if (assignments == null) return null;
     const assignedTeam = assignments.teamId == null ? null : scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId);
     if (!isBlank(assignedTeam?.name)) {
-        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments[feedIndex].filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
+        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments[feedIndex].assignments.filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
 
         return {
             teamId: assignedTeam!.id,
@@ -210,7 +210,7 @@ watch(chunkedTalentList, (newValue, oldValue) => {
         activeTalentListChunk.value = 0;
     }
 });
-watch(() => scheduleStore.playerNameplateAssignments[feedIndex], (newValue, oldValue) => {
+watch(() => scheduleStore.playerNameplateAssignments[feedIndex].assignments, (newValue, oldValue) => {
     if (
         newValue.length !== oldValue.length
         || newValue.some((assignment, i) => oldValue[i].playerIds.length !== assignment.playerIds.length)
@@ -224,7 +224,7 @@ watch(playerNameplateMode, newValue => {
     }
 });
 
-const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIndex]
+const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIndex].assignments
     .slice(0, props.index)
     .reduce((result, assignments) => {
         // If a named team only has a single nameplate, that nameplate displays only one name.
@@ -232,7 +232,7 @@ const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIn
         if (
             assignments.teamId != null
             && !isBlank(scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId)?.name)
-            && scheduleStore.playerNameplateAssignments[feedIndex].filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
+            && scheduleStore.playerNameplateAssignments[feedIndex].assignments.filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
         ) {
             result += 1;
         } else {
