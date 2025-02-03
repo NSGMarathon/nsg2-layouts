@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { layoutKeys, layouts } from 'types/Layouts';
-import { type Component, nextTick, onMounted, watch, ref } from 'vue';
+import { type Component, nextTick, onMounted, watch, ref, provide } from 'vue';
 import Layout_16x9_1g1c from './layouts/Layout_16x9_1g1c.vue';
 import Layout_16x9_2g1c from './layouts/Layout_16x9_2g1c.vue';
 import { useObsStore } from 'client-shared/stores/ObsStore';
@@ -24,6 +24,7 @@ import Layout_3x2_1g1c from './layouts/Layout_3x2_1g1c.vue';
 import Layout_16x9_4g1c from './layouts/Layout_16x9_4g1c.vue';
 import Layout_16x9_3g1c from './layouts/Layout_16x9_3g1c.vue';
 import Layout_4x3_2x1_sonics_gameworld from './layouts/Layout_4x3_2x1_sonics_gameworld.vue';
+import { PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
 
 const obsStore = useObsStore();
 
@@ -108,6 +109,11 @@ async function calculateCapturePositions(activeGameLayout: string, feedIndex: nu
     await sendMessage('obs:setVideoInputPositions', { feedIndex, positions: capturePositions });
 }
 
+const playerNameplateMode = ref<'name' | 'social'>('name');
+setInterval(() => {
+    playerNameplateMode.value = playerNameplateMode.value === 'name' ? 'social' : 'name';
+}, 15000);
+provide(PlayerNameplateModeInjectionKey, playerNameplateMode);
 </script>
 
 <style scoped lang="scss">

@@ -8,7 +8,7 @@
         }"
     >
         <opacity-swap-transition mode="default">
-            <div :key="talentListSlides.activeComponent.value ?? '-1'">
+            <div :key="activeTalentListChunk ?? '-1'">
                 <div
                     v-if="assignmentData?.teamName != null && assignmentData?.talent.length === 0"
                     class="talent-item team-name"
@@ -33,7 +33,7 @@
                     />
                 </div>
                 <div
-                    v-for="(talent, i) in chunkedTalentList[Number(talentListSlides.activeComponent.value)]"
+                    v-for="(talent, i) in chunkedTalentList[activeTalentListChunk]"
                     class="talent-item"
                     :class="{ 'is-compact': useCompactTalentItems }"
                     :key="talent.id"
@@ -42,13 +42,13 @@
                         <opacity-swap-transition mode="default">
                             <div
                                 class="talent-details"
-                                :key="getVisibleName(i).type"
+                                :key="isBlank(talent.socialType) ? 'name' : playerNameplateMode"
                             >
                                 <badge
                                     v-if="disableVolumeMeters || useCompactTalentItems"
                                     class="talent-index"
                                 >
-                                    {{ baseIndex + i + 1 + Number(talentListSlides.activeComponent.value) * props.maxConcurrentPlayers }}
+                                    {{ baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers }}
                                 </badge>
                                 <compact-player-speaking-indicator
                                     v-if="useCompactTalentItems"
@@ -64,11 +64,16 @@
                                         {{ assignmentData.teamName }}:
                                     </span>
                                     <font-awesome-icon
-                                        v-if="getVisibleName(i).type !== 'name'"
-                                        :icon="getVisibleName(i).type === 'twitch' ? ['fab', 'twitch'] : ['fab', 'youtube']"
+                                        v-if="playerNameplateMode === 'social' && !isBlank(talent.socialType)"
+                                        :icon="talent.socialType === 'twitch' ? ['fab', 'twitch'] : ['fab', 'youtube']"
                                         class="name-type-icon"
                                     />
-                                    {{ getVisibleName(i).visibleName }}
+                                    <template v-if="playerNameplateMode === 'name' || isBlank(talent.socialType)">
+                                        {{ talent.name }}
+                                    </template>
+                                    <template v-else>
+                                        /{{ talent.social }}
+                                    </template>
                                 </fitted-content>
                                 <badge
                                     v-if="talent.pronouns"
@@ -87,7 +92,7 @@
                     <player-volume-meter
                         v-if="!disableVolumeMeters && !useCompactTalentItems"
                         :talent-id="talent.id"
-                        :index="baseIndex + i + 1 + Number(talentListSlides.activeComponent.value) * props.maxConcurrentPlayers"
+                        :index="baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers"
                         :team-id="assignmentData?.teamId"
                         class="volume-meter"
                     />
@@ -99,24 +104,23 @@
 
 <script setup lang="ts">
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
-import { computed, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { Talent } from 'types/schemas';
 import FittedContent from 'components/FittedContent.vue';
 import CountryFlag from 'components/CountryFlag.vue';
 import Badge from 'components/Badge.vue';
 import chunk from 'lodash/chunk';
-import { useSlides } from '../../helpers/useSlides';
 import OpacitySwapTransition from 'components/OpacitySwapTransition.vue';
 import { disableVolumeMeters } from 'client-shared/stores/MixerStore';
 import PlayerVolumeMeter from './PlayerVolumeMeter.vue';
 import CompactPlayerSpeakingIndicator from './CompactPlayerSpeakingIndicator.vue';
-import { cloneDeep } from 'lodash';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons/faYoutube';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { isBlank } from 'shared/StringHelper';
+import { PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
 
 library.add(faTwitch, faYoutube);
 
@@ -132,7 +136,34 @@ const props = withDefaults(defineProps<{
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 
-const assignmentData = computed<{ teamId?: string, teamName?: string, talent: Talent } | null>(() => {
+type NormalizedTalentList = { id: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null }[];
+
+function normalizeTalentList(talent: Talent): NormalizedTalentList {
+    return talent.map(talentItem => {
+        let socialData: { social?: string, socialType?: string } = {};
+        if (!isBlank(talentItem.socials.twitch)) {
+            socialData = {
+                socialType: 'twitch',
+                social: talentItem.socials.twitch!
+            };
+        } else if (!isBlank(talentItem.socials.youtube)) {
+            socialData = {
+                socialType: 'youtube',
+                social: talentItem.socials.youtube!
+            };
+        }
+
+        return {
+            id: talentItem.id,
+            name: talentItem.name,
+            ...socialData,
+            pronouns: talentItem.pronouns,
+            countryCode: talentItem.countryCode
+        };
+    })
+}
+
+const assignmentData = computed<{ teamId?: string, teamName?: string, talent: NormalizedTalentList } | null>(() => {
     const assignments = scheduleStore.playerNameplateAssignments[props.index];
     if (assignments == null) return null;
     const assignedTeam = assignments.teamId == null ? null : scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId);
@@ -142,20 +173,20 @@ const assignmentData = computed<{ teamId?: string, teamName?: string, talent: Ta
         return {
             teamId: assignedTeam!.id,
             teamName: assignedTeam!.name,
-            talent: scheduleStore.activeSpeedrun?.relay || multipleNameplatesAssignedToTeam
+            talent: normalizeTalentList(scheduleStore.activeSpeedrun?.relay || multipleNameplatesAssignedToTeam
                 ? assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null)
-                : []
+                : [])
         };
     }
     return {
         teamId: assignments.teamId,
-        talent: assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null)
+        talent: normalizeTalentList(assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null))
     };
 });
 
 const useCompactTalentItems = computed(() => {
     if (!props.fixedHeight) return false;
-    return (chunkedTalentList.value[Number(talentListSlides.activeComponent.value)]?.length ?? 0) > 1;
+    return (chunkedTalentList.value[activeTalentListChunk.value]?.length ?? 0) > 1;
 });
 
 const minHeight = computed(() => {
@@ -168,51 +199,28 @@ const minHeight = computed(() => {
     }
 });
 
-const chunkedTalentList = computed<Talent[]>(() => assignmentData.value == null ? [] : chunk(assignmentData.value.talent, props.maxConcurrentPlayers));
+const chunkedTalentList = computed(() => assignmentData.value == null ? [] : chunk(assignmentData.value.talent, props.maxConcurrentPlayers));
 
-type VisibleTalentName = { talentId: string, visibleName: string, type: 'name' | 'twitch' | 'youtube', isFirstDisplay: boolean };
-const visibleTalentListNames = ref<VisibleTalentName[]>([]);
-function getVisibleName(talentIndex: number): VisibleTalentName {
-    return visibleTalentListNames.value[Number(talentListSlides.activeComponent.value) * props.maxConcurrentPlayers + talentIndex];
-}
-watch(assignmentData, newValue => {
-    if (newValue == null) {
-        visibleTalentListNames.value = [];
-        return;
+const activeTalentListChunk = ref(0);
+const playerNameplateMode = inject(PlayerNameplateModeInjectionKey)!;
+watch(chunkedTalentList, (newValue, oldValue) => {
+    if (newValue.length !== oldValue.length) {
+        activeTalentListChunk.value = 0;
     }
-    visibleTalentListNames.value = newValue.talent.map(talentItem => {
-        const existingItem = visibleTalentListNames.value.find(existingTalentNameItem => existingTalentNameItem.talentId === talentItem.id);
-        return existingItem ?? { talentId: talentItem.id, visibleName: talentItem.name, type: 'name', isFirstDisplay: true };
-    });
-}, { immediate: true });
-
-function beforeTalentSlideSwap(component: string) {
-    const talentChunkIndex = Number(component);
-    const talentListChunk = chunkedTalentList.value[talentChunkIndex];
-    const newVisibleNames = cloneDeep(visibleTalentListNames.value);
-    talentListChunk.forEach((talentItem, i) => {
-        const visibleName = newVisibleNames[talentChunkIndex * props.maxConcurrentPlayers + i];
-        if (visibleName.isFirstDisplay) {
-            visibleName.isFirstDisplay = false;
-            return;
-        }
-        if (visibleName.type === 'name') {
-            if (!isBlank(talentItem.socials.twitch)) {
-                visibleName.type = 'twitch';
-                visibleName.visibleName = `/${talentItem.socials.twitch}`;
-            } else if (!isBlank(talentItem.socials.youtube)) {
-                visibleName.type = 'youtube';
-                visibleName.visibleName = talentItem.socials.youtube!;
-            }
-        } else {
-            visibleName.type = 'name';
-            visibleName.visibleName = talentItem.name;
-        }
-    });
-    visibleTalentListNames.value = newVisibleNames;
-}
-
-const talentListSlides = useSlides(() => chunkedTalentList.value.map((_, i) => ({ component: String(i), duration: 12, beforeChange: beforeTalentSlideSwap })));
+});
+watch(() => scheduleStore.playerNameplateAssignments, (newValue, oldValue) => {
+    if (
+        newValue.length !== oldValue.length
+        || newValue.some((assignment, i) => oldValue[i].playerIds.length !== assignment.playerIds.length)
+    ) {
+        activeTalentListChunk.value = 0;
+    }
+});
+watch(playerNameplateMode, newValue => {
+    if (newValue === 'name') {
+        activeTalentListChunk.value = activeTalentListChunk.value === chunkedTalentList.value.length - 1 ? 0 : activeTalentListChunk.value + 1;
+    }
+});
 
 const baseIndex = computed(() => scheduleStore.playerNameplateAssignments
     .slice(0, props.index)
