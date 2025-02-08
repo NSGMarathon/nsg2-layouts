@@ -10,5 +10,9 @@ export class NameplateAssignmentController extends BaseController {
         this.listen('nameplate:setActiveRelayPlayer', data => {
             nameplateAssignmentService.setActiveRelayPlayer(data.teamId, data.playerId);
         });
+
+        this.listen('nameplate:setCustomAssignments', data => {
+            nameplateAssignmentService.setCustomAssignments(data.feedIndex, data.doAutomaticAssignments, data.nameplatePlayerIds);
+        });
     }
 }

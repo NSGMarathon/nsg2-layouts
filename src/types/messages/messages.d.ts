@@ -17,6 +17,7 @@ export interface MessageInputMap {
     'speedrun:setActiveSpeedrun': { scheduleItemId: string }
 
     'nameplate:setActiveRelayPlayer': { teamId: string, playerId: string }
+    'nameplate:setCustomAssignments': { feedIndex: number, doAutomaticAssignments: boolean, nameplatePlayerIds?: { talentId: string, teamId: string }[][] }
 
     'talent:updateTalentItems': Talent
     'talent:setCurrentHost': Talent[number]

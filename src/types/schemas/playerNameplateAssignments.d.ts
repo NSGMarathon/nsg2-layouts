@@ -13,22 +13,28 @@ export type PlayerNameplateAssignments = [
 	{
 		doAutomaticAssignments: boolean;
 		assignments: {
-			teamId?: string;
-			playerIds: string[];
+			players: {
+				teamId: string;
+				talentId: string;
+			}[];
 		}[];
 	},
 	{
 		doAutomaticAssignments: boolean;
 		assignments: {
-			teamId?: string;
-			playerIds: string[];
+			players: {
+				teamId: string;
+				talentId: string;
+			}[];
 		}[];
 	},
 	{
 		doAutomaticAssignments: boolean;
 		assignments: {
-			teamId?: string;
-			playerIds: string[];
+			players: {
+				teamId: string;
+				talentId: string;
+			}[];
 		}[];
 	}
 ];

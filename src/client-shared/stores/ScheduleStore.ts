@@ -9,6 +9,7 @@ import {
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { ScheduleItem, ScheduleItemType } from 'types/ScheduleHelpers';
+import { isBlank } from 'shared/StringHelper';
 
 const schedule = nodecg.Replicant<Schedule>('schedule');
 const activeSpeedrun = nodecg.Replicant<ActiveSpeedrun>('activeSpeedrun');
@@ -79,6 +80,29 @@ export const useScheduleStore = defineStore('schedule', {
                 });
             }
             return Array.from(talentIds.values());
+        },
+        getNameplateGlobalTeamName: state => (feedIndex: number, assignment?: PlayerNameplateAssignments[number]['assignments'][number]): string | null => {
+            if (assignment == null
+                || assignment.players.length <= 1
+                || state.activeSpeedrun == null
+                || state.activeSpeedrun?.teams.length === 1) return null;
+
+            const firstAssignedTeamId = assignment.players[0].teamId;
+            const isSingleTeamNameplate = assignment.players.slice(1).every(player => player.teamId === firstAssignedTeamId);
+
+            if (isSingleTeamNameplate) {
+                const teamData = state.activeSpeedrun.teams.find(team => team.id === firstAssignedTeamId);
+                if (state.activeSpeedrun?.relay) return isBlank(teamData?.name) ? null : teamData!.name!;
+
+                if (
+                    state.playerNameplateAssignments[feedIndex].assignments
+                        .filter(otherAssignment => otherAssignment.players.some(player => player.teamId === firstAssignedTeamId)).length === 1
+                ) {
+                    return isBlank(teamData?.name) ? null : teamData!.name!;
+                }
+            }
+
+            return null;
         }
     }
 });

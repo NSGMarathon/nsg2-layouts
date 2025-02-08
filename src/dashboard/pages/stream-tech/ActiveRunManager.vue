@@ -71,6 +71,16 @@
                         Edit mixer assignments
                     </ipl-button>
                 </div>
+                <div class="m-t-8 text-center">
+                    <ipl-button
+                        inline
+                        small
+                        @click="nameplateAssignmentDialog?.open()"
+                    >
+                        <font-awesome-icon icon="address-card" />
+                        Edit nameplate assignments
+                    </ipl-button>
+                </div>
             </ipl-space>
             <timer-manager class="m-t-8" />
         </template>
@@ -79,6 +89,9 @@
         />
         <talent-mixer-channel-assignment-dialog
             ref="talentMixerChannelAssignmentDialog"
+        />
+        <nameplate-assignment-dialog
+            ref="nameplateAssignmentDialog"
         />
     </div>
 </template>
@@ -103,11 +116,14 @@ import TalentMixerChannelAssignmentDialog from './TalentMixerChannelAssignmentDi
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
 import TwitchCategoryDataRow from './TwitchCategoryDataRow.vue';
+import NameplateAssignmentDialog from './NameplateAssignmentDialog.vue';
+import { faAddressCard } from '@fortawesome/free-solid-svg-icons/faAddressCard';
 
-library.add(faChevronRight, faChevronLeft, faSearch, faPenToSquare, faHeadset, faTriangleExclamation);
+library.add(faChevronRight, faChevronLeft, faSearch, faPenToSquare, faHeadset, faTriangleExclamation, faAddressCard);
 
 const talentMixerChannelAssignmentDialog = ref<InstanceType<typeof TalentMixerChannelAssignmentDialog>>();
 const scheduleItemSearchDialog = ref<InstanceType<typeof ScheduleItemSearchDialog>>();
+const nameplateAssignmentDialog = ref<InstanceType<typeof NameplateAssignmentDialog>>();
 const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();
 const mixerStore = useMixerStore();

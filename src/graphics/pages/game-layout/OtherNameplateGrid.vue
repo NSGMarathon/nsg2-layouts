@@ -34,7 +34,7 @@
                                 </fitted-content>
                             </div>
                         </template>
-                        <div class="cell-index">{{ talentStore.currentHostId != null && talent?.id === talentStore.currentHostId ? 'H' : i * rowCount + j + 1 + nameplatePlayerCount }}</div>
+                        <div class="cell-index">{{ talentStore.currentHostId != null && talent?.id === talentStore.currentHostId ? 'H' : i * rowCount + j + 1 + baseIndex }}</div>
                     </td>
                 </tr>
             </tbody>
@@ -63,8 +63,12 @@ const columnCount = 2;
 const rowCount = 2;
 const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
-const nameplatePlayerCount = computed(() => scheduleStore.playerNameplateAssignments[feedIndex].reduce((result, assignment) => {
-    result += assignment.playerIds.length;
+const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIndex].assignments.reduce((result, assignment) => {
+    if (scheduleStore.getNameplateGlobalTeamName(feedIndex, assignment) != null) {
+        result += 1;
+    } else {
+        result += assignment.players.length;
+    }
     return result;
 }, 0));
 const talent = computed(() => {

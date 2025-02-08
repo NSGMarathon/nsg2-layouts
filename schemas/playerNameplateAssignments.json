@@ -14,13 +14,20 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "teamId": { "type": "string" },
-                        "playerIds": {
+                        "players": {
                             "type": "array",
-                            "items": { "type": "string" }
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "teamId": { "type": "string" },
+                                    "talentId": { "type": "string" }
+                                },
+                                "required": ["teamId", "talentId"]
+                            }
                         }
                     },
-                    "required": ["playerIds"]
+                    "required": ["players"]
                 }
             }
         },

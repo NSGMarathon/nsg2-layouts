@@ -8,7 +8,6 @@ import type {
 } from 'types/schemas';
 import { layouts } from 'types/Layouts';
 import range from 'lodash/range';
-import cloneDeep from 'lodash/cloneDeep';
 
 export class NameplateAssignmentService {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
@@ -68,6 +67,46 @@ export class NameplateAssignmentService {
         });
     }
 
+    setCustomAssignments(feedIndex: number, doAutomaticAssignments: boolean, nameplatePlayers?: { talentId: string, teamId: string }[][]) {
+        const nameplateCount = layouts[this.activeGameLayouts.value[feedIndex] as keyof typeof layouts]?.playerNameplateCount ?? 0;
+        if (!doAutomaticAssignments) {
+            if (nameplatePlayers == null) {
+                throw new Error('Nameplate player IDs must be defined if automatic assignments are not requested');
+            }
+            if (nameplatePlayers.length !== nameplateCount) {
+                throw new Error(`Incorrect amount of nameplate assignments found (Expected ${nameplateCount}, found ${nameplatePlayers.length}`);
+            }
+            if (this.activeSpeedrun.value == null) {
+                this.playerNameplateAssignments.value[feedIndex] = {
+                    doAutomaticAssignments: false,
+                    assignments: []
+                };
+                return;
+            }
+
+            const teamIdToPlayerIdsMap = this.getTeamIdToPlayerIdsMap();
+
+            nameplatePlayers.forEach(nameplate => {
+                nameplate.forEach(player => {
+                    const teamPlayerIds = teamIdToPlayerIdsMap.get(player.teamId);
+                    if (teamPlayerIds == null) {
+                        throw new Error(`Could not find team in active speedrun with ID ${player.teamId}`);
+                    }
+                    if (!teamPlayerIds.has(player.talentId)) {
+                        throw new Error(`Player ${player.talentId} is not playing for team ${player.teamId}`);
+                    }
+                });
+            });
+
+            this.playerNameplateAssignments.value[feedIndex] = {
+                doAutomaticAssignments: false,
+                assignments: nameplatePlayers.map(nameplate => ({ players: nameplate }))
+            };
+        } else {
+            this.recalculateNameplateAssignments(feedIndex, nameplateCount, this.activeSpeedrun.value, true);
+        }
+    }
+
     private recalculateActiveRelayPlayers(activeSpeedrun: ActiveSpeedrun) {
         if (activeSpeedrun == null || !activeSpeedrun.relay) {
             this.activeRelayPlayers.value = [];
@@ -95,14 +134,14 @@ export class NameplateAssignmentService {
         });
     }
 
-    private recalculateNameplateAssignments(feedIndex: number, playerNameplateCount: number, activeSpeedrun: ActiveSpeedrun, speedrunChanging = false) {
+    private recalculateNameplateAssignments(feedIndex: number, playerNameplateCount: number, activeSpeedrun: ActiveSpeedrun, forceAutomaticAssignment = false) {
         if (activeSpeedrun == null || playerNameplateCount === 0) {
             this.playerNameplateAssignments.value[feedIndex].assignments = [];
             return;
         }
 
         const existingFeedAssignment = this.playerNameplateAssignments.value[feedIndex];
-        if (existingFeedAssignment.doAutomaticAssignments || speedrunChanging) {
+        if (existingFeedAssignment.doAutomaticAssignments || forceAutomaticAssignment) {
             this.playerNameplateAssignments.value[feedIndex] = {
                 doAutomaticAssignments: true,
                 assignments: range(playerNameplateCount).map(nameplateIndex => {
@@ -110,39 +149,41 @@ export class NameplateAssignmentService {
                         const activePlayers = this.activeRelayPlayers.value[nameplateIndex];
                         if (activePlayers == null) {
                             return {
-                                teamId: undefined,
-                                playerIds: []
+                                players: []
                             };
                         }
 
                         return {
-                            teamId: activePlayers.teamId,
-                            playerIds: cloneDeep(activePlayers.playerIds)
+                            players: activePlayers.playerIds.map(playerId => ({
+                                talentId: playerId,
+                                teamId: activePlayers.teamId
+                            }))
                         };
                     } else if (activeSpeedrun.teams.length === 1) {
                         const team = activeSpeedrun.teams[0];
                         if (playerNameplateCount === 1) {
                             return {
-                                teamId: team.id,
-                                playerIds: team.playerIds.map(player => player.id)
+                                players: team.playerIds.map(player => ({
+                                    talentId: player.id,
+                                    teamId: team.id
+                                }))
                             };
                         } else {
                             const player = team.playerIds[nameplateIndex];
                             return {
-                                teamId: player == null ? undefined : team.id,
-                                playerIds: player == null ? [] : [player.id]
+                                players: player == null ? [] : [{ talentId: player.id, teamId: team.id }]
                             };
                         }
                     } else {
                         const team = activeSpeedrun.teams[nameplateIndex];
                         return {
-                            teamId: team?.id,
-                            playerIds: team == null ? [] : team.playerIds.map(player => player.id)
+                            players: team == null ? [] : team.playerIds.map(player => ({ talentId: player.id, teamId: team.id }))
                         };
                     }
                 })
             }
         } else {
+            const teamIdToPlayerIdsMap = this.getTeamIdToPlayerIdsMap();
             const playerIdSet = new Set<string>();
             activeSpeedrun.teams.forEach(team => {
                 team.playerIds.forEach(player => {
@@ -155,18 +196,31 @@ export class NameplateAssignmentService {
                     const existingAssignment = existingFeedAssignment.assignments[nameplateIndex];
                     if (existingAssignment == null) {
                         return {
-                            teamId: undefined,
-                            playerIds: []
+                            players: []
                         };
                     } else {
                         return {
-                            teamId: existingAssignment.teamId,
-                            playerIds: existingAssignment.playerIds.filter(assignedPlayerId => playerIdSet.has(assignedPlayerId))
+                            players: existingAssignment.players.filter(player => {
+                                const teamPlayerIds = teamIdToPlayerIdsMap.get(player.teamId);
+                                return teamPlayerIds != null && teamPlayerIds.has(player.talentId);
+                            })
                         };
                     }
                 })
             };
         }
         this.nodecg.log.debug(`[Feed #${feedIndex + 1}] Recalculated player nameplates`);
+    }
+
+    private getTeamIdToPlayerIdsMap() {
+        const result = new Map<string, Set<string>>();
+        this.activeSpeedrun.value?.teams.forEach(team => {
+            const playerIdSet = new Set<string>();
+            team.playerIds.forEach(player => {
+                playerIdSet.add(player.id);
+            });
+            result.set(team.id, playerIdSet);
+        });
+        return result;
     }
 }

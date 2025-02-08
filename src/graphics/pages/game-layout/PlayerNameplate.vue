@@ -10,7 +10,7 @@
         <opacity-swap-transition mode="default">
             <div :key="activeTalentListChunk ?? '-1'">
                 <div
-                    v-if="assignmentData?.teamName != null && assignmentData?.talent.length === 0"
+                    v-if="!isBlank(assignmentData?.globalTeamName)"
                     class="talent-item team-name"
                     :class="{ 'is-compact': useCompactTalentItems }"
                     key="team-name"
@@ -21,14 +21,14 @@
                                 align="center"
                                 class="talent-name"
                             >
-                                {{ assignmentData.teamName }}
+                                {{ assignmentData.globalTeamName }}
                             </fitted-content>
                         </div>
                     </div>
                     <player-volume-meter
                         v-if="!disableVolumeMeters && !useCompactTalentItems"
                         :index="baseIndex + 1"
-                        :team-id="assignmentData?.teamId"
+                        :team-id="assignmentData?.globalTeamId"
                         class="volume-meter"
                     />
                 </div>
@@ -53,15 +53,15 @@
                                 <compact-player-speaking-indicator
                                     v-if="useCompactTalentItems"
                                     :player-id="talent.id"
-                                    :team-id="assignmentData?.teamId"
+                                    :team-id="talent.teamId"
                                     class="compact-speaking-indicator"
                                 />
                                 <fitted-content align="center">
                                     <span
-                                        v-if="assignmentData?.teamName != null"
+                                        v-if="!isBlank(talent.teamName)"
                                         class="talent-team-name"
                                     >
-                                        {{ assignmentData.teamName }}:
+                                        {{ talent.teamName }}:
                                     </span>
                                     <font-awesome-icon
                                         v-if="playerNameplateMode === 'social' && !isBlank(talent.socialType)"
@@ -93,7 +93,7 @@
                         v-if="!disableVolumeMeters && !useCompactTalentItems"
                         :talent-id="talent.id"
                         :index="baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers"
-                        :team-id="assignmentData?.teamId"
+                        :team-id="talent.teamId"
                         class="volume-meter"
                     />
                 </div>
@@ -106,7 +106,6 @@
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { computed, inject, ref, watch } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { Talent } from 'types/schemas';
 import FittedContent from 'components/FittedContent.vue';
 import CountryFlag from 'components/CountryFlag.vue';
 import Badge from 'components/Badge.vue';
@@ -138,70 +137,77 @@ const talentStore = useTalentStore();
 
 const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
-type NormalizedTalentList = { id: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null }[];
+type NormalizedTalentList = { id: string, teamName?: string, teamId: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null }[];
 
-function normalizeTalentList(talent: Talent): NormalizedTalentList {
-    return talent.map(talentItem => {
+function normalizeTalentList(players: { talentId: string, teamId: string }[]): NormalizedTalentList {
+    return players.map(playerItem => {
+        const talentData = talentStore.findTalentItemById(playerItem.talentId);
+        if (talentData == null) return null;
+        const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === playerItem.teamId);
+
         let socialData: { social?: string, socialType?: string } = {};
-        if (!isBlank(talentItem.socials.twitch)) {
+        if (!isBlank(talentData.socials.twitch)) {
             socialData = {
                 socialType: 'twitch',
-                social: talentItem.socials.twitch!
+                social: talentData.socials.twitch!
             };
-        } else if (!isBlank(talentItem.socials.youtube)) {
+        } else if (!isBlank(talentData.socials.youtube)) {
             socialData = {
                 socialType: 'youtube',
-                social: talentItem.socials.youtube!
+                social: talentData.socials.youtube!
             };
         }
 
         return {
-            id: talentItem.id,
-            name: talentItem.name,
+            id: talentData.id,
+            teamId: playerItem.teamId,
+            name: talentData.name,
             ...socialData,
-            pronouns: talentItem.pronouns,
-            countryCode: talentItem.countryCode
+            pronouns: talentData.pronouns,
+            countryCode: talentData.countryCode,
+            teamName: team?.name
         };
-    })
+    }).filter(talentItem => talentItem != null);
 }
 
-const assignmentData = computed<{ teamId?: string, teamName?: string, talent: NormalizedTalentList } | null>(() => {
-    const assignments = scheduleStore.playerNameplateAssignments[feedIndex].assignments[props.index];
-    if (assignments == null) return null;
-    const assignedTeam = assignments.teamId == null ? null : scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId);
-    if (!isBlank(assignedTeam?.name)) {
-        const multipleNameplatesAssignedToTeam = scheduleStore.playerNameplateAssignments[feedIndex].assignments.filter(otherAssignment => assignments.teamId === otherAssignment.teamId).length > 1;
+const assignmentData = computed<{ talentList: NormalizedTalentList, globalTeamName?: string, globalTeamId?: string }>(() => {
+    const assignment = scheduleStore.playerNameplateAssignments[feedIndex].assignments[props.index];
+    if (assignment == null || assignment.players.length === 0) return { talentList: [] };
+
+    const talentList = normalizeTalentList(assignment.players);
+    const globalTeamName = scheduleStore.getNameplateGlobalTeamName(feedIndex, assignment);
+
+    if (globalTeamName != null) {
+        const globalTeamId = assignment.players[0].teamId;
 
         return {
-            teamId: assignedTeam!.id,
-            teamName: assignedTeam!.name,
-            talent: normalizeTalentList(scheduleStore.activeSpeedrun?.relay || multipleNameplatesAssignedToTeam
-                ? assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null)
-                : [])
+            globalTeamId,
+            globalTeamName: scheduleStore.activeSpeedrun?.teams.find(team => team.id === globalTeamId)?.name,
+            talentList: scheduleStore.activeSpeedrun?.relay ? talentList : []
         };
     }
+
     return {
-        teamId: assignments.teamId,
-        talent: normalizeTalentList(assignments.playerIds.map(playerId => talentStore.findTalentItemById(playerId)).filter(talent => talent != null))
+        talentList
     };
 });
 
 const useCompactTalentItems = computed(() => {
     if (!props.fixedHeight) return false;
-    return (chunkedTalentList.value[activeTalentListChunk.value]?.length ?? 0) > 1;
+    return assignmentData.value.talentList.length > 1;
 });
 
 const minHeight = computed(() => {
     if (props.fixedHeight) return undefined;
 
-    if (assignmentData.value?.teamName != null) {
+    if (assignmentData.value?.globalTeamName != null) {
         return '80px';
     } else {
-        return `${Math.max(80, Math.min(props.maxConcurrentPlayers, assignmentData.value?.talent.length ?? 0) * 60 + 16)}px`;
+        return `${Math.max(80, Math.min(props.maxConcurrentPlayers, assignmentData.value?.talentList.length ?? 0) * 60 + 16)}px`;
     }
 });
 
-const chunkedTalentList = computed(() => assignmentData.value == null ? [] : chunk(assignmentData.value.talent, props.maxConcurrentPlayers));
+const chunkedTalentList = computed(() => assignmentData.value == null ? [] : chunk(assignmentData.value.talentList, props.maxConcurrentPlayers));
 
 const activeTalentListChunk = ref(0);
 const playerNameplateMode = inject(PlayerNameplateModeInjectionKey)!;
@@ -213,7 +219,7 @@ watch(chunkedTalentList, (newValue, oldValue) => {
 watch(() => scheduleStore.playerNameplateAssignments[feedIndex].assignments, (newValue, oldValue) => {
     if (
         newValue.length !== oldValue.length
-        || newValue.some((assignment, i) => oldValue[i].playerIds.length !== assignment.playerIds.length)
+        || newValue.some((assignment, i) => oldValue[i].players.length !== assignment.players.length)
     ) {
         activeTalentListChunk.value = 0;
     }
@@ -226,17 +232,13 @@ watch(playerNameplateMode, newValue => {
 
 const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIndex].assignments
     .slice(0, props.index)
-    .reduce((result, assignments) => {
+    .reduce((result, assignment) => {
         // If a named team only has a single nameplate, that nameplate displays only one name.
         // Otherwise, each member of the team is shown individually.
-        if (
-            assignments.teamId != null
-            && !isBlank(scheduleStore.activeSpeedrun?.teams.find(team => team.id === assignments.teamId)?.name)
-            && scheduleStore.playerNameplateAssignments[feedIndex].assignments.filter(otherAssignments => assignments.teamId === otherAssignments.teamId).length === 1
-        ) {
+        if (scheduleStore.getNameplateGlobalTeamName(feedIndex, assignment) != null) {
             result += 1;
         } else {
-            result += assignments.playerIds.length;
+            result += assignment.players.length;
         }
         return result;
     }, 0));
