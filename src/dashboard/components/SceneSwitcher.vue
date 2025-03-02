@@ -1,10 +1,28 @@
 <template>
     <ipl-space>
-        <ipl-button
-            label="Switch to gameplay"
-            :disabled="!shouldAllowSceneSwitch(obsStore.obsConfig.gameplayScene)"
-            @click="switchScene(obsStore.obsConfig.gameplayScene)"
-        />
+        <div class="layout horizontal">
+            <ipl-button
+                :disabled="!shouldAllowSceneSwitch(obsStore.obsConfig.gameplayScenes[0])"
+                class="m-r-8 max-width"
+                @click="switchScene(obsStore.obsConfig.gameplayScenes[0])"
+            >
+                <font-awesome-icon icon="gamepad" /> MAIN
+            </ipl-button>
+            <ipl-button
+                :disabled="!shouldAllowSceneSwitch(obsStore.obsConfig.gameplayScenes[1])"
+                class="m-r-8 max-width"
+                @click="switchScene(obsStore.obsConfig.gameplayScenes[1])"
+            >
+                <font-awesome-icon icon="gamepad" /> 2
+            </ipl-button>
+            <ipl-button
+                :disabled="!shouldAllowSceneSwitch(obsStore.obsConfig.gameplayScenes[2])"
+                class="max-width"
+                @click="switchScene(obsStore.obsConfig.gameplayScenes[2])"
+            >
+                <font-awesome-icon icon="gamepad" /> 3
+            </ipl-button>
+        </div>
         <ipl-button
             class="m-t-8"
             label="Switch to intermission"
@@ -19,6 +37,11 @@
 import { IplButton, IplSpace } from '@iplsplatoon/vue-components';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+library.add(faGamepad);
 
 const obsStore = useObsStore();
 

@@ -8,11 +8,15 @@
             "type": "array",
             "items": { "type": ["string", "null"] }
         },
-        "gameplayScene": { "type": "string" },
+        "gameplayScenes": {
+            "type": "array",
+            "items": { "type": ["string", "null"] }
+        },
         "intermissionScene": { "type": "string" }
     },
-    "required": ["gameLayoutVideoFeedScenes"],
+    "required": ["gameLayoutVideoFeedScenes", "gameplayScenes"],
     "default": {
-        "gameLayoutVideoFeedScenes": [null, null, null]
+        "gameLayoutVideoFeedScenes": [null, null, null],
+        "gameplayScenes": [null, null, null]
     }
 }

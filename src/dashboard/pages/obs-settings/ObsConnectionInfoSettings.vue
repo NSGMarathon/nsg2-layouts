@@ -1,5 +1,5 @@
 <template>
-    <ipl-space>
+    <ipl-space style="max-width: 272px; margin: 0 auto;">
         <div class="title">OBS Socket</div>
         <ipl-toggle
             v-model="socketEnabled"
@@ -10,6 +10,7 @@
     <ipl-space
         v-if="socketEnabled"
         class="m-t-8"
+        style="max-width: 272px; margin: 8px auto 0 auto;"
     >
         <ipl-input
             v-model="socketUrl"

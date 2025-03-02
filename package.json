@@ -40,7 +40,7 @@
             {
                 "name": "obs-settings",
                 "title": "OBS Settings",
-                "width": 2,
+                "width": 3,
                 "file": "obs-settings.html",
                 "workspace": "3 - Setup",
                 "headerColor": "#262F40"

@@ -472,6 +472,13 @@ export class ObsConnectorService {
         this.obsState.value.videoInputs = await this.getVideoInputs();
     }
 
+    gameplaySceneInProgram(): boolean {
+        return this.obsState.value.status !== 'NOT_CONNECTED'
+            && this.obsConfig.value.gameplayScenes
+                .filter(Boolean)
+                .some(sceneName => sceneName === this.obsState.value.currentScene);
+    }
+
     static sceneNameTagPresent(tag: string, sceneName: string): boolean {
         return new RegExp(`\\[.*${tag}.*]$`).test(sceneName);
     }
