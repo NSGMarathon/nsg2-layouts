@@ -8,6 +8,7 @@ import type {
 } from 'types/schemas';
 import { layouts } from 'types/Layouts';
 import range from 'lodash/range';
+import { ObsConnectorService } from './ObsConnectorService';
 
 export class NameplateAssignmentService {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
@@ -43,7 +44,7 @@ export class NameplateAssignmentService {
         });
     }
 
-    setActiveRelayPlayer(teamId: string, playerId: string) {
+    setActiveRelayPlayer(teamId: string, playerIndex: number) {
         if (this.activeSpeedrun.value == null) {
             throw new Error('No speedrun is active');
         }
@@ -52,15 +53,20 @@ export class NameplateAssignmentService {
         }
 
         const team = this.activeSpeedrun.value.teams.find(team => team.id === teamId);
-        if (team == null || !team.playerIds.some(teamPlayer => teamPlayer.id === playerId)) {
+        if (team == null || team.playerIds[playerIndex] == null) {
             throw new Error('Given player does not exist on given team');
         }
+
+        const player = team.playerIds[playerIndex];
 
         const teamActivePlayers = this.activeRelayPlayers.value.find(activePlayers => activePlayers.teamId === teamId);
         if (teamActivePlayers == null) {
             throw new Error('Could not find active player assignments for given team');
         }
-        teamActivePlayers.playerIds = [playerId];
+        teamActivePlayers.players = [{
+            index: playerIndex,
+            talentId: player.id
+        }];
         this.activeGameLayouts.value.forEach((layout, i) => {
             const nameplateCount = layouts[layout as keyof typeof layouts]?.playerNameplateCount ?? 0;
             this.recalculateNameplateAssignments(i, nameplateCount, this.activeSpeedrun.value);
@@ -114,20 +120,48 @@ export class NameplateAssignmentService {
         }
 
         this.activeRelayPlayers.value = activeSpeedrun.teams.map(team => {
-            const existingActivePlayers = this.activeRelayPlayers.value.find(activePlayers => activePlayers.teamId === team.id);
-            if (existingActivePlayers == null) {
+            if (team.playerIds.length === 0) {
                 return {
                     teamId: team.id,
-                    playerIds: [team.playerIds[0].id]
+                    players: []
+                };
+            }
+
+            const existingActivePlayers = this.activeRelayPlayers.value.find(activePlayers => activePlayers.teamId === team.id);
+            if (existingActivePlayers == null || existingActivePlayers.players.length !== 1) {
+                return {
+                    teamId: team.id,
+                    players: [{
+                        index: 0,
+                        talentId: team.playerIds[0].id
+                    }]
                 };
             } else {
-                const validPlayerIds = existingActivePlayers.playerIds.filter(activePlayerId => team.playerIds.some(teamPlayer => teamPlayer.id === activePlayerId));
-                if (validPlayerIds.length > 0) {
-                    return existingActivePlayers;
-                } else {
+                const existingActivePlayer = existingActivePlayers.players[0];
+                if (team.playerIds[existingActivePlayer.index] == null) {
+                    // If there's no longer a player in the given position, the team has shrunk.
+                    // We move backwards to the last position available. How did we get here?
                     return {
                         teamId: team.id,
-                        playerIds: [team.playerIds[0].id]
+                        players: [{
+                            index: team.playerIds.length - 1,
+                            talentId: team.playerIds[team.playerIds.length - 1].id
+                        }]
+                    };
+                } else {
+                    // If the previously active player stayed in the same position, all is well.
+                    // Presumably some players next up in line got swapped around.
+
+                    // What if the player at the given index is no longer the player we expect them to be?
+                    // Let's keep the index and assume the player change was expected.
+                    // The UI for moving players around in teams reflects this behavior, so it shouldn't be unexpected.
+
+                    return {
+                        teamId: team.id,
+                        players: [{
+                            index: existingActivePlayer.index,
+                            talentId: team.playerIds[existingActivePlayer.index].id
+                        }]
                     };
                 }
             }
@@ -152,10 +186,9 @@ export class NameplateAssignmentService {
                                 players: []
                             };
                         }
-
                         return {
-                            players: activePlayers.playerIds.map(playerId => ({
-                                talentId: playerId,
+                            players: activePlayers.players.map(activePlayer => ({
+                                talentId: activePlayer.talentId,
                                 teamId: activePlayers.teamId
                             }))
                         };

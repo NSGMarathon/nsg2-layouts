@@ -149,6 +149,7 @@
                             v-model:talent-list="team.playerIds"
                             :talent-item-map="talentItemMap"
                             color="secondary"
+                            :team-active-relay-players="activeRelayPlayerIndexMap?.[team.id]"
                         />
                     </ipl-space>
                 </div>
@@ -222,7 +223,7 @@ import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import cloneDeep from 'lodash/cloneDeep';
 import DurationInput from './DurationInput.vue';
 import TalentListEditor from './TalentListEditor.vue';
-import { OtherScheduleItem, Speedrun, Talent } from 'types/schemas';
+import { ActiveRelayPlayers, OtherScheduleItem, Speedrun, Talent } from 'types/schemas';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import TalentSelectDialog from './TalentSelectDialog.vue';
@@ -243,6 +244,17 @@ const talentStore = useTalentStore();
 const isOpen = ref(false);
 const selectedScheduleItem = ref<ScheduleItem | null>(null);
 const talentItemMap = ref<Record<string, Talent[number]>>({});
+
+const editingActiveSpeedrun = computed(() => selectedScheduleItem.value?.type === 'SPEEDRUN' && selectedScheduleItem.value?.id === scheduleStore.activeSpeedrun?.id);
+
+const activeRelayPlayerIndexMap = computed(() => {
+    if (!editingActiveSpeedrun.value) return null;
+
+    return scheduleStore.activeRelayPlayers.reduce((result, activeTeamPlayers) => {
+        result[activeTeamPlayers.teamId] = activeTeamPlayers.players;
+        return result;
+    }, {} as Record<string, ActiveRelayPlayers[number]['players']>);
+});
 
 const isRelay = computed({
     get() {

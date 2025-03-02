@@ -16,7 +16,7 @@ export interface MessageInputMap {
     'speedrun:seekToPreviousRun': never
     'speedrun:setActiveSpeedrun': { scheduleItemId: string }
 
-    'nameplate:setActiveRelayPlayer': { teamId: string, playerId: string }
+    'nameplate:setActiveRelayPlayer': { teamId: string, playerIndex: number }
     'nameplate:setCustomAssignments': { feedIndex: number, doAutomaticAssignments: boolean, nameplatePlayerIds?: { talentId: string, teamId: string }[][] }
 
     'talent:updateTalentItems': Talent

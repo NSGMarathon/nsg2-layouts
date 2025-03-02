@@ -2,7 +2,7 @@
     <div>
         <draggable
             :list="internalTalentList"
-            item-key="id"
+            item-key="teamPlayerId"
             handle=".talent-item-grip"
             group="talent-items"
             @change="onChange"
@@ -13,7 +13,12 @@
                     :color="props.color"
                 >
                     <template #title>
-                        {{ props.talentItemMap[element.id]?.name }}
+                        {{ props.talentItemMap[element.talentId]?.name }}
+                        <TalentListEditorRelayStatusBadge
+                            :index="index"
+                            :talent-id="element.talentId"
+                            :team-active-relay-players="props.teamActiveRelayPlayers"
+                        />
                     </template>
                     <template #header-extra>
                         <div class="layout horizontal center-vertical">
@@ -30,8 +35,8 @@
                         </div>
                     </template>
                     <talent-item-editor-form
-                        v-if="props.talentItemMap[element.id] != null"
-                        :model-value="props.talentItemMap[element.id]"
+                        v-if="props.talentItemMap[element.talentId] != null"
+                        :model-value="props.talentItemMap[element.talentId]"
                         :color="props.color"
                     />
                 </ipl-expanding-space>
@@ -50,6 +55,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faGripVertical } from '@fortawesome/free-solid-svg-icons/faGripVertical';
 import { faUserXmark } from '@fortawesome/free-solid-svg-icons/faUserXmark';
+import TalentListEditorRelayStatusBadge from './TalentListEditorRelayStatusBadge.vue';
 
 library.add(faGripVertical, faUserXmark);
 
@@ -57,16 +63,19 @@ const props = defineProps<{
     talentList: { id: string }[]
     talentItemMap: Record<string, Talent[number]>
     color: 'primary' | 'secondary'
+    teamActiveRelayPlayers?: { talentId: string, index: number }[]
 }>();
 
 const emit = defineEmits<{
     'update:talentList': [newValue: { id: string }[]]
 }>();
 
-const internalTalentList = ref<{ id: string }[]>([]);
+const internalTalentList = ref<{ talentId: string, teamPlayerId: string }[]>([]);
 watch(() => props.talentList, newValue => {
-    internalTalentList.value = newValue;
-}, { immediate: true });
+    // Each member of this list needs a strictly unique ID, or else things will occasionally go wrong.
+    // Talent may be added to a team multiple times, so this was cooked up as a workaround.
+    internalTalentList.value = newValue.map((talentId, index) => ({ talentId: talentId.id, teamPlayerId: `${talentId.id}_${index}` }));
+}, { immediate: true, deep: true });
 
 function onRemove(talentIndex: number) {
     internalTalentList.value = internalTalentList.value.toSpliced(talentIndex, 1);
@@ -74,7 +83,7 @@ function onRemove(talentIndex: number) {
 }
 
 function onChange() {
-    emit('update:talentList', internalTalentList.value);
+    emit('update:talentList', internalTalentList.value.map(listItem => ({ id: listItem.talentId })));
 }
 </script>
 

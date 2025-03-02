@@ -7,5 +7,8 @@
 
 export type ActiveRelayPlayers = {
 	teamId: string;
-	playerIds: string[];
+	players: {
+		talentId: string;
+		index: number;
+	}[];
 }[];

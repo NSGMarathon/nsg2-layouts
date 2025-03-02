@@ -6,8 +6,11 @@
                 {{ timerStore.timer.teamResults[props.team.id].state === 'FORFEIT' ? 'Forfeited' : 'Finished' }}
                 <span>{{ formatTimer(timerStore.timer.teamResults[props.team.id].time, true) }}</span>
             </div>
-            <div v-if="assignedPlayers.length > 0" class="m-t-8">
-                Now playing: <span class="text-bold">{{ talentStore.formatTalentIdList(assignedPlayers, 4) }}</span>
+            <div
+                v-if="assignedPlayers.length > 0"
+                class="m-t-8"
+            >
+                Now playing: <span class="text-bold">{{ talentStore.formatTalentIdList(assignedPlayers, 4) }} ({{ assignedPlayerIndices }})</span>
             </div>
             <div v-else-if="nameplateAssignment == null && scheduleStore.activeSpeedrun?.relay" class="m-t-8 no-nameplate-warning">
                 Team has no nameplate assignment!<br>Try switching layouts.
@@ -80,7 +83,7 @@
                 v-for="(player, i) in props.team.playerIds"
                 clickable
                 class="relay-select-player"
-                @click="selectRelayPlayer(player.id)"
+                @click="selectRelayPlayer(i)"
             >
                 #{{ i + 1 }} - {{ talentStore.findTalentItemById(player.id)?.name ?? `Unknown talent ${player.id}` }}
             </ipl-space>
@@ -98,6 +101,11 @@ import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { computed, ref } from 'vue';
 import { formatTimer } from 'client-shared/helpers/TimerHelper';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons/faChevronRight';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
+
+library.add(faChevronRight, faChevronLeft);
 
 const timerStore = useTimerStore();
 const scheduleStore = useScheduleStore();
@@ -137,30 +145,26 @@ const nameplateAssignment = computed(() => {
 
 const assignedPlayers = computed(() => {
     if (!scheduleStore.activeSpeedrun?.relay) return [];
-    return (nameplateAssignment.value?.playerIds ?? []).map(playerId => ({ id: playerId }));
+    return (nameplateAssignment.value?.players ?? []).map(playerId => ({ id: playerId.talentId, index: playerId.index }));
 });
 
-const activeRelayPlayerIndex = computed(() => {
-    if (!scheduleStore.activeSpeedrun?.relay) return -1;
-    if (nameplateAssignment.value == null || nameplateAssignment.value.playerIds.length !== 1) return -1;
-    return props.team.playerIds.findIndex(playerId => playerId.id === nameplateAssignment.value!.playerIds[0]);
-});
+const assignedPlayerIndices = computed(() => assignedPlayers.value.map(assignment => `#${assignment.index + 1}`).join(', '));
+
+const activeRelayPlayerIndex = computed(() => assignedPlayers.value[0]?.index ?? -1);
 
 async function selectPreviousRelayPlayer() {
     if (activeRelayPlayerIndex.value <= 0) return;
-    const player = props.team.playerIds[activeRelayPlayerIndex.value - 1];
-    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerId: player.id });
+    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerIndex: activeRelayPlayerIndex.value - 1 });
 }
 
 async function selectNextRelayPlayer() {
     if (activeRelayPlayerIndex.value === -1 || activeRelayPlayerIndex.value === props.team.playerIds.length - 1) return;
-    const player = props.team.playerIds[activeRelayPlayerIndex.value + 1];
-    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerId: player.id });
+    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerIndex: activeRelayPlayerIndex.value + 1 });
 }
 
 const playerSelectOpen = ref(false);
-async function selectRelayPlayer(playerId: string) {
-    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerId });
+async function selectRelayPlayer(playerIndex: number) {
+    await sendMessage('nameplate:setActiveRelayPlayer', { teamId: props.team.id, playerIndex });
     playerSelectOpen.value = false;
 }
 </script>
@@ -197,7 +201,7 @@ async function selectRelayPlayer(playerId: string) {
     max-width: 275px;
 }
 
-.no-nameplate-warning {
+.no-nameplate-warning, .has-unknown-indices {
     color: #FF5959;
 }
 

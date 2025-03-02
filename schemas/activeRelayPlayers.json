@@ -6,12 +6,20 @@
         "additionalProperties": false,
         "properties": {
             "teamId": { "type": "string" },
-            "playerIds": {
+            "players": {
                 "type": "array",
-                "items": { "type": "string" }
+                "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "talentId": { "type": "string" },
+                        "index": { "type": "number" }
+                    },
+                    "required": ["talentId", "index"]
+                }
             }
         },
-        "required": ["teamId", "playerIds"]
+        "required": ["teamId", "players"]
     },
     "default": []
 }
