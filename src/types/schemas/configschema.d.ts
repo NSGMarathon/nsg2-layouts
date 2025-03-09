@@ -73,6 +73,7 @@ export interface Configschema {
 			games?: ChannelItem[];
 			[k: string]: unknown;
 		};
+		visibleChannels?: ChannelItem[];
 		[k: string]: unknown;
 	};
 	[k: string]: unknown;

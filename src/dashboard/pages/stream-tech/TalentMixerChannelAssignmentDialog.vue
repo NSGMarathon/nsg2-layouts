@@ -9,6 +9,16 @@
             @close="isOpen = false"
         />
 
+        <ipl-space
+            class="m-t-8 layout horizontal center-horizontal"
+            color="secondary"
+        >
+            <ipl-checkbox
+                v-model="showAllChannels"
+                label="Show all channels"
+            />
+        </ipl-space>
+
         <template v-if="scheduleStore.activeSpeedrun?.relay">
             <div class="m-t-8">Teams</div>
             <hr class="m-y-2">
@@ -19,6 +29,7 @@
                 :assigned-channel="teamChannels[team.id]?.channelId"
                 :visible="isOpen"
                 class="m-t-8"
+                :show-all-channels="showAllChannels"
                 :fallback-label="`Team ${i + 1}`"
                 @update:assigned-channel="selectChannel('team', team.id, $event)"
                 @update:speaking-threshold="updateSpeakingThreshold('team', team.id, $event)"
@@ -33,6 +44,7 @@
             :assigned-channel="talentChannels[talentId]?.channelId"
             :visible="isOpen"
             class="m-t-8"
+            :show-all-channels="showAllChannels"
             :fallback-label="`Unknown talent ${talentId}`"
             @update:assigned-channel="selectChannel('talent', talentId, $event)"
             @update:speaking-threshold="updateSpeakingThreshold('talent', talentId, $event)"
@@ -42,6 +54,7 @@
             :talent-id="talentStore.currentHostId"
             :assigned-channel="hostChannel.channelId"
             class="m-t-8"
+            :show-all-channels="showAllChannels"
             fallback-label="Host (None currently assigned)"
             talent-name-suffix="(Host)"
             :visible="isOpen"
@@ -69,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplDialog, IplDialogTitle, IplSpace } from '@iplsplatoon/vue-components';
+import { IplButton, IplCheckbox, IplDialog, IplDialogTitle, IplSpace } from '@iplsplatoon/vue-components';
 import { ref } from 'vue';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
@@ -83,6 +96,7 @@ const talentStore = useTalentStore();
 
 type ChannelAssignment = { channelId?: number, speakingThresholdDB?: number };
 
+const showAllChannels = ref(false);
 const hostChannel = ref<ChannelAssignment>({ });
 const talentChannels = ref<Record<string, ChannelAssignment>>({});
 const teamChannels = ref<Record<string, ChannelAssignment>>({});
@@ -141,6 +155,7 @@ function open() {
     } else {
         hostChannel.value = { ...existingHostChannel };
     }
+    showAllChannels.value = false;
     isOpen.value = true;
 }
 defineExpose({

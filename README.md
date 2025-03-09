@@ -78,7 +78,15 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "channelMapping": {
       "runners": [{ "type": "DCA", "number": 1 }],
       "games": [{ "type": "DCA", "number": 2 }]
-    }
+    },
+    "visibleChannels": [
+      { "type": "CHANNEL", "number": 1 },
+      { "type": "CHANNEL", "number": 2 },
+      { "type": "CHANNEL", "number": 3 },
+      { "type": "CHANNEL", "number": 4 },
+      { "type": "AUX_IN", "number": 8 },
+      { "type": "AUX_IN", "number": 9 }
+    ]
   }
 }
 ```
@@ -93,7 +101,7 @@ Music information is gathered through foobar2000 with the [beefweb](https://gith
 
 #### X32 integration
 
-When configuring mixer channel mappings (`x32.channelMappings`), the following channel types are accepted:
+When configuring mixer channel mappings (`x32.channelMappings` and `x32.visibleChannels`), the following channel types are accepted:
 `CHANNEL`, `AUX_IN`, `FX_RETURN`, `BUS`, `MATRIX` & `DCA`
 
 #### OBS Websocket

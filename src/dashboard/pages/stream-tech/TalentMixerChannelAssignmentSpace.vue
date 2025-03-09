@@ -3,7 +3,7 @@
         <ipl-select
             :model-value="props.assignedChannel == null ? 'none' : String(props.assignedChannel)"
             :label="talentName"
-            :option-groups="mixerStore.mixerChannelOptions"
+            :option-groups="mixerStore.mixerChannelOptions(props.showAllChannels, String(props.assignedChannel))"
             class="max-width"
             @update:model-value="selectTalentChannel($event)"
         />
@@ -78,6 +78,7 @@ const props = defineProps<{
     visible: boolean
     fallbackLabel: string
     talentNameSuffix?: string
+    showAllChannels: boolean
 }>();
 
 const emit = defineEmits<{

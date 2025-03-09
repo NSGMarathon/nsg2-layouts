@@ -118,6 +118,12 @@
                             }
                         }
                     }
+                },
+                "visibleChannels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/channelItem"
+                    }
                 }
             }
         }
