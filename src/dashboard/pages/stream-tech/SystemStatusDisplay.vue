@@ -1,32 +1,28 @@
 <template>
     <ipl-space>
         <div class="title">System status</div>
-        <div class="system-status-grid">
-            <div>OBS</div>
-            <div :class="`state-color-${obsState.color}`">
-                {{ obsState.text }}
-            </div>
-            <div>Music</div>
-            <div :class="`state-color-${musicState.color}`">
-                {{ musicState.text }}
-            </div>
-            <div>Twitch</div>
-            <div :class="`state-color-${twitchState.color}`">
-                {{ twitchState.text }}
-            </div>
-            <div>Tracker websocket</div>
-            <div :class="`state-color-${trackerSocketStatus.color}`">
-                {{ trackerSocketStatus.text }}
-            </div>
-            <div>Tracker</div>
-            <div :class="`state-color-${trackerLoginStatus.color}`">
-                {{ trackerLoginStatus.text }}
-            </div>
-            <div>Mixer</div>
-            <div :class="`state-color-${mixerStatus.color}`">
-                {{ mixerStatus.text }}
-            </div>
-        </div>
+        <table class="system-status-table max-width">
+            <thead>
+            <tr>
+                <th><img src="../../assets/img/obs-logo.png" title="OBS Studio"></th>
+                <th><font-awesome-icon class="icon" icon="music" title="Music" fixed-width /></th>
+                <th><font-awesome-icon class="icon" :icon="['fab', 'twitch']" title="Twitch" fixed-width /></th>
+                <th><font-awesome-icon class="icon" icon="dollar" title="Tracker" fixed-width /></th>
+                <th><img src="../../assets/img/icon-tracker-ws.png" title="Tracker Websocket"></th>
+                <th><font-awesome-icon class="icon" icon="volume-high" title="Mixer" fixed-width /></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><div :class="`state-color-${obsState.color}`" :title="`OBS Studio: ${obsState.text}`" /></td>
+                <td><div :class="`state-color-${musicState.color}`" :title="`Music: ${musicState.text}`" /></td>
+                <td><div :class="`state-color-${twitchState.color}`" :title="`Twitch: ${twitchState.text}`" /></td>
+                <td><div :class="`state-color-${trackerLoginStatus.color}`" :title="`Tracker: ${trackerLoginStatus.text}`" /></td>
+                <td><div :class="`state-color-${trackerSocketStatus.color}`" :title="`Tracker Websocket: ${trackerSocketStatus.text}`" /></td>
+                <td><div :class="`state-color-${mixerStatus.color}`" :title="`Mixer: ${mixerStatus.text}`" /></td>
+            </tr>
+            </tbody>
+        </table>
     </ipl-space>
 </template>
 
@@ -39,6 +35,14 @@ import { Configschema } from 'types/schemas';
 import { useTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 import { useInternalStatusStore } from 'client-shared/stores/InternalStatusStore';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faMusic } from '@fortawesome/free-solid-svg-icons/faMusic';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
+import { faDollar } from '@fortawesome/free-solid-svg-icons/faDollar';
+import { faVolumeHigh } from '@fortawesome/free-solid-svg-icons/faVolumeHigh';
+
+library.add(faMusic, faTwitch, faDollar, faVolumeHigh);
 
 const bundleConfig = nodecg.bundleConfig as Configschema;
 
@@ -217,25 +221,40 @@ const mixerStatus = computed(() => {
 <style scoped lang="scss">
 @use '../../styles/dashboard-colors';
 
-.system-status-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 2px;
+.system-status-table {
+    td {
+        text-align: center;
 
-    > *:nth-child(even) {
-        justify-self: end;
+        > div {
+            width: 16px;
+            height: 16px;
+            border-radius: 99px;
+            display: inline-block;
+        }
+    }
+
+    img {
+        width: 1.25em;
+        height: 1em;
+        object-fit: contain;
+        display: inline-block;
+    }
+
+    .icon {
+        font-size: 16px;
     }
 }
 
+.state-color-neutral {
+    background-color: #444;
+}
 .state-color-green {
-    color: dashboard-colors.$state-green;
+    background-color: dashboard-colors.$state-green;
 }
 .state-color-yellow {
-    color: dashboard-colors.$state-yellow;
-    font-weight: 700;
+    background-color: dashboard-colors.$state-yellow;
 }
 .state-color-red {
-    color: dashboard-colors.$state-red;
-    font-weight: 700;
+    background-color: dashboard-colors.$state-red;
 }
 </style>
