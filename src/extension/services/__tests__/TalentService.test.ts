@@ -10,6 +10,157 @@ describe('TalentService', () => {
         talentService = new TalentService(mockNodecg);
     });
 
+    describe('formatScheduleItemTalentList', () => {
+        beforeEach(() => {
+            replicants.talent = [
+                { id: '1', name: 'Talent One' },
+                { id: '2', name: 'Talent Two' },
+                { id: '3', name: 'Talent Three' },
+                { id: '4', name: 'Talent Four' },
+                { id: '5', name: 'Talent Five' },
+                { id: '6', name: 'Talent Six' },
+                { id: '7', name: 'Talent Seven' },
+                { id: '8', name: 'Talent Eight' }
+            ];
+        });
+
+        it('formats speedruns with one player', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }] }
+                ]
+            })).toEqual('Talent One');
+        });
+
+        it('formats speedruns with multiple players in one team', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }] }
+                ]
+            })).toEqual('Talent One & Talent Two');
+        });
+
+        it('formats speedruns with lots of players in one team', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }, { id: '6' }, { id: '7' }] }
+                ]
+            })).toEqual('Talent One, Talent Two, Talent Three, Talent Four, Talent Five, Talent Six & 1 other');
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }, { id: '6' }, { id: '7' }, { id: '8' }] }
+                ]
+            })).toEqual('Talent One, Talent Two, Talent Three, Talent Four, Talent Five, Talent Six & 2 others');
+        });
+
+        it('formats speedruns with multiple teams with one player', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }] },
+                    { id: '2222', playerIds: [{ id: '2' }] }
+                ]
+            })).toEqual('Talent One vs. Talent Two');
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }] },
+                    { id: '2222', playerIds: [{ id: '2' }] },
+                    { id: '3333', playerIds: [{ id: '3' }] }
+                ]
+            })).toEqual('Talent One vs. Talent Two vs. Talent Three');
+        });
+
+        it('formats speedruns with multiple teams with multiple players', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }] },
+                    { id: '2222', playerIds: [{ id: '3' }, { id: '4' }] }
+                ]
+            })).toEqual('Talent One & Talent Two vs. Talent Three & Talent Four');
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }] },
+                    { id: '2222', playerIds: [{ id: '3' }, { id: '4' }] },
+                    { id: '3333', playerIds: [{ id: '5' }, { id: '6' }] }
+                ]
+            })).toEqual('Talent One & Talent Two vs. Talent Three & Talent Four vs. Talent Five & Talent Six');
+        });
+
+        it('formats speedruns with multiple teams with lots of players', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', playerIds: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }] },
+                    { id: '2222', playerIds: [{ id: '5' }, { id: '6' }, { id: '7' }, { id: '8' }, { id: '1' }] }
+                ]
+            })).toEqual('Talent One, Talent Two, Talent Three & 1 other vs. Talent Five, Talent Six, Talent Seven & 2 others');
+        });
+
+        it('uses team names if available', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', name: 'Team One', playerIds: [{ id: '1' }] },
+                    { id: '2222', name: 'Team Two', playerIds: [{ id: '5' }] }
+                ]
+            })).toEqual('Team One vs. Team Two');
+        });
+
+        it('ignores blank team names', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SPEEDRUN',
+                teams: [
+                    { id: '1111', name: '', playerIds: [{ id: '1' }] },
+                    { id: '2222', name: 'Team Two', playerIds: [{ id: '5' }] }
+                ]
+            })).toEqual('Talent One vs. Team Two');
+        });
+
+        it('formats talent for interstitials', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SETUP',
+                talentIds: [{ id: '1' }]
+            })).toEqual('Talent One');
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'OTHER',
+                talentIds: [{ id: '2' }, { id: '3' }]
+            })).toEqual('Talent Two & Talent Three');
+        });
+
+        it('handles unknown talent gracefully', () => {
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SETUP',
+                talentIds: [{ id: '1' }, { id: '9' }]
+            })).toEqual('Talent One & 1 other');
+            // @ts-ignore
+            expect(talentService.formatScheduleItemTalentList({
+                type: 'SETUP',
+                talentIds: [{ id: '9' }]
+            })).toEqual('(Somebody?)');
+        });
+    });
+
     describe('mergeNewTalentList', () => {
         it('merges old and new talent list', () => {
             replicants.talent = [

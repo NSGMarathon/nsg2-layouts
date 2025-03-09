@@ -17,7 +17,7 @@
             </div>
             <div>
                 <font-awesome-icon icon="gamepad" size="sm" fixed-width />
-                {{ talentStore.formatSpeedrunTeamList(scheduleStore.nextSpeedrun.teams) }}
+                {{ talentStore.formatSpeedrunTeamList(scheduleStore.nextSpeedrun) }}
             </div>
             <div v-if="scheduleStore.nextSpeedrun.commentatorIds.length > 0">
                 <font-awesome-icon icon="headset" size="sm" fixed-width />

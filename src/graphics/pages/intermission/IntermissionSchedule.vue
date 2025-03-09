@@ -36,7 +36,7 @@
                                 <div class="max-width m-t-4">
                                     <vfd-pixel-text
                                         :font-size="22"
-                                        :text-content="talentStore.formatSpeedrunTeamList(item.teams)"
+                                        :text-content="talentStore.formatSpeedrunTeamList(item)"
                                     />
                                     <vfd-pixel-text
                                         :font-size="22"

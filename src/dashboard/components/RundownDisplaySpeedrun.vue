@@ -16,7 +16,7 @@
                 </template>
             </div>
             <div class="m-t-4">
-                <font-awesome-icon icon="gamepad" size="sm" fixed-width /> {{ talentStore.formatSpeedrunTeamList(props.speedrun.teams) }}
+                <font-awesome-icon icon="gamepad" size="sm" fixed-width /> {{ talentStore.formatSpeedrunTeamList(props.speedrun) }}
             </div>
             <div
                 v-if="props.speedrun.commentatorIds.length > 0"

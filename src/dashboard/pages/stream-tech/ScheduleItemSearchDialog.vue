@@ -57,7 +57,7 @@
                         class="title-additional-details"
                     >
                         <font-awesome-icon icon="gamepad" size="sm" fixed-width />
-                        {{ talentStore.formatSpeedrunTeamList(result.teams) }}
+                        {{ talentStore.formatSpeedrunTeamList(result) }}
                     </div>
                     <div
                         v-else-if="result.talentIds.length > 0"

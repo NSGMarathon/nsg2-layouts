@@ -55,9 +55,9 @@ const secondLine = computed(() => {
     if (props.scheduleItem == null) return '';
     if (props.scheduleItem.type === 'SPEEDRUN') {
         if (!!props.scheduleItem.category) {
-            return `${props.scheduleItem.category}·${talentStore.formatSpeedrunTeamList(props.scheduleItem.teams)}`;
+            return `${props.scheduleItem.category}·${talentStore.formatSpeedrunTeamList(props.scheduleItem)}`;
         } else {
-            return talentStore.formatSpeedrunTeamList(props.scheduleItem.teams);
+            return talentStore.formatSpeedrunTeamList(props.scheduleItem);
         }
     } else {
         return talentStore.formatTalentIdList(props.scheduleItem.talentIds, 4);
