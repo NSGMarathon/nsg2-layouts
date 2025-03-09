@@ -57,6 +57,7 @@ export class ObsConnectorService {
         this.programSceneChangeListeners = [];
 
         this.obsState.value.status = 'NOT_CONNECTED';
+        this.obsState.value.transitionInProgress = false;
 
         this.socket
             .on('ConnectionClosed', e => this.handleClosure(e))
@@ -67,7 +68,8 @@ export class ObsConnectorService {
                 });
             })
             .on('CurrentProgramSceneChanged', e => this.handleProgramSceneChange(e))
-            .on('CurrentSceneCollectionChanged', this.handleSceneCollectionChange.bind(this));
+            .on('CurrentSceneCollectionChanged', this.handleSceneCollectionChange.bind(this))
+            .on('SceneTransitionStarted', this.handleSceneTransitionStart.bind(this));
 
         if (this.obsState.value.enabled) {
             this.connect().catch(e => {
@@ -76,19 +78,18 @@ export class ObsConnectorService {
         }
     }
 
-    // We can use a slightly modified build of obs-websocket to know when the program scene changes when the transition
-    // begins instead of when it ends.
     addProgramSceneChangeListener(callback: (sceneName: string) => void) {
         this.programSceneChangeListeners.push(callback);
-        if (this.sceneDataInTransitionEvents) {
-            this.socket.on('SceneTransitionStarted', event => {
-                callback((event as unknown as { toScene: string }).toScene);
-            });
-        } else {
-            this.socket.on('CurrentProgramSceneChanged', event => {
-                callback(event.sceneName);
-            });
-        }
+    }
+
+    private callProgramSceneChangeListeners(sceneName: string) {
+        this.programSceneChangeListeners.forEach(callback => {
+            try {
+                callback(sceneName);
+            } catch (e) {
+                this.logger.error('Error calling program scene change callback:', e);
+            }
+        });
     }
 
     private handleClosure(event: EventTypes['ConnectionClosed']): void {
@@ -135,9 +136,7 @@ export class ObsConnectorService {
         const scenes = await this.getScenes();
         const videoInputs = await this.getVideoInputs();
 
-        this.programSceneChangeListeners.forEach(callback => {
-            callback(scenes.currentScene);
-        });
+        this.callProgramSceneChangeListeners(scenes.currentScene);
 
         this.obsState.value = {
             ...this.obsState.value,
@@ -151,6 +150,7 @@ export class ObsConnectorService {
     private handleOpening(): void {
         this.logger.info('OBS websocket is open.');
         this.obsState.value.status = 'CONNECTED';
+        this.obsState.value.transitionInProgress = false;
         this.stopReconnecting();
     }
 
@@ -400,8 +400,21 @@ export class ObsConnectorService {
         }
     }
 
+    private handleSceneTransitionStart(event: EventTypes['SceneTransitionStarted']): void {
+        this.obsState.value.transitionInProgress = true;
+        // We can use a slightly modified build of obs-websocket to know when the program scene changes when the transition
+        // begins instead of when it ends.
+        if (this.sceneDataInTransitionEvents) {
+            this.callProgramSceneChangeListeners((event as unknown as { toScene: string }).toScene);
+        }
+    }
+
     private handleProgramSceneChange(event: EventTypes['CurrentProgramSceneChanged']): void {
         this.obsState.value.currentScene = event.sceneName;
+        this.obsState.value.transitionInProgress = false;
+        if (!this.sceneDataInTransitionEvents) {
+            this.callProgramSceneChangeListeners(event.sceneName);
+        }
     }
 
     private async getScenes(): Promise<{ currentScene: string, scenes: string[] }> {
@@ -415,7 +428,11 @@ export class ObsConnectorService {
     }
 
     setCurrentScene(scene: string): Promise<void> {
-        return this.socket.call('SetCurrentProgramScene', { sceneName: scene });
+        if (!this.obsState.value.transitionInProgress) {
+            return this.socket.call('SetCurrentProgramScene', { sceneName: scene });
+        } else {
+            return Promise.reject(new Error('Another transition is still in progress.'));
+        }
     }
     // endregion
 

@@ -16,4 +16,5 @@ export interface ObsState {
 	}[];
 	currentScene?: string;
 	currentSceneCollection?: string;
+	transitionInProgress: boolean;
 }

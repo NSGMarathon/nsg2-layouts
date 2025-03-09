@@ -46,7 +46,10 @@ library.add(faGamepad);
 const obsStore = useObsStore();
 
 function shouldAllowSceneSwitch(sceneName?: string | null) {
-    return sceneName != null && obsStore.obsState.status === 'CONNECTED' && obsStore.obsState.currentScene !== sceneName;
+    return sceneName != null
+        && !obsStore.obsState.transitionInProgress
+        && obsStore.obsState.status === 'CONNECTED'
+        && obsStore.obsState.currentScene !== sceneName;
 }
 
 async function switchScene(sceneName?: string | null) {

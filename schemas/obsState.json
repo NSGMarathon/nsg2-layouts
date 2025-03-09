@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "type": "object",
-    "required": ["status", "enabled"],
+    "required": ["status", "enabled", "transitionInProgress"],
     "properties": {
         "enabled": {
             "type": "boolean"
@@ -34,11 +34,15 @@
         },
         "currentSceneCollection": {
             "type": "string"
+        },
+        "transitionInProgress": {
+            "type": "boolean"
         }
     },
     "additionalProperties": false,
     "default": {
         "enabled": false,
-        "status": "NOT_CONNECTED"
+        "status": "NOT_CONNECTED",
+        "transitionInProgress": false
     }
 }
