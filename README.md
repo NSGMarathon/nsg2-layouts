@@ -84,8 +84,8 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
       { "type": "CHANNEL", "number": 2 },
       { "type": "CHANNEL", "number": 3 },
       { "type": "CHANNEL", "number": 4 },
-      { "type": "AUX_IN", "number": 8 },
-      { "type": "AUX_IN", "number": 9 }
+      { "type": "AUX_IN", "number": 7 },
+      { "type": "AUX_IN", "number": 8 }
     ]
   }
 }
