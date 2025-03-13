@@ -199,7 +199,7 @@ export class MixerService {
                 ...MixerService.getMatrixAddresses('/config/name'),
                 ...MixerService.getMatrixAddresses('/mix/on'),
                 ...MixerService.getDCAAddresses('/config/name'),
-                ...MixerService.getDCAAddresses('/mix/on'),
+                ...MixerService.getDCAAddresses('/on'),
                 '/main/st/config/name',
                 '/main/m/config/name',
                 '/main/st/mix/on',
