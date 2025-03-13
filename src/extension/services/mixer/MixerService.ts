@@ -39,6 +39,8 @@ export class MixerService {
     private readonly muteTransitionDuration: number;
     private readonly unmuteTransitionDuration: number;
     private readonly requiredFaders: string[];
+    private readonly channelIdToAddressPrefix: string[];
+    private assignedChannels: number[] = [];
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
@@ -52,6 +54,13 @@ export class MixerService {
             this.updateStateReplicant, 100, { maxWait: 500, trailing: true, leading: false });
         this.debouncedUpdateMixerLevelsReplicant = debounce(
             this.updateMixerLevelsReplicant, 50, { maxWait: 50, trailing: false, leading: true });
+        this.channelIdToAddressPrefix = [
+            ...MixerService.getChannelAddresses(''),
+            ...MixerService.getAuxInAddresses(''),
+            ...MixerService.getFxReturnAddresses(''),
+            ...MixerService.getBusAddresses(''),
+            ...MixerService.getMatrixAddresses('')
+        ];
 
         this.osc = null;
         if (MixerService.hasRequiredConfig(nodecg)) {
@@ -115,6 +124,20 @@ export class MixerService {
             });
             this.talentMixerChannelAssignments.value = newChannelAssignments;
         });
+
+        this.talentMixerChannelAssignments.on('change', newValue => {
+            const assignedChannels = new Set<number>();
+            Object.values(newValue.speedrunTalent).forEach(assignment => {
+                assignedChannels.add(assignment.channelId);
+            });
+            Object.values(newValue.speedrunTeams).forEach(assignment => {
+                assignedChannels.add(assignment.channelId);
+            });
+            if (newValue.host != null) {
+                assignedChannels.add(newValue.host.channelId);
+            }
+            this.assignedChannels = Array.from(assignedChannels.values());
+        });
     }
 
     private fadeChannels(direction: 'out' | 'in', channels?: readonly ChannelItem[]) {
@@ -165,14 +188,22 @@ export class MixerService {
             }, 8000);
 
             const requiredState = [
-                ...this.getChannelNameAddresses(),
-                ...this.getAuxInNameAddresses(),
-                ...this.getFxReturnNameAddresses(),
-                ...this.getBusNameAddresses(),
-                ...this.getMatrixNameAddresses(),
-                ...this.getDCANameAddresses(),
+                ...MixerService.getChannelAddresses('/config/name'),
+                ...MixerService.getChannelAddresses('/mix/on'),
+                ...MixerService.getAuxInAddresses('/config/name'),
+                ...MixerService.getAuxInAddresses('/mix/on'),
+                ...MixerService.getFxReturnAddresses('/config/name'),
+                ...MixerService.getFxReturnAddresses('/mix/on'),
+                ...MixerService.getBusAddresses('/config/name'),
+                ...MixerService.getBusAddresses('/mix/on'),
+                ...MixerService.getMatrixAddresses('/config/name'),
+                ...MixerService.getMatrixAddresses('/mix/on'),
+                ...MixerService.getDCAAddresses('/config/name'),
+                ...MixerService.getDCAAddresses('/mix/on'),
                 '/main/st/config/name',
                 '/main/m/config/name',
+                '/main/st/mix/on',
+                '/main/m/mix/on',
                 ...this.requiredFaders
             ];
             requiredState.forEach(address => {
@@ -223,46 +254,40 @@ export class MixerService {
             connectionState: this.mixerState.value.connectionState,
             mainLRName: findName('/main/st/config/name') ?? 'LR',
             mainMonoName: findName('/main/m/config/name') ?? 'M/C',
-            channelNames: this.getChannelNameAddresses().map((address, i) => findName(address) ?? `Ch ${String(i + 1).padStart(2, '0')}`),
-            auxInNames: this.getAuxInNameAddresses().map((address, i) => findName(address) ?? `Aux ${i + 1}`),
-            fxReturnNames: this.getFxReturnNameAddresses().map((address, i) => findName(address) ?? `Fx ${Math.floor(i / 2) + 1}${i % 2 === 0 ? 'L' : 'R'}`),
-            busNames: this.getBusNameAddresses().map((address, i) => findName(address) ?? `Bus ${i + 1}`),
-            matrixNames: this.getMatrixNameAddresses().map((address, i) => findName(address) ?? `Matrix ${i + 1}`),
-            dcaNames: this.getDCANameAddresses().map((address, i) => findName(address) ?? `DCA ${i + 1}`)
+            channelNames: MixerService.getChannelAddresses('/config/name').map((address, i) => findName(address) ?? `Ch ${String(i + 1).padStart(2, '0')}`),
+            auxInNames: MixerService.getAuxInAddresses('/config/name').map((address, i) => findName(address) ?? `Aux ${i + 1}`),
+            fxReturnNames: MixerService.getFxReturnAddresses('/config/name').map((address, i) => findName(address) ?? `Fx ${Math.floor(i / 2) + 1}${i % 2 === 0 ? 'L' : 'R'}`),
+            busNames: MixerService.getBusAddresses('/config/name').map((address, i) => findName(address) ?? `Bus ${i + 1}`),
+            matrixNames: MixerService.getMatrixAddresses('/config/name').map((address, i) => findName(address) ?? `Matrix ${i + 1}`),
+            dcaNames: MixerService.getDCAAddresses('/config/name').map((address, i) => findName(address) ?? `DCA ${i + 1}`)
         };
     }
 
     private updateMixerLevelsReplicant() {
-        const assignedChannels = new Set<number>();
-        Object.values(this.talentMixerChannelAssignments.value.speedrunTalent).forEach(assignment => {
-            assignedChannels.add(assignment.channelId);
-        });
-        Object.values(this.talentMixerChannelAssignments.value.speedrunTeams).forEach(assignment => {
-            assignedChannels.add(assignment.channelId);
-        });
-        if (this.talentMixerChannelAssignments.value.host != null) {
-            assignedChannels.add(this.talentMixerChannelAssignments.value.host.channelId);
-        }
-        this.mixerChannelLevels.value = Object.fromEntries(Array.from(assignedChannels.values()).map(channelId => [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90]));
+        this.mixerChannelLevels.value = Object.fromEntries(this.assignedChannels.map(channelId => {
+            const muteState = this.oscState.get(`${this.channelIdToAddressPrefix[channelId]}/mix/on`);
+            if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) return [channelId, -90];
+            return [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90];
+        }));
     }
 
-    private getChannelNameAddresses(): string[] {
-        return range(1, 33).map(i => `/ch/${String(i).padStart(2, '0')}/config/name`);
+    private static getChannelAddresses(suffix: string): string[] {
+        return range(1, 33).map(i => `/ch/${String(i).padStart(2, '0')}${suffix}`);
     }
-    private getAuxInNameAddresses(): string[] {
-        return range(1, 9).map(i => `/auxin/0${i}/config/name`);
+    private static getAuxInAddresses(suffix: string): string[] {
+        return range(1, 9).map(i => `/auxin/0${i}${suffix}`);
     }
-    private getFxReturnNameAddresses(): string[] {
-        return range(1, 9).map(i => `/fxrtn/0${i}/config/name`);
+    private static getFxReturnAddresses(suffix: string): string[] {
+        return range(1, 9).map(i => `/fxrtn/0${i}${suffix}`);
     }
-    private getBusNameAddresses(): string[] {
-        return range(1, 17).map(i => `/bus/${String(i).padStart(2, '0')}/config/name`);
+    private static getBusAddresses(suffix: string): string[] {
+        return range(1, 17).map(i => `/bus/${String(i).padStart(2, '0')}${suffix}`);
     }
-    private getMatrixNameAddresses(): string[] {
-        return range(1, 7).map(i => `/mtx/0${i}/config/name`);
+    private static getMatrixAddresses(suffix: string): string[] {
+        return range(1, 7).map(i => `/mtx/0${i}${suffix}`);
     }
-    private getDCANameAddresses(): string[] {
-        return range(1, 9).map(i => `/dca/${i}/config/name`);
+    private static getDCAAddresses(suffix: string): string[] {
+        return range(1, 9).map(i => `/dca/${i}${suffix}`);
     }
 
     private registerForUpdates() {
