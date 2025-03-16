@@ -8,6 +8,7 @@
             "enum": ["UNKNOWN", "OENGUS"]
         },
         "id": { "type": "string" },
+        "startTime": { "type": "string" },
         "sourceSpecificData": {
             "type": "object",
             "additionalProperties": false,
@@ -40,9 +41,10 @@
             }
         }
     },
-    "required": ["source", "items"],
+    "required": ["source", "items", "startTime"],
     "default": {
         "source": "UNKNOWN",
+        "startTime": "2025-03-16T12:06:00Z",
         "items": []
     }
 }

@@ -44,6 +44,7 @@ export class ScheduleService {
 
     async importSchedule(slug: string, mergeExisting: boolean): Promise<void> {
         const scheduleAndTalent = await this.oengusClient.getScheduleAndTalent(slug);
+        this.validateDate(scheduleAndTalent.schedule.startTime);
 
         const newTalentList = this.talentService.mergeNewTalentList(scheduleAndTalent.talent);
         const scheduleWithTalentIds = this.talentService.getScheduleWithTalentIds(scheduleAndTalent.schedule.items, newTalentList);
@@ -54,6 +55,7 @@ export class ScheduleService {
             this.schedule.value = {
                 source: 'OENGUS',
                 id: slug,
+                startTime: scheduleAndTalent.schedule.startTime,
                 items: scheduleWithTwitchCategories
             };
         } else {
@@ -62,6 +64,7 @@ export class ScheduleService {
             this.schedule.value = {
                 source: 'OENGUS',
                 id: slug,
+                startTime: scheduleAndTalent.schedule.startTime,
                 items: this.generateScheduleItemAndTeamIds(scheduleWithTwitchCategories)
             };
         }

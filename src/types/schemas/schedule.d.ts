@@ -8,6 +8,7 @@
 export interface Schedule {
 	source: 'UNKNOWN' | 'OENGUS';
 	id?: string;
+	startTime: string;
 	sourceSpecificData?: {
 		oengus?: {
 			scheduleId?: number;

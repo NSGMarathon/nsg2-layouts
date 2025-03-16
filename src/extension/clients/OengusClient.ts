@@ -3,6 +3,8 @@ import axios from 'axios';
 import { type Configschema, OengusData, OtherScheduleItem, Schedule, Speedrun, Talent } from 'types/schemas';
 import type NodeCG from '@nodecg/types';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
+import { Duration } from 'luxon';
+import { string } from 'yargs';
 
 type OengusRunType = 'SINGLE' | 'RACE' | 'COOP' | 'COOP_RACE' | 'OTHER' | 'RELAY' | 'RELAY_RACE';
 type OengusSocialPlatform = 'DISCORD' | 'EMAIL' | 'FACEBOOK' | 'INSTAGRAM' | 'NICO' | 'SNAPCHAT' | 'SPEEDRUNCOM' | 'TWITCH' | 'TWITTER' | 'MASTODON' | 'YOUTUBE';
@@ -126,6 +128,16 @@ interface OengusV2ScheduleResponse {
     lines: OengusV2ScheduleLine[]
 }
 
+interface OengusV1MarathonInfoResponse {
+    id: string
+    name: string
+    startDate: string
+    endDate: string
+    submissionsStartDate: string
+    submissionsEndDate: string
+    description: string
+}
+
 export class OengusClient {
     private readonly axios: AxiosInstance;
     private readonly logger: NodeCG.Logger;
@@ -148,6 +160,11 @@ export class OengusClient {
             }
             return config;
         });
+    }
+
+    private async getMarathonInfoV1(marathonSlug: string): Promise<OengusV1MarathonInfoResponse> {
+        const response = await this.axios.get<OengusV1MarathonInfoResponse>(`/v1/marathons/${marathonSlug}`);
+        return response.data;
     }
 
     private getRunnerExternalIdV1(scheduleLineId: number, runnerName: string | undefined, runnerIndex: number): string {
@@ -234,6 +251,7 @@ export class OengusClient {
     }
 
     private async getScheduleV1(marathonId: string): Promise<{ schedule: Schedule, talent: Talent }> {
+        const marathonInfo = await this.getMarathonInfoV1(marathonId);
         const scheduleResponse = await this.axios.get<OengusV1ScheduleResponse>(`/v1/marathons/${marathonId}/schedule?withCustomData=true`);
 
         const scheduleItems: Schedule['items'] = scheduleResponse.data.lines.map(line => {
@@ -243,8 +261,8 @@ export class OengusClient {
                     externalId: String(line.id),
                     title: line.setupBlockText || 'Setup Block',
                     type: 'SETUP',
-                    estimate: line.estimate,
-                    setupTime: line.setupTime,
+                    estimate: Duration.fromISO(line.estimate).plus(Duration.fromISO(line.setupTime)).toISO() as string,
+                    setupTime: Duration.fromObject({ seconds: 0 }).toISO(),
                     scheduledStartTime: line.date,
                     talentIds: []
                 } satisfies OtherScheduleItem;
@@ -312,6 +330,7 @@ export class OengusClient {
             schedule: {
                 id: marathonId,
                 source: 'OENGUS',
+                startTime: marathonInfo.startDate,
                 items: scheduleItems
             },
             talent
@@ -339,6 +358,7 @@ export class OengusClient {
     }
 
     private async getScheduleV2(marathonId: string, scheduleSlug: string, scheduleId: number): Promise<{ schedule: Schedule, talent: Talent }> {
+        const marathonInfo = await this.getMarathonInfoV1(marathonId);
         const scheduleResponse = await this.getScheduleLinesV2(marathonId, scheduleSlug, scheduleId);
 
         const scheduleItems: Schedule['items'] = scheduleResponse.map(line => {
@@ -418,6 +438,7 @@ export class OengusClient {
             schedule: {
                 id: marathonId,
                 source: 'OENGUS',
+                startTime: marathonInfo.startDate,
                 items: scheduleItems
             },
             talent
