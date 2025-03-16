@@ -14,12 +14,12 @@
             </thead>
             <tbody>
             <tr>
-                <td><div :class="`state-color-${obsState.color}`" :title="`OBS Studio: ${obsState.text}`" /></td>
-                <td><div :class="`state-color-${musicState.color}`" :title="`Music: ${musicState.text}`" /></td>
-                <td><div :class="`state-color-${twitchState.color}`" :title="`Twitch: ${twitchState.text}`" /></td>
-                <td><div :class="`state-color-${trackerLoginStatus.color}`" :title="`Tracker: ${trackerLoginStatus.text}`" /></td>
-                <td><div :class="`state-color-${trackerSocketStatus.color}`" :title="`Tracker Websocket: ${trackerSocketStatus.text}`" /></td>
-                <td><div :class="`state-color-${mixerStatus.color}`" :title="`Mixer: ${mixerStatus.text}`" /></td>
+                <td><div :class="`state-background-${obsState.color}`" :title="`OBS Studio: ${obsState.text}`" /></td>
+                <td><div :class="`state-background-${musicState.color}`" :title="`Music: ${musicState.text}`" /></td>
+                <td><div :class="`state-background-${twitchState.color}`" :title="`Twitch: ${twitchState.text}`" /></td>
+                <td><div :class="`state-background-${trackerLoginStatus.color}`" :title="`Tracker: ${trackerLoginStatus.text}`" /></td>
+                <td><div :class="`state-background-${trackerSocketStatus.color}`" :title="`Tracker Websocket: ${trackerSocketStatus.text}`" /></td>
+                <td><div :class="`state-background-${mixerStatus.color}`" :title="`Mixer: ${mixerStatus.text}`" /></td>
             </tr>
             </tbody>
         </table>
@@ -245,16 +245,7 @@ const mixerStatus = computed(() => {
     }
 }
 
-.state-color-neutral {
+.state-background-neutral {
     background-color: #444;
-}
-.state-color-green {
-    background-color: dashboard-colors.$state-green;
-}
-.state-color-yellow {
-    background-color: dashboard-colors.$state-yellow;
-}
-.state-color-red {
-    background-color: dashboard-colors.$state-red;
 }
 </style>

@@ -22,7 +22,7 @@ import { IplDataRow } from '@iplsplatoon/vue-components';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 const props = defineProps<{
-    twitchCategory: Speedrun['twitchCategory']
+    twitchCategory?: Speedrun['twitchCategory']
 }>();
 </script>
 

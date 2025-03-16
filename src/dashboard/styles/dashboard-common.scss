@@ -1,3 +1,5 @@
+@use './dashboard-colors';
+
 @import '@iplsplatoon/vue-components/style.css';
 @import '../../client-shared/styles/layout';
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
@@ -39,4 +41,23 @@ a {
     &:hover {
         text-decoration: underline;
     }
+}
+
+.state-background-green {
+    background-color: dashboard-colors.$state-green;
+}
+.state-background-yellow {
+    background-color: dashboard-colors.$state-yellow;
+}
+.state-background-red {
+    background-color: dashboard-colors.$state-red;
+}
+.state-color-green {
+    color: dashboard-colors.$state-green;
+}
+.state-color-yellow {
+    color: dashboard-colors.$state-yellow;
+}
+.state-color-red {
+    color: dashboard-colors.$state-red;
 }

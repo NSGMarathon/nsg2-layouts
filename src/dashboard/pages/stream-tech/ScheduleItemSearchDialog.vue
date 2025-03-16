@@ -68,7 +68,11 @@
                     </div>
                 </template>
                 <div>
-                    <div class="m-b-2" :key="minutes">
+                    <div
+                        v-if="isOpen"
+                        class="m-b-2"
+                        :key="minutes"
+                    >
                         <font-awesome-icon icon="clock" size="sm" fixed-width />
                         {{ formatScheduledStartTime(result.scheduledStartTime) }}
                     </div>
@@ -109,7 +113,7 @@ import {
     IplInput,
     IplSpace
 } from '@iplsplatoon/vue-components';
-import { computed, inject, onUnmounted, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
 import { isBlank } from 'shared/StringHelper';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
@@ -131,6 +135,7 @@ import ScheduleItemTypeBadge from '../../components/ScheduleItemTypeBadge.vue';
 import { ScheduleItemEditorInjectionKey } from '../../helpers/Injections';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import { DateTime } from 'luxon';
+import { useMinutes } from '../../helpers/useMinutes';
 
 library.add(faGamepad, faHeadset, faCircle, faPenToSquare, faClock);
 
@@ -147,21 +152,13 @@ const searchByTitle = ref(true);
 
 const scheduleItemEditor = inject(ScheduleItemEditorInjectionKey);
 
-const minutes = ref(0);
-let minuteUpdateInterval: number | undefined = undefined;
-onUnmounted(() => {
-    window.clearInterval(minuteUpdateInterval);
-});
+const minutes = useMinutes();
 
 watch(isOpen, newValue => {
     if (!newValue) {
         query.value = '';
-        window.clearInterval(minuteUpdateInterval);
     } else {
         minutes.value = DateTime.now().minute;
-        minuteUpdateInterval = window.setInterval(() => {
-            minutes.value = DateTime.now().minute;
-        }, 30 * 1000);
     }
 });
 
