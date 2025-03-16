@@ -24,6 +24,7 @@ export interface Speedrun {
 	setupTime?: string | null;
 	scheduledStartTime: string;
 	timerStartTime?: string | null;
+	firstGameplayTransitionTime?: string | null;
 	relay?: boolean | null;
 	emulated?: boolean | null;
 	layout?: string | null;

@@ -11,6 +11,8 @@ import { ScheduleService } from './ScheduleService';
 import { ScheduleItem } from 'types/ScheduleHelpers';
 import { TimerService } from './TimerService';
 import { Layout, layouts } from 'types/Layouts';
+import { ObsConnectorService } from './ObsConnectorService';
+import { DateTime } from 'luxon';
 
 export class SpeedrunService {
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
@@ -20,7 +22,7 @@ export class SpeedrunService {
     private readonly scheduleService: ScheduleService;
     private readonly timerService: TimerService;
 
-    constructor(nodecg: NodeCG.ServerAPI<Configschema>, scheduleService: ScheduleService, timerService: TimerService) {
+    constructor(nodecg: NodeCG.ServerAPI<Configschema>, scheduleService: ScheduleService, timerService: TimerService, obsConnectorService: ObsConnectorService) {
         this.schedule = nodecg.Replicant('schedule') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.nextSpeedrun = nodecg.Replicant('nextSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<NextSpeedrun>;
@@ -41,6 +43,15 @@ export class SpeedrunService {
             const newNextRun = this.scheduleService.findScheduleItemAfter(this.activeSpeedrun.value?.id, 'SPEEDRUN');
             if (newNextRun == null || this.nextSpeedrun.value == null || newNextRun.id !== this.nextSpeedrun.value.id) {
                 this.setNextSpeedrun(newNextRun);
+            }
+        });
+
+        obsConnectorService.addProgramSceneChangeListener(sceneName => {
+            if (this.activeSpeedrun.value != null && this.activeSpeedrun.value.firstGameplayTransitionTime == null && obsConnectorService.isGameplayScene(sceneName)) {
+                this.scheduleService.updateScheduleItem({
+                    ...this.activeSpeedrun.value,
+                    firstGameplayTransitionTime: DateTime.utc().toISO()
+                });
             }
         });
     }

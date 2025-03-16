@@ -41,7 +41,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const scheduleService = new ScheduleService(nodecg, oengusClient, talentService, igdbService);
     const obsConnectorService = new ObsConnectorService(nodecg);
     const timerService = new TimerService(nodecg, obsConnectorService, scheduleService);
-    const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService);
+    const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService, obsConnectorService);
     scheduleService.init(speedrunService);
     const nameplateAssignmentService = new NameplateAssignmentService(nodecg);
     new TrackerService(nodecg);
