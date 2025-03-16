@@ -1,4 +1,4 @@
-import { Duration } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { ScheduleItem } from 'types/ScheduleHelpers';
 import { Configschema } from 'types/schemas';
 
@@ -65,4 +65,21 @@ export function shortenLargeNumber(number: number): string {
     } else {
         return `${Math.floor(number / 100000) / 10}M`;
     }
+}
+
+export function formatScheduledStartTime(scheduledStartTime: string): string {
+    const parsedStartTime = DateTime.fromISO(scheduledStartTime);
+    const relativeStartTime = parsedStartTime.toRelative({ unit: ['days', 'hours', 'minutes'] });
+    const now = DateTime.now();
+    const tomorrow = now.plus({ days: 1 });
+    let date: string;
+    if (parsedStartTime.year === now.year && parsedStartTime.month === now.month && parsedStartTime.day === now.day) {
+        date = 'Scheduled for ';
+    } else if (parsedStartTime.year === tomorrow.year && parsedStartTime.month === tomorrow.month && parsedStartTime.day === tomorrow.day) {
+        date = 'Tomorrow at';
+    } else {
+        date = parsedStartTime.toISODate() + ' at';
+    }
+
+    return `${date} ${parsedStartTime.setLocale('en-GB').toLocaleString(DateTime.TIME_24_SIMPLE)} - ${relativeStartTime}`;
 }

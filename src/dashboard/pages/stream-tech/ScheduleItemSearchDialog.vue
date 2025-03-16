@@ -70,11 +70,18 @@
                 <div>
                     <div
                         v-if="isOpen"
-                        class="m-b-2"
+                        class="m-b-4"
                         :key="minutes"
                     >
                         <font-awesome-icon icon="clock" size="sm" fixed-width />
                         {{ formatScheduledStartTime(result.scheduledStartTime) }}
+                    </div>
+                    <div
+                        v-if="result.firstGameplayTransitionTime != null"
+                        class="m-b-4"
+                    >
+                        <font-awesome-icon icon="stopwatch" size="sm" fixed-width />
+                        {{ formatScheduleTimeliness(result.scheduledStartTime, result.firstGameplayTransitionTime as string) }}
                     </div>
                     <div class="layout horizontal">
                         <ipl-button
@@ -118,26 +125,28 @@ import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
 import { isBlank } from 'shared/StringHelper';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { faHeadset } from '@fortawesome/free-solid-svg-icons/faHeadset';
 import {
     OtherScheduleItemWithTalentInfo,
     ScheduleItemWithTalentInfo,
     SpeedrunWithTalentInfo
 } from 'types/ScheduleHelpers';
+import { faHeadset } from '@fortawesome/free-solid-svg-icons/faHeadset';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faStopwatch } from '@fortawesome/free-solid-svg-icons/faStopwatch';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import ScheduleItemTypeBadge from '../../components/ScheduleItemTypeBadge.vue';
 import { ScheduleItemEditorInjectionKey } from '../../helpers/Injections';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import { DateTime } from 'luxon';
 import { useMinutes } from '../../helpers/useMinutes';
+import { formatScheduledStartTime } from 'client-shared/helpers/StringHelper';
 
-library.add(faGamepad, faHeadset, faCircle, faPenToSquare, faClock);
+library.add(faGamepad, faHeadset, faCircle, faPenToSquare, faClock, faStopwatch);
 
 type ScheduleItemWithIndexAndTalentInfo = ScheduleItemWithTalentInfo & { index: number };
 
@@ -166,10 +175,14 @@ function open() {
     isOpen.value = true;
 }
 
-function formatScheduledStartTime(scheduledStartTime: string): string {
-    const parsedTime = DateTime.fromISO(scheduledStartTime);
+function formatScheduleTimeliness(scheduledStartTime: string, firstGameplayTransitionTime: string): string {
+    const parsedScheduledStartTime = DateTime.fromISO(scheduledStartTime);
+    const parsedFirstGameplayTransitionTime = DateTime.fromISO(firstGameplayTransitionTime);
+    const isAheadOfSchedule = parsedScheduledStartTime >= parsedFirstGameplayTransitionTime;
+    const timeDiff = parsedFirstGameplayTransitionTime.set({ millisecond: 0 }).diff(parsedScheduledStartTime).rescale().mapUnits(x => Math.abs(Math.round(x)));
+    const formattedDiff = timeDiff.toHuman({ unitDisplay: 'narrow' });
 
-    return `${parsedTime.setLocale('en-GB').toLocaleString(DateTime.DATETIME_SHORT)} (${parsedTime.toRelative({ unit: ['days', 'hours', 'minutes'] })})`;
+    return isAheadOfSchedule ? `Started ${formattedDiff} ahead of schedule` : `Started ${formattedDiff} behind schedule`;
 }
 
 const scheduleItemsWithTalentInfo = computed<ScheduleItemWithIndexAndTalentInfo[]>(() => {

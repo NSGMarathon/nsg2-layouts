@@ -23,7 +23,7 @@
                     {{ scheduleState.text }}
                 </template>
                 <template v-else>
-                    {{ getScheduledStartTime() }}
+                    {{ formatScheduledStartTime(props.speedrun.scheduledStartTime) }}
                 </template>
             </ipl-badge>
             <div class="speedrun-title">{{ props.speedrun.title }}</div>
@@ -78,6 +78,7 @@ import { ScheduleItemEditorInjectionKey } from '../helpers/Injections';
 import { DateTime } from 'luxon';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { useMinutes } from '../helpers/useMinutes';
+import { formatScheduledStartTime } from 'client-shared/helpers/StringHelper';
 
 library.add(faCircle, faGamepad, faHeadset, faPenToSquare, faClock, faStopwatch);
 
@@ -119,23 +120,6 @@ const scheduleState = computed(() => {
 });
 
 const showScheduledStartTime = computed(() => props.speedrun.id === scheduleStore.activeSpeedrun?.id || props.speedrun.id === scheduleStore.nextSpeedrun?.id);
-
-function getScheduledStartTime() {
-    const scheduledStartTime = DateTime.fromISO(props.speedrun.scheduledStartTime);
-    const relativeStartTime = scheduledStartTime.toRelative({ unit: ['days', 'hours', 'minutes'] });
-    const now = DateTime.now();
-    const tomorrow = now.plus({ days: 1 });
-    let date: string;
-    if (scheduledStartTime.year === now.year && scheduledStartTime.month === now.month && scheduledStartTime.day === now.day) {
-        date = 'Scheduled for ';
-    } else if (scheduledStartTime.year === tomorrow.year && scheduledStartTime.month === tomorrow.month && scheduledStartTime.day === tomorrow.day) {
-        date = 'Tomorrow at';
-    } else {
-        date = scheduledStartTime.toISODate() + ' at';
-    }
-
-    return `${date} ${scheduledStartTime.setLocale('en-GB').toLocaleString(DateTime.TIME_24_SIMPLE)} - ${relativeStartTime}`;
-}
 </script>
 
 <style scoped lang="scss">
