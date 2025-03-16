@@ -37,12 +37,12 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const igdbClient = twitchOauthClient ? new IgdbClient(nodecg, twitchOauthClient) : null;
 
     const igdbService = igdbClient ? new IgdbService(nodecg, igdbClient) : null;
-    const timerService = new TimerService(nodecg);
     const talentService = new TalentService(nodecg);
     const scheduleService = new ScheduleService(nodecg, oengusClient, talentService, igdbService);
+    const obsConnectorService = new ObsConnectorService(nodecg);
+    const timerService = new TimerService(nodecg, obsConnectorService, scheduleService);
     const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService);
     scheduleService.init(speedrunService);
-    const obsConnectorService = new ObsConnectorService(nodecg);
     const nameplateAssignmentService = new NameplateAssignmentService(nodecg);
     new TrackerService(nodecg);
     const twitchService = new TwitchService(nodecg, twitchOauthClient, twitchClient, talentService, scheduleService);

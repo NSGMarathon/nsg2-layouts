@@ -30,6 +30,7 @@
         "estimate": { "type": "string" },
         "setupTime": { "type": ["string", "null"] },
         "scheduledStartTime": { "type": "string" },
+        "timerStartTime": { "type": ["string", "null"] },
         "relay": { "type": ["boolean", "null"] },
         "emulated": { "type": ["boolean", "null"] },
         "layout": { "type": ["string", "null"] },

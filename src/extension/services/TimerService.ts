@@ -1,17 +1,23 @@
 import type NodeCG from '@nodecg/types';
-import type { ActiveSpeedrun, Configschema, Timer } from 'types/schemas';
+import type { ActiveSpeedrun, Configschema, Speedrun, Timer } from 'types/schemas';
 import * as livesplitCore from 'livesplit-core';
-import { Duration } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
+import { ObsConnectorService } from './ObsConnectorService';
+import { ScheduleService } from './ScheduleService';
 
 export class TimerService {
     private readonly timerRep: NodeCG.ServerReplicantWithSchemaDefault<Timer>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly timer: livesplitCore.Timer;
+    private readonly obsConnectorService: ObsConnectorService;
+    private readonly scheduleService: ScheduleService;
 
-    constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
+    constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, scheduleService: ScheduleService) {
         this.timerRep = nodecg.Replicant('timer') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Timer>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
+        this.obsConnectorService = obsConnectorService;
+        this.scheduleService = scheduleService;
         const run = livesplitCore.Run.new();
         run.pushSegment(livesplitCore.Segment.new('done!'));
 
@@ -27,6 +33,29 @@ export class TimerService {
         }
 
         setInterval(this.tick.bind(this), 100);
+
+        obsConnectorService.addProgramSceneChangeListener(sceneName => {
+            if (
+                this.activeSpeedrun.value != null
+                && this.activeSpeedrun.value?.timerStartTime == null
+                && this.timerRep.value.state === 'RUNNING'
+                && obsConnectorService.isGameplayScene(sceneName)
+            ) {
+                // The timer starting during intermission is usually assumed to just be a test, perhaps
+                // we're just demonstrating to the runner how to start the timer. If it's still running
+                // as we switch out of intermission, we'll assign the start time just to have some
+                // value there.
+
+                this.setLastStartTime();
+            }
+        });
+    }
+
+    private setLastStartTime() {
+        this.scheduleService.updateScheduleItem({
+            ...this.activeSpeedrun.value,
+            timerStartTime: this.timerRep.value.lastStartTime
+        } as Speedrun);
     }
 
     start(force = false) {
@@ -38,12 +67,17 @@ export class TimerService {
         }
 
         this.timerRep.value.state = 'RUNNING';
+        this.timerRep.value.lastStartTime = DateTime.utc().toISO();
         if (this.timer.currentPhase() === 0) {
             this.timer.start();
         } else {
             this.timer.resume();
         }
         this.initGameTime();
+
+        if (this.obsConnectorService.gameplaySceneInProgram() && this.activeSpeedrun.value != null && this.activeSpeedrun.value.timerStartTime == null) {
+            this.setLastStartTime();
+        }
     }
 
     stop(teamId?: string, forfeit?: boolean) {
@@ -122,6 +156,7 @@ export class TimerService {
         this.timer.reset(false);
         this.timerRep.value = {
             state: 'STOPPED',
+            lastStartTime: this.timerRep.value.lastStartTime,
             time: {
                 hours: 0,
                 minutes: 0,

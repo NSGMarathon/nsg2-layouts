@@ -7,6 +7,9 @@
             "type": "string",
             "enum": ["STOPPED", "RUNNING", "PAUSED", "FINISHED"]
         },
+        "lastStartTime": {
+            "type": ["string", "null"]
+        },
         "time": {
             "$ref": "defs/Duration.json"
         },
@@ -28,9 +31,10 @@
             }
         }
     },
-    "required": ["state", "time", "teamResults"],
+    "required": ["state", "time", "teamResults", "lastStartTime"],
     "default": {
         "state": "STOPPED",
+        "lastStartTime": null,
         "time": {
             "hours": 0,
             "minutes": 0,

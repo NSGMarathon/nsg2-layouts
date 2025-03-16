@@ -32,6 +32,7 @@ export interface Speedrun {
 	estimate: string;
 	setupTime?: string | null;
 	scheduledStartTime: string;
+	timerStartTime?: string | null;
 	relay?: boolean | null;
 	emulated?: boolean | null;
 	layout?: string | null;
