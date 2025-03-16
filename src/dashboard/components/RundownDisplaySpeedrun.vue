@@ -9,18 +9,18 @@
                 class="m-b-2"
             />
             <ipl-badge
-                v-if="timerStartTime != null || showScheduledStartTime"
-                :color="timerStartTime?.color ?? 'blue'"
-                :key="timerStartTime == null ? minutes : undefined"
+                v-if="scheduleState != null || showScheduledStartTime"
+                :color="scheduleState?.color ?? 'blue'"
+                :key="scheduleState == null ? minutes : undefined"
                 class="m-b-2"
             >
                 <font-awesome-icon
-                    :icon="timerStartTime != null ? 'stopwatch' : 'clock'"
+                    :icon="scheduleState != null ? 'stopwatch' : 'clock'"
                     size="xs"
                     class="m-r-4"
                 />
-                <template v-if="timerStartTime != null">
-                    {{ timerStartTime.text }}
+                <template v-if="scheduleState != null">
+                    {{ scheduleState.text }}
                 </template>
                 <template v-else>
                     {{ getScheduledStartTime() }}
@@ -95,13 +95,13 @@ const props = withDefaults(defineProps<{
     isActive: false
 });
 
-const timerStartTime = computed(() => {
-    if (props.speedrun.id !== scheduleStore.activeSpeedrun?.id || props.speedrun.timerStartTime == null) return null;
+const scheduleState = computed(() => {
+    if (props.speedrun.id !== scheduleStore.activeSpeedrun?.id || props.speedrun.firstGameplayTransitionTime == null) return null;
 
     const scheduledStartTime = DateTime.fromISO(props.speedrun.scheduledStartTime);
-    const timerStartTime = DateTime.fromISO(props.speedrun.timerStartTime);
-    const isAheadOfSchedule = scheduledStartTime >= timerStartTime;
-    const timeDiff = timerStartTime.set({ millisecond: 0 }).diff(scheduledStartTime).rescale().mapUnits(x => Math.abs(Math.round(x)));
+    const firstGameplayTransitionTime = DateTime.fromISO(props.speedrun.firstGameplayTransitionTime);
+    const isAheadOfSchedule = scheduledStartTime >= firstGameplayTransitionTime;
+    const timeDiff = firstGameplayTransitionTime.set({ millisecond: 0 }).diff(scheduledStartTime).rescale().mapUnits(x => Math.abs(Math.round(x)));
 
     const timeDiffMinutes = timeDiff.shiftTo('minutes').minutes;
     let timeDiffColor: string;
