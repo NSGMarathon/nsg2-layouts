@@ -42,6 +42,7 @@
                         :list="nameplate.players"
                         group="nameplate-assignments"
                         class="nameplate-assignment-draggable"
+                        :item-key="getDraggableItemKey"
                         :disabled="nameplateAssignments.doAutomaticAssignments"
                     >
                         <template #item="{ element }">
@@ -57,6 +58,7 @@
                         :list="unassignedTalent"
                         group="nameplate-assignments"
                         class="nameplate-assignment-draggable"
+                        :item-key="getDraggableItemKey"
                         :disabled="nameplateAssignments.doAutomaticAssignments"
                     >
                         <template #item="{ element }">
@@ -110,13 +112,13 @@ watch(selectedFeedIndex, newValue => {
 }, { immediate: true });
 
 const unassignedTalent = computed(() => {
-    const assignedTeamPlayerIds = new Map<string, Set<string>>();
+    const assignedTeamPlayerIds = new Map<string, string[]>();
     nameplateAssignments.value.assignments.forEach(assignment => {
         assignment.players.forEach(player => {
             if (!assignedTeamPlayerIds.has(player.teamId)) {
-                assignedTeamPlayerIds.set(player.teamId, new Set([player.talentId]));
+                assignedTeamPlayerIds.set(player.teamId, [player.talentId]);
             } else {
-                assignedTeamPlayerIds.get(player.teamId)!.add(player.talentId);
+                assignedTeamPlayerIds.get(player.teamId)!.push(player.talentId);
             }
         });
     });
@@ -126,8 +128,11 @@ const unassignedTalent = computed(() => {
         const assignedPlayerIds = assignedTeamPlayerIds.get(team.id);
         if (assignedPlayerIds != null) {
             team.playerIds.forEach(player => {
-                if (!assignedPlayerIds.has(player.id)) {
+                const playerIndex = assignedPlayerIds.indexOf(player.id);
+                if (playerIndex === -1) {
                     result.push({ teamId: team.id, talentId: player.id });
+                } else {
+                    assignedPlayerIds.splice(playerIndex, 1);
                 }
             });
         } else {
@@ -175,6 +180,10 @@ function formatTalentName(talentItem: { talentId: string, teamId: string }) {
     return talentName;
 }
 
+function getDraggableItemKey(item: { teamId: string, talentId: string }): string {
+    return `${item.teamId}_${item.talentId}`;
+}
+
 defineExpose({
     open
 });
@@ -215,7 +224,7 @@ defineExpose({
         margin-top: 8px;
     }
 
-    &.disabled .player-item {
+    &.disabled .nameplate-assignment-draggable {
         opacity: 0.75;
     }
 
