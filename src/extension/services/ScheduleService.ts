@@ -10,9 +10,11 @@ import { DateTime, Duration } from 'luxon';
 import { SpeedrunService } from './SpeedrunService';
 import { findActiveScheduleItem } from '../helpers/ScheduleHelpers';
 import { IgdbService } from './IgdbService';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class ScheduleService {
-    private readonly logger: NodeCG.Logger;
+// todo: calculate scheduled start times for schedule items manually
+
+export class ScheduleService extends HasNodecgLogger {
     private readonly scheduleImportStatus: NodeCG.ServerReplicantWithSchemaDefault<ScheduleImportStatus>;
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
     private readonly talent: NodeCG.ServerReplicantWithSchemaDefault<Talent>;
@@ -28,7 +30,7 @@ export class ScheduleService {
         talentService: TalentService,
         igdbService: IgdbService | null
     ) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:ScheduleService`);
+        super(nodecg);
         this.scheduleImportStatus = nodecg.Replicant('scheduleImportStatus', { persistent: false }) as unknown as NodeCG.ServerReplicantWithSchemaDefault<ScheduleImportStatus>;
         this.schedule = nodecg.Replicant('schedule') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
         this.talent = nodecg.Replicant('talent') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Talent>;

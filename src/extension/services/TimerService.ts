@@ -5,8 +5,9 @@ import { DateTime, Duration } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
 import { ObsConnectorService } from './ObsConnectorService';
 import { ScheduleService } from './ScheduleService';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class TimerService {
+export class TimerService extends HasNodecgLogger {
     private readonly timerRep: NodeCG.ServerReplicantWithSchemaDefault<Timer>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly timer: livesplitCore.Timer;
@@ -14,6 +15,7 @@ export class TimerService {
     private readonly scheduleService: ScheduleService;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, scheduleService: ScheduleService) {
+        super(nodecg);
         this.timerRep = nodecg.Replicant('timer') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Timer>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.obsConnectorService = obsConnectorService;
@@ -27,7 +29,7 @@ export class TimerService {
             const missedTime = Date.now() - this.timerRep.value.time.timestamp;
             const previousTime = this.timerRep.value.time.rawTime;
             const timeOffset = previousTime + missedTime;
-            nodecg.log.info(`Recovered ${(missedTime / 1000).toFixed(2)} seconds of lost time`);
+            this.logger.info(`Recovered ${(missedTime / 1000).toFixed(2)} seconds of lost time`);
             this.start(true);
             livesplitCore.TimeSpan.fromSeconds(timeOffset / 1000).with(t => this.timer.setGameTime(t));
         }

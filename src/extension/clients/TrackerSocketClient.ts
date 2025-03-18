@@ -3,6 +3,7 @@ import TypedEmitter from 'typed-emitter';
 import type NodeCG from '@nodecg/types';
 import type { Configschema, TrackerState } from 'types/schemas';
 import WebSocket from 'ws';
+import { createLogger } from '../helpers/LogHelper';
 
 type TrackerSocketClientEvent = {
     donation: (amount: number, newTotal: number, displayName?: string | null) => void
@@ -26,7 +27,7 @@ export class TrackerSocketClient extends (EventEmitter as new () => TypedEmitter
             throw new Error('Required GDQ tracker config is missing');
         }
         this.address = nodecg.bundleConfig.tracker!.socketAddress!;
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:TrackerSocketClient`);
+        this.logger = createLogger(this, nodecg);
         this.trackerState = nodecg.Replicant('trackerState', { persistent: false }) as unknown as NodeCG.ServerReplicantWithSchemaDefault<TrackerState>;
     }
 

@@ -8,9 +8,9 @@ import type {
 } from 'types/schemas';
 import { layouts } from 'types/Layouts';
 import range from 'lodash/range';
-import { ObsConnectorService } from './ObsConnectorService';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class NameplateAssignmentService {
+export class NameplateAssignmentService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly playerNameplateAssignments: NodeCG.ServerReplicantWithSchemaDefault<PlayerNameplateAssignments>;
@@ -18,6 +18,7 @@ export class NameplateAssignmentService {
     private readonly activeRelayPlayers: NodeCG.ServerReplicantWithSchemaDefault<ActiveRelayPlayers>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
+        super(nodecg);
         this.nodecg = nodecg;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.playerNameplateAssignments = nodecg.Replicant('playerNameplateAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<PlayerNameplateAssignments>;
@@ -242,7 +243,7 @@ export class NameplateAssignmentService {
                 })
             };
         }
-        this.nodecg.log.debug(`[Feed #${feedIndex + 1}] Recalculated player nameplates`);
+        this.logger.debug(`[Feed #${feedIndex + 1}] Recalculated player nameplates`);
     }
 
     private getTeamIdToPlayerIdsMap() {

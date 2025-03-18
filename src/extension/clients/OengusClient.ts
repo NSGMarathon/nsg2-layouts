@@ -4,7 +4,7 @@ import { type Configschema, OengusData, OtherScheduleItem, Schedule, Speedrun, T
 import type NodeCG from '@nodecg/types';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import { Duration } from 'luxon';
-import { string } from 'yargs';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 type OengusRunType = 'SINGLE' | 'RACE' | 'COOP' | 'COOP_RACE' | 'OTHER' | 'RELAY' | 'RELAY_RACE';
 type OengusSocialPlatform = 'DISCORD' | 'EMAIL' | 'FACEBOOK' | 'INSTAGRAM' | 'NICO' | 'SNAPCHAT' | 'SPEEDRUNCOM' | 'TWITCH' | 'TWITTER' | 'MASTODON' | 'YOUTUBE';
@@ -138,13 +138,12 @@ interface OengusV1MarathonInfoResponse {
     description: string
 }
 
-export class OengusClient {
+export class OengusClient extends HasNodecgLogger {
     private readonly axios: AxiosInstance;
-    private readonly logger: NodeCG.Logger;
     private readonly oengusData: NodeCG.ServerReplicantWithSchemaDefault<OengusData>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:OengusClient`);
+        super(nodecg);
         this.axios = axios.create({
             baseURL: (nodecg.bundleConfig.oengus?.useSandbox ?? false) ? 'https://sandbox.oengus.io/api' : 'https://oengus.io/api',
             headers: {

@@ -2,15 +2,15 @@ import type NodeCG from '@nodecg/types';
 import type { Configschema, OengusData } from 'types/schemas';
 import { OengusClient } from '../clients/OengusClient';
 import { DateTime } from 'luxon';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class OengusService {
-    private readonly logger: NodeCG.Logger;
+export class OengusService extends HasNodecgLogger {
     private readonly oengusClient: OengusClient;
     private readonly oengusData: NodeCG.ServerReplicantWithSchemaDefault<OengusData>;
     private tokenValidationTimeout: NodeJS.Timeout | undefined = undefined;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, oengusClient: OengusClient) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:OengusService`);
+        super(nodecg);
         this.oengusClient = oengusClient;
         this.oengusData = nodecg.Replicant('oengusData') as unknown as NodeCG.ServerReplicantWithSchemaDefault<OengusData>;
 

@@ -2,6 +2,7 @@ import type NodeCG from '@nodecg/types';
 import type { Configschema, Speedrun } from 'types/schemas';
 import { IgdbClient, IgdbGameDataResponse } from '../clients/IgdbClient';
 import { DateTime } from 'luxon';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 export type IgdbGameData = {
     twitchGameId: string
@@ -14,12 +15,11 @@ export type IgdbGameData = {
     boxArtUrl?: string
 };
 
-export class IgdbService {
-    private readonly logger: NodeCG.Logger;
+export class IgdbService extends HasNodecgLogger {
     private readonly igdbClient: IgdbClient;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, igdbClient: IgdbClient) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:IgdbService`);
+        super(nodecg);
         this.igdbClient = igdbClient;
     }
 

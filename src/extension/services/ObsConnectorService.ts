@@ -11,6 +11,7 @@ import { EventTypes, OBSWebSocketError, OBSWebSocket } from 'obs-websocket-js';
 import { isBlank } from 'shared/StringHelper';
 import cloneDeep from 'lodash/cloneDeep';
 import { ObsSceneItem, ObsSceneItemTransform } from 'types/obs';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 // Authentication failed, Unsupported protocol version, Session invalidated
 const SOCKET_CLOSURE_CODES_FORBIDDING_RECONNECTION = [4009, 4010, 4011];
@@ -29,9 +30,8 @@ const OBS_INPUT_KINDS_WITHOUT_VIDEO = [
     'sndio_output_capture'
 ];
 
-export class ObsConnectorService {
+export class ObsConnectorService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI;
-    private readonly logger: NodeCG.Logger;
     private readonly socket: OBSWebSocket;
     private readonly sceneDataInTransitionEvents: boolean;
     private obsConnectionInfo: NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
@@ -44,8 +44,8 @@ export class ObsConnectorService {
     readonly obsState: NodeCG.ServerReplicantWithSchemaDefault<ObsState>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
+        super(nodecg);
         this.nodecg = nodecg;
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:ObsConnectorService`);
         this.obsState = nodecg.Replicant('obsState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsState>;
         this.obsConnectionInfo = nodecg.Replicant('obsConnectionInfo') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
         this.obsConfig = nodecg.Replicant('obsConfig') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConfig>;
@@ -73,7 +73,7 @@ export class ObsConnectorService {
 
         if (this.obsState.value.enabled) {
             this.connect().catch(e => {
-                nodecg.log.error('Error while connecting to OBS:', e.toString());
+                this.logger.error('Error while connecting to OBS:', e.toString());
             });
         }
     }

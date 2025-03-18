@@ -3,6 +3,7 @@ import type { Configschema, MusicState } from 'types/schemas';
 import axios, { isAxiosError } from 'axios';
 import { Readable } from 'stream';
 import { ObsConnectorService } from './ObsConnectorService';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 type FoobarUpdate = { } | {
     player: {
@@ -14,8 +15,7 @@ type FoobarUpdate = { } | {
 
 const FOOBAR_RECONNECTION_TIMEOUT = 5000;
 
-export class MusicService {
-    private readonly logger: NodeCG.Logger;
+export class MusicService extends HasNodecgLogger {
     private readonly musicState: NodeCG.ServerReplicantWithSchemaDefault<MusicState>;
     private readonly config: Configschema['foobar2000'];
     private readonly authorization: string | undefined = undefined;
@@ -23,7 +23,7 @@ export class MusicService {
     private reconnectionTimeout: NodeJS.Timeout | undefined = undefined;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:MusicService`);
+        super(nodecg);
         this.musicState = nodecg.Replicant('musicState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MusicState>;
         this.config = nodecg.bundleConfig.foobar2000;
         this.obsConnectorService = obsConnectorService;

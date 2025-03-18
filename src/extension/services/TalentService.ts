@@ -6,13 +6,13 @@ import cloneDeep from 'lodash/cloneDeep';
 import { ScheduleItem, TalentItem } from 'types/ScheduleHelpers';
 import { isBlank } from 'shared/StringHelper';
 import { formatScheduleItemTalentList } from 'shared/TalentHelper';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class TalentService {
-    private readonly logger: NodeCG.Logger;
+export class TalentService extends HasNodecgLogger {
     private readonly talent: NodeCG.ServerReplicantWithSchemaDefault<Talent>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
-        this.logger = new nodecg.Logger('TalentService');
+        super(nodecg);
         this.talent = nodecg.Replicant('talent') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Talent>;
     }
 

@@ -15,9 +15,9 @@ import { ObsConnectorService } from '../ObsConnectorService';
 import { X32Transitions } from './X32Transitions';
 import { dbToFloat, floatToDB } from './X32Util';
 import cloneDeep from 'lodash/cloneDeep';
+import { HasNodecgLogger } from '../../helpers/HasNodecgLogger';
 
-export class MixerService {
-    private readonly logger: NodeCG.Logger;
+export class MixerService extends HasNodecgLogger {
     private readonly mixerState: NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
     private readonly talentMixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<TalentMixerChannelAssignments>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
@@ -43,11 +43,11 @@ export class MixerService {
     private assignedChannels: number[] = [];
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
+        super(nodecg);
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.mixerState = nodecg.Replicant('mixerState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
         this.talentMixerChannelAssignments = nodecg.Replicant('talentMixerChannelAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<TalentMixerChannelAssignments>;
         this.mixerChannelLevels = nodecg.Replicant('mixerChannelLevels', { persistent: false }) as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelLevels>;
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:MixerService`);
         this.unmuteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.unmute ?? 500;
         this.muteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.mute ?? 500;
         this.debouncedUpdateStateReplicant = debounce(

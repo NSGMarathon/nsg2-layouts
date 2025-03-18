@@ -8,18 +8,18 @@ import { ScheduleService } from './ScheduleService';
 import { findActiveScheduleItem } from '../helpers/ScheduleHelpers';
 import isEqual from 'lodash/isEqual';
 import { DateTime } from 'luxon';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 const TWITCH_STREAM_TITLE_LENGTH_CAP = 140;
 const DEFAULT_TWITCH_CATEGORY = 'Special Events';
 
-export class TwitchService {
+export class TwitchService extends HasNodecgLogger {
     private readonly twitchCommercialState: NodeCG.ServerReplicantWithSchemaDefault<TwitchCommercialState>;
     private readonly twitchData: NodeCG.ServerReplicantWithSchemaDefault<TwitchData>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
     private readonly talent: NodeCG.ServerReplicantWithSchemaDefault<Talent>;
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
-    private readonly logger: NodeCG.Logger;
     private readonly twitchClient: TwitchClient | null;
     private readonly talentService: TalentService;
     private readonly scheduleService: ScheduleService;
@@ -33,9 +33,9 @@ export class TwitchService {
         talentService: TalentService,
         scheduleService: ScheduleService
     ) {
+        super(nodecg);
         const router = nodecg.Router();
         this.nodecg = nodecg;
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:TwitchService`);
         this.twitchCommercialState = nodecg.Replicant('twitchCommercialState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<TwitchCommercialState>;
         this.twitchData = nodecg.Replicant('twitchData') as unknown as NodeCG.ServerReplicantWithSchemaDefault<TwitchData>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;

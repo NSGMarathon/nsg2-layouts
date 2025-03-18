@@ -11,10 +11,10 @@ import type {
 } from 'types/schemas';
 import { TrackerClient } from '../clients/TrackerClient';
 import { TrackerSocketClient } from '../clients/TrackerSocketClient';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
-export class TrackerService {
+export class TrackerService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
-    private readonly logger: NodeCG.Logger;
     private readonly trackerClient?: TrackerClient;
     private readonly trackerSocketClient?: TrackerSocketClient;
     private readonly donationTotal: NodeCG.ServerReplicantWithSchemaDefault<DonationTotal>;
@@ -28,7 +28,7 @@ export class TrackerService {
     private isFirstLogin = true;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:TrackerService`);
+        super(nodecg);
         this.donationTotal = nodecg.Replicant('donationTotal') as unknown as NodeCG.ServerReplicantWithSchemaDefault<DonationTotal>;
         this.allBids = nodecg.Replicant('allBids') as unknown as NodeCG.ServerReplicantWithSchemaDefault<AllBids>;
         this.currentBids = nodecg.Replicant('currentBids') as unknown as NodeCG.ServerReplicantWithSchemaDefault<CurrentBids>;

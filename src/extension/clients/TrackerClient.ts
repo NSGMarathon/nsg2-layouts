@@ -7,6 +7,7 @@ import cookie from 'cookie';
 import { URLSearchParams } from 'url';
 import { isBlank } from 'shared/StringHelper';
 import { DateTime } from 'luxon';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 interface TrackerEventIndexResponse {
     count: {
@@ -150,9 +151,8 @@ interface TrackerAllBidsSearchResponseItem {
     }
 }
 
-export class TrackerClient {
+export class TrackerClient extends HasNodecgLogger {
     private readonly axios: AxiosInstance;
-    private readonly logger: NodeCG.Logger;
     private readonly username?: string;
     private readonly password?: string;
     private readonly address: string;
@@ -163,12 +163,12 @@ export class TrackerClient {
         if (!TrackerClient.hasRequiredTrackerConfig(nodecg)) {
             throw new Error('GDQ tracker config is missing');
         }
+        super(nodecg);
 
         this.username = nodecg.bundleConfig.tracker!.username;
         this.password = nodecg.bundleConfig.tracker!.password;
         this.address = nodecg.bundleConfig.tracker!.address!;
         this.eventId = nodecg.bundleConfig.tracker!.eventId!;
-        this.logger = new nodecg.Logger('TrackerClient');
         this.axios = axios.create({
             baseURL: nodecg.bundleConfig.tracker!.address,
             headers: {

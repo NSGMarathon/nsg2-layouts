@@ -3,6 +3,7 @@ import type NodeCG from '@nodecg/types';
 import type { Configschema, TwitchData } from 'types/schemas';
 import axios from 'axios';
 import { REQUIRED_TWITCH_TOKEN_SCOPES } from 'shared/TwitchHelpers';
+import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 interface TwitchOauthTokenResponse {
     access_token: string
@@ -20,8 +21,7 @@ interface TwitchOauthValidateResponse {
     expires_in: number
 }
 
-export class TwitchOauthClient {
-    private readonly logger: NodeCG.Logger;
+export class TwitchOauthClient extends HasNodecgLogger {
     private readonly axios: AxiosInstance;
     private readonly clientId: string;
     private readonly clientSecret: string;
@@ -29,11 +29,11 @@ export class TwitchOauthClient {
     private readonly twitchData: NodeCG.ServerReplicantWithSchemaDefault<TwitchData>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
+        super(nodecg);
         if (!TwitchOauthClient.hasRequiredConfig(nodecg)) {
             throw new Error('Twitch API config is missing');
         }
 
-        this.logger = new nodecg.Logger(`${nodecg.bundleName}:TwitchOauthClient`);
         this.axios = axios.create({
             baseURL: 'https://id.twitch.tv'
         });
