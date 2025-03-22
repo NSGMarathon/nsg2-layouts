@@ -1,9 +1,9 @@
 <template>
     <div>
-        <ipl-label>Twitch category</ipl-label>
+        <ipl-label>Video file</ipl-label>
         <div class="layout horizontal center-vertical">
             <ipl-space
-                class="twitch-category-select"
+                class="video-file-select"
                 clickable
                 :color="props.color"
                 @click="onClick"
@@ -23,41 +23,33 @@
 
 <script setup lang="ts">
 import { IplButton, IplLabel, IplSpace } from '@iplsplatoon/vue-components';
-import { ScheduleItem } from 'types/ScheduleHelpers';
+import { VideoFile } from 'types/schemas';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
 import { inject } from 'vue';
-import { TwitchCategorySearchDialogInjectionKey } from '../helpers/Injections';
+import { VideoFileSelectDialogInjectionKey } from '../helpers/Injections';
 
 library.add(faXmark);
 
 const props = defineProps<{
-    modelValue: ScheduleItem['twitchCategory']
+    modelValue: VideoFile | null | undefined
     color: 'secondary' | 'primary'
 }>();
 
 const emit = defineEmits<{
-    'update:modelValue': [newValue: ScheduleItem['twitchCategory']]
-    'update:releaseYear': [newValue: string]
+    'update:modelValue': [newValue: VideoFile | null | undefined]
 }>();
 
-const twitchCategorySelectDialog = inject(TwitchCategorySearchDialogInjectionKey);
+const videoFileSelectDialog = inject(VideoFileSelectDialogInjectionKey);
 function onClick() {
-    twitchCategorySelectDialog?.value?.open(newValue => {
-        emit('update:modelValue', {
-            id: newValue.category.id,
-            name: newValue.category.name,
-            igdbUrl: newValue.igdbUrl
-        });
-        if (newValue.releaseYear != null) {
-            emit('update:releaseYear', newValue.releaseYear);
-        }
+    videoFileSelectDialog?.value?.open(newValue => {
+        emit('update:modelValue', newValue);
     });
 }
 </script>
 
 <style scoped lang="scss">
-.twitch-category-select {
+.video-file-select {
     padding: 4px !important;
     text-align: center !important;
     box-sizing: border-box;

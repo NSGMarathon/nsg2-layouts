@@ -35,6 +35,28 @@
         "relay": { "type": ["boolean", "null"] },
         "emulated": { "type": ["boolean", "null"] },
         "layout": { "type": ["string", "null"] },
+        "videoFile": {
+            "anyOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "./VideoFile.json"
+                        },
+                        {
+                            "type": "object",
+                            "required": ["timerStartTime", "timerStopTime"],
+                            "properties": {
+                                "timerStartTime": { "type": "string" },
+                                "timerStopTime": { "type": "string" }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
         "teams": {
             "type": "array",
             "items": {

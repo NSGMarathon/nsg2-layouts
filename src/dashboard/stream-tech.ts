@@ -13,6 +13,7 @@ import { initTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 import { initMusicStore } from 'client-shared/stores/MusicStore';
 import { initMixerStore } from 'client-shared/stores/MixerStore';
 import { initCountdownStore } from 'client-shared/stores/CountdownStore';
+import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 
 (async () => {
     const app = createApp(StreamTechPanel);
@@ -28,7 +29,8 @@ import { initCountdownStore } from 'client-shared/stores/CountdownStore';
         initTwitchDataStore(),
         initMusicStore(),
         initMixerStore(),
-        initCountdownStore()
+        initCountdownStore(),
+        initVideoFileStore()
     ]);
     app.mount('#app');
 })();

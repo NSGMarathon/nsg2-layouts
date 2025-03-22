@@ -66,6 +66,30 @@
                         class="m-l-8 max-width"
                     />
                 </div>
+                <ipl-space color="primary" class="m-t-8">
+                    <video-file-select
+                        :model-value="selectedScheduleItem.videoFile"
+                        color="secondary"
+                        class="max-width"
+                        @update:model-value="onVideoFileSelect"
+                    />
+                    <div
+                        v-if="selectedScheduleItem.videoFile != null"
+                        class="layout horizontal center-horizontal m-t-4"
+                    >
+                        <duration-input
+                            v-model="selectedScheduleItem.videoFile.timerStartTime"
+                            label="Timer starts at"
+                            style="max-width: 150px"
+                        />
+                        <duration-input
+                            v-model="selectedScheduleItem.videoFile.timerStopTime"
+                            class="m-l-8"
+                            label="Timer stops at"
+                            style="max-width: 150px"
+                        />
+                    </div>
+                </ipl-space>
             </template>
             <template v-else>
                 <twitch-category-select
@@ -214,7 +238,8 @@ import {
     IplDialog,
     IplDialogTitle,
     IplInput,
-    IplMessage, IplSelect,
+    IplMessage,
+    IplSelect,
     IplSpace
 } from '@iplsplatoon/vue-components';
 import { computed, ref } from 'vue';
@@ -223,7 +248,7 @@ import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import cloneDeep from 'lodash/cloneDeep';
 import DurationInput from './DurationInput.vue';
 import TalentListEditor from './TalentListEditor.vue';
-import { ActiveRelayPlayers, OtherScheduleItem, Speedrun, Talent } from 'types/schemas';
+import { ActiveRelayPlayers, OtherScheduleItem, Speedrun, Talent, VideoFile } from 'types/schemas';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import TalentSelectDialog from './TalentSelectDialog.vue';
@@ -235,6 +260,8 @@ import TwitchCategorySelect from './TwitchCategorySelect.vue';
 import { layouts } from 'types/Layouts';
 import { Option } from '@iplsplatoon/vue-components/dist/types/select';
 import { v4 as uuidV4 } from 'uuid';
+import VideoFileSelect from './VideoFileSelect.vue';
+import { Duration } from 'luxon';
 
 library.add(faUserPlus, faPlus, faXmark);
 
@@ -397,6 +424,21 @@ function selectScheduleItem(scheduleItem: ScheduleItem | null) {
         selectedScheduleItem.value = cloneDeep(scheduleItem);
     }
     isOpen.value = true;
+}
+
+function onVideoFileSelect(videoFile: VideoFile | null | undefined) {
+    if (selectedScheduleItem.value?.type === 'SPEEDRUN') {
+        if (videoFile == null) {
+            selectedScheduleItem.value.videoFile = null;
+        } else {
+            const emptyDuration = Duration.fromObject({ seconds: 0, minutes: 0, hours: 0 }).toISO();
+            selectedScheduleItem.value.videoFile = {
+                ...videoFile,
+                timerStartTime: emptyDuration,
+                timerStopTime: emptyDuration
+            };
+        }
+    }
 }
 
 defineExpose({

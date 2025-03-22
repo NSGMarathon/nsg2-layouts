@@ -124,6 +124,17 @@ export class ScheduleService extends HasNodecgLogger {
         this.validateDuration(item.estimate);
         this.validateDuration(item.setupTime);
         this.validateDate(item.scheduledStartTime);
+        if (item.type === 'SPEEDRUN' && item.videoFile != null) {
+            const timerStartTime = Duration.fromISO(item.videoFile.timerStartTime);
+            const timerStopTime = Duration.fromISO(item.videoFile.timerStopTime);
+
+            if (!timerStartTime.isValid || !timerStopTime.isValid) {
+                throw new Error('Video file timer stop or start time is not valid');
+            }
+            if (timerStartTime >= timerStopTime) {
+                throw new Error('Video file timer stop time must be greater than timer start time');
+            }
+        }
 
         const normalizedItem: ScheduleItem = cloneDeep(item);
 
@@ -270,7 +281,7 @@ export class ScheduleService extends HasNodecgLogger {
                         });
                         return result;
                     }
-                    if (key === 'commentatorIds') {
+                    if (key === 'commentatorIds' || key === 'videoFile') {
                         // todo: atm no schedule importer knows commentator IDs, but this needs improved if that becomes possible
                         return objValue;
                     }
