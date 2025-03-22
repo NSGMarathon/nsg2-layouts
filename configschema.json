@@ -126,6 +126,12 @@
                     }
                 }
             }
+        },
+        "videos": {
+            "type": "object",
+            "properties": {
+                "preRecordedSpeedrunDirectory": { "type": "string" }
+            }
         }
     }
 }

@@ -24,7 +24,9 @@ export default defineConfig({
                 'obs-websocket-js',
                 'ws',
                 'url',
-                'osc'
+                'osc',
+                /fs\/.*/,
+                /node:.*/
             ]
         }
     },

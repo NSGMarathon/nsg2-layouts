@@ -76,6 +76,10 @@ export interface Configschema {
 		visibleChannels?: ChannelItem[];
 		[k: string]: unknown;
 	};
+	videos?: {
+		preRecordedSpeedrunDirectory?: string;
+		[k: string]: unknown;
+	};
 	[k: string]: unknown;
 }
 export interface ChannelItem {

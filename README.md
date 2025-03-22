@@ -87,6 +87,9 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
       { "type": "AUX_IN", "number": 7 },
       { "type": "AUX_IN", "number": 8 }
     ]
+  },
+  "videos": {
+    "preRecordedSpeedrunDirectory": "/Users/inkfarer/Movies/speedruns"
   }
 }
 ```

@@ -63,3 +63,5 @@ export * from './trackerState';
 export * from './twitchCommercialState';
 // @ts-ignore
 export * from './twitchData';
+// @ts-ignore
+export * from './videoFiles';

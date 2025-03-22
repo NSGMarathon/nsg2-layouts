@@ -27,6 +27,8 @@ import { IgdbClient } from './clients/IgdbClient';
 import { IgdbService } from './services/IgdbService';
 import { IgdbController } from './controllers/IgdbController';
 import { CountdownService } from './services/CountdownService';
+import { VideoFileService } from './services/VideoFileService';
+import { VideoFileController } from './controllers/VideoFileController';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -50,6 +52,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new MixerService(nodecg, obsConnectorService);
     const oengusService = new OengusService(nodecg, oengusClient);
     new CountdownService(nodecg);
+    const videoFileService = new VideoFileService(nodecg);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);
@@ -61,4 +64,5 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new TwitchController(nodecg, twitchService);
     new OengusController(nodecg, oengusService);
     new IgdbController(nodecg, igdbService);
+    new VideoFileController(nodecg, videoFileService);
 };

@@ -46,6 +46,8 @@ export interface MessageInputMap {
     'twitch:startCommercial': { length: number }
 
     'igdb:findGame': { name: string }
+
+    'videos:loadSpeedruns': never
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;
