@@ -54,7 +54,7 @@ export class OengusService extends HasNodecgLogger {
             }
             this.logger.debug('Refreshed Oengus token');
         } catch (e) {
-            this.logger.error('Failed to refresh Oengus token:', e instanceof Error ? e.message : String(e));
+            this.logError('Failed to refresh Oengus token', e);
             this.oengusData.value = {
                 token: null,
                 tokenLastRefreshed: null

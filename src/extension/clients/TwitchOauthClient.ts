@@ -44,7 +44,7 @@ export class TwitchOauthClient extends HasNodecgLogger {
 
         const tokenValidationLoop = () => {
             this.validateToken().catch(e => {
-                this.logger.error('Error validating Twitch token', e);
+                this.logError('Error validating Twitch token', e);
             });
         };
         tokenValidationLoop();
@@ -98,8 +98,7 @@ export class TwitchOauthClient extends HasNodecgLogger {
                         this.twitchData.value.state = 'LOGGED_IN';
                     })
                     .catch(e => {
-                        this.logger.error('Failed to refresh Twitch token', e instanceof Error ? e.message : String(e));
-                        this.logger.debug('Failed to refresh Twitch token', e);
+                        this.logError('Failed to refresh Twitch token', e);
                         this.twitchData.value = {
                             state: 'NOT_LOGGED_IN',
                             syncEnabled: this.twitchData.value.syncEnabled

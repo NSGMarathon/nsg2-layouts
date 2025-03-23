@@ -57,11 +57,11 @@ export class MusicService extends HasNodecgLogger {
     private onSceneChange(sceneName: string) {
         if (ObsConnectorService.sceneNameTagPresent('M', sceneName)) {
             this.play().catch(e => {
-                this.logger.error('Error playing music:', e instanceof Error ? e.message : String(e));
+                this.logError('Error playing music', e);
             });
         } else {
             this.pause().catch(e => {
-                this.logger.error('Error pausing music:', e instanceof Error ? e.message : String(e));
+                this.logError('Error pausing music', e);
             });
         }
     }
@@ -134,16 +134,14 @@ export class MusicService extends HasNodecgLogger {
                     }
                 }
             } catch (e) {
-                this.logger.error('Error parsing foobar2000 response:', e instanceof Error ? e.message : String(e));
-                this.logger.debug('Error parsing foobar2000 response:', e);
+                this.logError('Error parsing foobar2000 response', e);
             }
         });
         response.data.on('close', () => {
             this.logger.warn('Foobar2000 connection closed');
         });
         response.data.on('error', e => {
-            this.logger.error('Foobar2000 connection error:', e instanceof Error ? e.message : String(e));
-            this.logger.debug('Foobar2000 connection error:', e);
+            this.logError('Foobar2000 connection error', e);
         });
         response.data.on('end', () => {
             this.musicState.value.connectionState = 'DISCONNECTED';

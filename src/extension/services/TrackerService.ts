@@ -109,8 +109,7 @@ export class TrackerService extends HasNodecgLogger {
             })
             .catch(e => {
                 this.trackerState.value.login = 'NOT_LOGGED_IN';
-                this.logger.error('Failed to log in to GDQ tracker:', e instanceof Error ? e.message : String(e));
-                this.logger.debug('Failed to log in to GDQ tracker:', e);
+                this.logError('Failed to log in to GDQ tracker', e);
                 if (!this.isFirstLogin) {
                     setTimeout(this.doLoginLoop.bind(this), 60 * 1000);
                 }
@@ -126,8 +125,7 @@ export class TrackerService extends HasNodecgLogger {
                 this.donationTotal.value = newTotal;
             }
         } catch (e) {
-            this.logger.error('Error updating donation total:', e instanceof Error ? e.message : String(e));
-            this.logger.debug('Error updating donation total:', e);
+            this.logError('Error updating donation total', e);
         } finally {
             this.donationTotalApiUpdateTimeout = setTimeout(this.updateDonationTotal.bind(this), 60 * 1000);
         }

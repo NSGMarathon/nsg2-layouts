@@ -64,7 +64,7 @@ export class ObsConnectorService extends HasNodecgLogger {
             .on('ConnectionOpened', () => this.handleOpening())
             .on('Identified', () => {
                 this.handleIdentification().catch(e => {
-                    this.logger.error('Error loading OBS data:', e);
+                    this.logError('Error loading OBS data', e);
                 });
             })
             .on('CurrentProgramSceneChanged', e => this.handleProgramSceneChange(e))
@@ -73,7 +73,7 @@ export class ObsConnectorService extends HasNodecgLogger {
 
         if (this.obsState.value.enabled) {
             this.connect().catch(e => {
-                this.logger.error('Error while connecting to OBS:', e.toString());
+                this.logError('Error while connecting to OBS', e);
             });
         }
     }
@@ -87,7 +87,7 @@ export class ObsConnectorService extends HasNodecgLogger {
             try {
                 callback(sceneName);
             } catch (e) {
-                this.logger.error('Error calling program scene change callback:', e);
+                this.logError('Error calling program scene change callback', e);
             }
         });
     }
@@ -128,7 +128,7 @@ export class ObsConnectorService extends HasNodecgLogger {
 
     private handleSceneCollectionChange(event: EventTypes['CurrentSceneCollectionChanged']): void {
         this.loadState(event.sceneCollectionName).catch(e => {
-            this.logger.error('Error loading OBS data after scene collection change:', e);
+            this.logError('Error loading OBS data after scene collection change', e);
         });
     }
 

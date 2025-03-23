@@ -320,7 +320,7 @@ export class MixerService extends HasNodecgLogger {
             await p;
         }).catch(e => {
             delete this.inFlightRequests[path];
-            this.logger.error(`OSC request failed at path ${path}: ${'message' in e ? e.message : String(e)}`);
+            this.logError(`OSC request failed at path ${path}`, e);
         });
     }
 

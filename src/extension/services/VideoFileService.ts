@@ -20,7 +20,7 @@ export class VideoFileService extends HasNodecgLogger {
         try {
             this.videoFiles.value.speedruns = await this.loadVideoFiles(this.preRecordedSpeedrunDirectory);
         } catch (e) {
-            this.logger.error('Failed to load pre-recorded speedruns:', e);
+            this.logError('Failed to load pre-recorded speedruns', e);
             this.videoFiles.value.speedruns = [];
         }
     }

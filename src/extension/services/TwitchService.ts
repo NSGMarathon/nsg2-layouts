@@ -72,7 +72,7 @@ export class TwitchService extends HasNodecgLogger {
                     await this.setStreamInfo(this.scheduleService.findActiveScheduleItem());
                 }
             } catch (e) {
-                this.logger.error('Error retrieving access token from Twitch', e);
+                this.logError('Error retrieving access token from Twitch', e);
             } finally {
                 res.status(200).send('<script>window.close();</script>');
             }
@@ -175,8 +175,7 @@ export class TwitchService extends HasNodecgLogger {
                 this.logger.debug(`Twitch stream title is now "${newTitle}"`);
             }
         } catch (e) {
-            this.logger.error('Failed to update Twitch stream info', e instanceof Error ? e.message : String(e));
-            this.logger.debug('Failed to update Twitch stream info', e);
+            this.logError('Failed to update Twitch stream info', e);
         }
     }
 
