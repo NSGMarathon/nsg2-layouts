@@ -4,7 +4,7 @@ import { createLogger } from './LogHelper';
 
 export abstract class HasNodecgLogger {
     protected readonly logger: NodeCG.Logger;
-    private readonly usingDebugLogging: boolean;
+    protected readonly usingDebugLogging: boolean;
 
     protected constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         this.logger = createLogger(this, nodecg);

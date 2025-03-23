@@ -21,8 +21,11 @@ export abstract class BaseController extends HasNodecgLogger {
                     (cb as NodeCG.UnhandledAcknowledgement)(null, result);
                 }
             } catch (e) {
-                this.logger.error(typeof e === 'object' && e != null && 'message' in e ? e.message : String(e));
-                this.logger.debug(e);
+                if (this.usingDebugLogging) {
+                    this.logger.debug(e);
+                } else {
+                    this.logger.error(typeof e === 'object' && e != null && 'message' in e ? e.message : String(e));
+                }
                 if (cb && !cb.handled) {
                     (cb as NodeCG.UnhandledAcknowledgement)(e);
                 }
