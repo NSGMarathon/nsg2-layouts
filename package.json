@@ -54,6 +54,14 @@
                 "headerColor": "#262F40"
             },
             {
+                "name": "speedrun-playlist-control",
+                "title": "Speedrun Playlist",
+                "width": 2,
+                "file": "speedrun-playlist-control.html",
+                "workspace": "3 - Setup",
+                "headerColor": "#262F40"
+            },
+            {
                 "name": "stream-tech",
                 "title": "1 - Stream Tech Dashboard",
                 "file": "stream-tech.html",

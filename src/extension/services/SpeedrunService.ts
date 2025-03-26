@@ -16,11 +16,11 @@ import { DateTime } from 'luxon';
 
 export class SpeedrunService {
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
-    private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly nextSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<NextSpeedrun>;
     private readonly activeGameLayouts: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
     private readonly scheduleService: ScheduleService;
     private readonly timerService: TimerService;
+    readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, scheduleService: ScheduleService, timerService: TimerService, obsConnectorService: ObsConnectorService) {
         this.schedule = nodecg.Replicant('schedule') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Schedule>;

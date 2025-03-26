@@ -29,6 +29,8 @@ import { IgdbController } from './controllers/IgdbController';
 import { CountdownService } from './services/CountdownService';
 import { VideoFileService } from './services/VideoFileService';
 import { VideoFileController } from './controllers/VideoFileController';
+import { SpeedrunPlaylistService } from './services/SpeedrunPlaylistService';
+import { SpeedrunPlaylistController } from './controllers/SpeedrunPlaylistController';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -53,6 +55,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusService = new OengusService(nodecg, oengusClient);
     new CountdownService(nodecg);
     const videoFileService = new VideoFileService(nodecg);
+    const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);
@@ -65,4 +68,5 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new OengusController(nodecg, oengusService);
     new IgdbController(nodecg, igdbService);
     new VideoFileController(nodecg, videoFileService);
+    new SpeedrunPlaylistController(nodecg, speedrunPlaylistService);
 };

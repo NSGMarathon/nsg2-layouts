@@ -5,13 +5,15 @@ import {
     ObsConnectionInfo,
     ObsState,
     ObsVideoInputAssignments,
-    ObsVideoInputPositions, VideoInputAssignment
+    ObsVideoInputPositions,
+    VideoInputAssignment
 } from 'types/schemas';
-import { EventTypes, OBSWebSocketError, OBSWebSocket } from 'obs-websocket-js';
+import { EventTypes, OBSWebSocketError, OBSWebSocket, OBSResponseTypes } from 'obs-websocket-js';
 import { isBlank } from 'shared/StringHelper';
 import cloneDeep from 'lodash/cloneDeep';
 import { ObsSceneItem, ObsSceneItemTransform } from 'types/obs';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
+import { JsonObject } from 'type-fest';
 
 // Authentication failed, Unsupported protocol version, Session invalidated
 const SOCKET_CLOSURE_CODES_FORBIDDING_RECONNECTION = [4009, 4010, 4011];
@@ -35,12 +37,12 @@ export class ObsConnectorService extends HasNodecgLogger {
     private readonly socket: OBSWebSocket;
     private readonly sceneDataInTransitionEvents: boolean;
     private obsConnectionInfo: NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
-    private obsConfig: NodeCG.ServerReplicantWithSchemaDefault<ObsConfig>;
     private obsVideoInputAssignments: NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputAssignments>;
     private obsVideoInputPositions: NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputPositions>;
     private reconnectionInterval: NodeJS.Timeout | null = null;
     private reconnectionCount: number;
     private programSceneChangeListeners: ((sceneName: string) => void)[]
+    readonly obsConfig: NodeCG.ServerReplicantWithSchemaDefault<ObsConfig>;
     readonly obsState: NodeCG.ServerReplicantWithSchemaDefault<ObsState>;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
@@ -143,13 +145,17 @@ export class ObsConnectorService extends HasNodecgLogger {
             scenes: scenes.scenes,
             currentScene: scenes.currentScene,
             currentSceneCollection,
-            videoInputs
+            videoInputs,
+            status: 'CONNECTED'
         };
+    }
+
+    async getVideoSettings(): Promise<OBSResponseTypes['GetVideoSettings']> {
+        return this.socket.call('GetVideoSettings');
     }
 
     private handleOpening(): void {
         this.logger.info('OBS websocket is open.');
-        this.obsState.value.status = 'CONNECTED';
         this.obsState.value.transitionInProgress = false;
         this.stopReconnecting();
     }
@@ -213,14 +219,52 @@ export class ObsConnectorService extends HasNodecgLogger {
         }
     }
 
-    private async getSceneItemList(sceneName: string): Promise<ObsSceneItem[]> {
-        try {
-            const sceneItemListResponse = await this.socket.call('GetSceneItemList', { sceneName });
-            return sceneItemListResponse.sceneItems as ObsSceneItem[];
-        } catch (e) {
-            this.logger.debug('Error getting scene item list', e);
-            return [];
-        }
+    async createInput(sceneName: string, inputName: string, inputKind: string, inputSettings: JsonObject): Promise<OBSResponseTypes['CreateInput']> {
+        return this.socket.call('CreateInput', {
+            sceneName,
+            inputName,
+            inputKind,
+            // @ts-ignore: TypeScript doesn't like this, even if it is correct.
+            inputSettings
+        });
+    }
+
+    async setInputSettings(inputName: string, inputSettings: JsonObject): Promise<void> {
+        return this.socket.call('SetInputSettings', {
+            inputName,
+            // @ts-ignore: TypeScript doesn't like this, even if it is correct.
+            inputSettings
+        });
+    }
+
+    async removeInput(inputName: string): Promise<void> {
+        return this.socket.call('RemoveInput', { inputName });
+    }
+
+    async getMediaInputStatus(inputName: string): Promise<OBSResponseTypes['GetMediaInputStatus']> {
+        return this.socket.call('GetMediaInputStatus', { inputName });
+    }
+
+    async removeSceneItem(sceneName: string, sceneItemId: number): Promise<void> {
+        await this.socket.call('RemoveSceneItem', { sceneName, sceneItemId });
+    }
+
+    async setSceneItemIndex(sceneName: string, sceneItemId: number, sceneItemIndex: number): Promise<void> {
+        await this.socket.call('SetSceneItemIndex', { sceneName, sceneItemId, sceneItemIndex });
+    }
+
+    async getSceneItemList(sceneName: string): Promise<ObsSceneItem[]> {
+        const sceneItemListResponse = await this.socket.call('GetSceneItemList', { sceneName });
+        return sceneItemListResponse.sceneItems as ObsSceneItem[];
+    }
+
+    async setSceneItemTransform(sceneName: string, sceneItemId: number, sceneItemTransform: JsonObject): Promise<void> {
+        return this.socket.call('SetSceneItemTransform', {
+            sceneName,
+            sceneItemId,
+            // @ts-ignore: TypeScript doesn't like this, even if it is correct.
+            sceneItemTransform
+        });
     }
 
     async setGameLayoutVideoFeedAssignments(type: 'game' | 'camera', assignments: (VideoInputAssignment | null)[], feedIndex: number) {
@@ -433,6 +477,14 @@ export class ObsConnectorService extends HasNodecgLogger {
         } else {
             return Promise.reject(new Error('Another transition is still in progress.'));
         }
+    }
+
+    async waitForSceneSwitch(): Promise<string> {
+        return new Promise(resolve => {
+            this.socket.once('CurrentProgramSceneChanged', event => {
+                resolve(event.sceneName);
+            });
+        });
     }
     // endregion
 

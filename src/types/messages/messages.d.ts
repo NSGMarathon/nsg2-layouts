@@ -48,6 +48,9 @@ export interface MessageInputMap {
     'igdb:findGame': { name: string }
 
     'videos:loadSpeedruns': never
+
+    'speedrunPlaylist:play': never
+    'speedrunPlaylist:stop': never
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;

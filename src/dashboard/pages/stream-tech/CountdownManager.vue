@@ -67,7 +67,7 @@ import { computed, ref, watch } from 'vue';
 import { updateRefOnValueChange } from 'client-shared/helpers/StoreHelper';
 import { DateObjectUnits, Duration, DurationUnit } from 'luxon';
 import { padNumber } from 'client-shared/helpers/StringHelper';
-import { DurationObjectUnits } from 'luxon/src/duration';
+import { DurationObjectUnits } from 'luxon';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faStop } from '@fortawesome/free-solid-svg-icons/faStop';

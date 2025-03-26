@@ -258,10 +258,10 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
 import TwitchCategorySelect from './TwitchCategorySelect.vue';
 import { layouts } from 'types/Layouts';
-import { Option } from '@iplsplatoon/vue-components/dist/types/select';
 import { v4 as uuidV4 } from 'uuid';
 import VideoFileSelect from './VideoFileSelect.vue';
 import { Duration } from 'luxon';
+import { Option } from '@iplsplatoon/vue-components/dist/types/select';
 
 library.add(faUserPlus, faPlus, faXmark);
 

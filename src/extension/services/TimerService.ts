@@ -83,7 +83,7 @@ export class TimerService extends HasNodecgLogger {
     }
 
     stop(teamId?: string, forfeit?: boolean) {
-        if (!['RUNNING', 'PAUSED'].includes(this.timerRep.value.state)) {
+        if (!this.isActive()) {
             throw new Error('Timer must be running or paused');
         }
         const teamCount = this.activeSpeedrun.value?.teams.length ?? 0;
@@ -113,6 +113,32 @@ export class TimerService extends HasNodecgLogger {
             this.timer.split();
             this.timerRep.value.state = 'FINISHED';
         }
+    }
+
+    stopAll() {
+        const teams = this.activeSpeedrun.value?.teams ?? [];
+        if (teams.length <= 1) {
+            this.stop();
+            return;
+        }
+        if (!this.isActive()) {
+            throw new Error('Timer must be running or paused');
+        }
+        const newTeamResults = cloneDeep(this.timerRep.value.teamResults);
+        teams.forEach(team => {
+            if (newTeamResults[team.id] == null) {
+                newTeamResults[team.id] = {
+                    state: 'FINISHED',
+                    time: cloneDeep(this.timerRep.value.time)
+                };
+            }
+        });
+        this.timerRep.value.teamResults = newTeamResults;
+        if (this.timerRep.value.state === 'PAUSED') {
+            this.timer.resume();
+        }
+        this.timer.split();
+        this.timerRep.value.state = 'FINISHED';
     }
 
     // todo: doesn't work properly if nodecg is restarted after the timer is finished
@@ -172,7 +198,11 @@ export class TimerService extends HasNodecgLogger {
     }
 
     isActive() {
-        return ['RUNNING', 'PAUSED'].includes(this.timerRep.value.state);
+        return this.timerRep.value.state === 'RUNNING' || this.timerRep.value.state === 'PAUSED';
+    }
+
+    isFinished() {
+        return this.timerRep.value.state === 'FINISHED';
     }
 
     private tick() {

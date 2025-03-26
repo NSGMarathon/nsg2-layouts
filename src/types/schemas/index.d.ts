@@ -52,6 +52,8 @@ export * from './schedule';
 // @ts-ignore
 export * from './scheduleImportStatus';
 // @ts-ignore
+export * from './speedrunPlaylistState';
+// @ts-ignore
 export * from './talent';
 // @ts-ignore
 export * from './talentMixerChannelAssignments';
