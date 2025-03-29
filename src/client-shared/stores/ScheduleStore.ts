@@ -4,7 +4,7 @@ import {
     NextSpeedrun,
     OtherScheduleItem,
     PlayerNameplateAssignments,
-    Schedule
+    Schedule, Speedrun
 } from 'types/schemas';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
@@ -103,6 +103,24 @@ export const useScheduleStore = defineStore('schedule', {
             }
 
             return null;
+        },
+        speedrunPlaylist(state) {
+            if (this.activeSpeedrunIndex === -1 || state.activeSpeedrun?.videoFile == null) return [];
+
+            const result: Speedrun[] = [];
+            for (let i = this.activeSpeedrunIndex; i < state.schedule.items.length; i++) {
+                const scheduleItem = state.schedule.items[i];
+                if (scheduleItem.type !== 'SPEEDRUN') continue;
+                if (scheduleItem.videoFile == null) break;
+                result.push(scheduleItem);
+            }
+            for (let i = this.activeSpeedrunIndex - 1; i > 0; i--) {
+                const scheduleItem = state.schedule.items[i];
+                if (scheduleItem.type !== 'SPEEDRUN') continue;
+                if (scheduleItem.videoFile == null) break;
+                result.unshift(scheduleItem);
+            }
+            return result;
         }
     }
 });

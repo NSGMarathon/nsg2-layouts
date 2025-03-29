@@ -1,6 +1,11 @@
 <template>
     <div class="layout horizontal">
-        <badge class="volume-meter-talent-index">{{ props.index }}</badge>
+        <badge
+            v-if="index != null"
+            class="volume-meter-talent-index"
+        >
+            {{ props.index }}
+        </badge>
         <canvas
             ref="volumeMeterCanvas"
             class="max-width"
@@ -11,26 +16,23 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { colors } from '../../styles/colors';
-import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
+import { useMixerStore } from 'client-shared/stores/MixerStore';
 import Badge from 'components/Badge.vue';
 import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
-import { MixerChannelAssignment } from 'types/schemas';
-import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
+import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
 
 const mixerStore = useMixerStore();
-const scheduleStore = useScheduleStore();
 
 const props = defineProps<{
-    talentId?: string
-    teamId?: string
-    index: number
+    channelAssignments: MixerVolumeMeterChannelAssignment
+    index?: number
 }>();
 
 const volumeMeterCanvas = ref<HTMLCanvasElement>();
 onMounted(() => {
     const canvas = volumeMeterCanvas.value;
     if (canvas == null) {
-        console.warn('Mounted PlayerVolumeMeter with no canvas?');
+        console.warn('Mounted MixerVolumeMeter with no canvas?');
         return;
     }
     const ctx = canvas.getContext('2d');
@@ -66,78 +68,18 @@ onMounted(() => {
     let currentLevel = 0;
     let targetLevel = 0;
 
-    // If the volume meter is assigned to a player, look for the player's mixer channel then the team's channel
-    // If the volume meter is only assigned to a team, look for the team's channel then try to get the highest level out of all team players
-    const assignmentData = ref<{
-        channelIds: number[]
-        speakingThresholdDB: number
-    }>({
-        channelIds: [],
-        speakingThresholdDB: defaultSpeakingThreshold
-    });
-
-    watch(() => [
-        props.talentId,
-        props.teamId,
-        mixerStore.mixerChannelAssignments,
-        scheduleStore.activeSpeedrun?.teams
-    ], () => {
-        let assignments: MixerChannelAssignment[] | undefined = undefined;
-
-        if (props.talentId != null) {
-            const talentAssignment = mixerStore.mixerChannelAssignments.speedrunTalent[props.talentId];
-            if (talentAssignment != null) {
-                assignments = [talentAssignment];
-            }
-        }
-
-        if (assignments == null && props.teamId != null) {
-            const teamAssignment = mixerStore.mixerChannelAssignments.speedrunTeams[props.teamId];
-            if (teamAssignment != null) {
-                assignments = [teamAssignment];
-            }
-
-            if (assignments == null && props.talentId == null) {
-                const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === props.teamId);
-                if (team != null) {
-                    assignments = team.playerIds
-                        .map(playerId => mixerStore.mixerChannelAssignments.speedrunTalent[playerId.id])
-                        .filter(assignment => assignment != null);
-                }
-            }
-        }
-
-        if (assignments == null || assignments.length === 0) {
-            assignmentData.value = {
-                channelIds: [],
-                speakingThresholdDB: defaultSpeakingThreshold
-            };
-        } else if (assignments.length === 1) {
-            assignmentData.value = {
-                channelIds: [assignments[0].channelId],
-                speakingThresholdDB: assignments[0].speakingThresholdDB ?? defaultSpeakingThreshold
-            };
-        } else {
-            const highestSpeakingThreshold = Math.max(...assignments.map(assignment => assignment.speakingThresholdDB ?? defaultSpeakingThreshold));
-            assignmentData.value = {
-                channelIds: assignments.map(assignment => assignment.channelId),
-                speakingThresholdDB: highestSpeakingThreshold
-            };
-        }
-    }, { immediate: true });
-
     watch(() => {
-        if (assignmentData.value.channelIds.length === 0) {
-            return [-90, assignmentData.value.speakingThresholdDB];
-        } else if (assignmentData.value.channelIds.length === 1) {
+        if (props.channelAssignments.channelIds.length === 0) {
+            return [-90, props.channelAssignments.speakingThresholdDB];
+        } else if (props.channelAssignments.channelIds.length === 1) {
             return [
-                mixerStore.mixerChannelLevels[assignmentData.value.channelIds[0]] ?? -90,
-                assignmentData.value.speakingThresholdDB
+                mixerStore.mixerChannelLevels[props.channelAssignments.channelIds[0]] ?? -90,
+                props.channelAssignments.speakingThresholdDB
             ];
         } else {
             return [
-                Math.max(...assignmentData.value.channelIds.map(channelId => mixerStore.mixerChannelLevels[channelId] ?? -90)),
-                assignmentData.value.speakingThresholdDB
+                Math.max(...props.channelAssignments.channelIds.map(channelId => mixerStore.mixerChannelLevels[channelId] ?? -90)),
+                props.channelAssignments.speakingThresholdDB
             ];
         }
     }, ([channelLevel, speakingThreshold]) => {

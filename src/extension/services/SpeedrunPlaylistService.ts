@@ -23,8 +23,6 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
     private activeSpeedrunTimerStopTimeMillis: number | undefined;
 
     // todo:
-    // - assign a mixer channel to the video
-    // - show that mixer channel on graphics, along with other pre-recorded video stuff
     // - indicate that the run is pre-recorded on twitch stream title
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, speedrunService: SpeedrunService, timerService: TimerService) {

@@ -1,7 +1,7 @@
 <template>
-    <ipl-space v-if="speedrunPlaylist.length === 0">
+    <ipl-space v-if="scheduleStore.speedrunPlaylist.length === 0">
         <ipl-message
-            v-if="speedrunPlaylist.length === 0"
+            v-if="scheduleStore.speedrunPlaylist.length === 0"
             type="warning"
         >
             Currently not in speedrun playlist
@@ -37,7 +37,7 @@
         <ipl-space>
             <div class="title">Active speedrun playlist</div>
             <ipl-space
-                v-for="speedrun of speedrunPlaylist"
+                v-for="speedrun of scheduleStore.speedrunPlaylist"
                 :key="speedrun.id"
                 :color="speedrun.id === scheduleStore.activeSpeedrun?.id ? 'blue' : 'secondary'"
                 class="m-t-8"
@@ -77,7 +77,7 @@
 import { IplButton, IplMessage, IplSpace } from '@iplsplatoon/vue-components';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { computed, ref, watch } from 'vue';
-import { MixerChannelAssignment, Speedrun } from 'types/schemas';
+import { MixerChannelAssignment } from 'types/schemas';
 import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
@@ -108,25 +108,6 @@ watch(() => mixerStore.mixerChannelAssignments.speedrunPlaylist, newValue => {
 function updateMixerChannel() {
     mixerStore.setSpeedrunPlaylistChannel(playlistMixerChannel.value.channelId == null ? undefined : (playlistMixerChannel.value as MixerChannelAssignment));
 }
-
-const speedrunPlaylist = computed(() => {
-    if (scheduleStore.activeSpeedrunIndex === -1 || scheduleStore.activeSpeedrun?.videoFile == null) return [];
-
-    const result: Speedrun[] = [];
-    for (let i = scheduleStore.activeSpeedrunIndex; i < scheduleStore.schedule.items.length; i++) {
-        const scheduleItem = scheduleStore.schedule.items[i];
-        if (scheduleItem.type !== 'SPEEDRUN') continue;
-        if (scheduleItem.videoFile == null) break;
-        result.push(scheduleItem);
-    }
-    for (let i = scheduleStore.activeSpeedrunIndex - 1; i > 0; i--) {
-        const scheduleItem = scheduleStore.schedule.items[i];
-        if (scheduleItem.type !== 'SPEEDRUN') continue;
-        if (scheduleItem.videoFile == null) break;
-        result.unshift(scheduleItem);
-    }
-    return result;
-});
 
 const canStartPlaylist = computed(() =>
     !speedrunPlaylistStore.speedrunPlaylistState.isRunning

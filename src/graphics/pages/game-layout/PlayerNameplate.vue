@@ -25,10 +25,10 @@
                             </fitted-content>
                         </div>
                     </div>
-                    <player-volume-meter
-                        v-if="!disableVolumeMeters && !useCompactTalentItems"
+                    <mixer-volume-meter
+                        v-if="!mixerStore.disableVolumeMeters && !useCompactTalentItems"
                         :index="baseIndex + 1"
-                        :team-id="assignmentData?.globalTeamId"
+                        :channel-assignments="getGlobalTeamVolumeMeterAssignments(assignmentData.globalTeamId!)"
                         class="volume-meter"
                     />
                 </div>
@@ -45,7 +45,7 @@
                                 :key="isBlank(talent.socialType) ? 'name' : playerNameplateMode"
                             >
                                 <badge
-                                    v-if="disableVolumeMeters || useCompactTalentItems"
+                                    v-if="mixerStore.disableVolumeMeters || useCompactTalentItems"
                                     class="talent-index"
                                 >
                                     {{ baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers }}
@@ -89,11 +89,10 @@
                             </div>
                         </opacity-swap-transition>
                     </div>
-                    <player-volume-meter
-                        v-if="!disableVolumeMeters && !useCompactTalentItems"
-                        :talent-id="talent.id"
+                    <mixer-volume-meter
+                        v-if="!mixerStore.disableVolumeMeters && !useCompactTalentItems"
                         :index="baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers"
-                        :team-id="talent.teamId"
+                        :channel-assignments="getPlayerVolumeMeterChannelAssignments(talent)"
                         class="volume-meter"
                     />
                 </div>
@@ -111,8 +110,7 @@ import CountryFlag from 'components/CountryFlag.vue';
 import Badge from 'components/Badge.vue';
 import chunk from 'lodash/chunk';
 import OpacitySwapTransition from 'components/OpacitySwapTransition.vue';
-import { disableVolumeMeters } from 'client-shared/stores/MixerStore';
-import PlayerVolumeMeter from './PlayerVolumeMeter.vue';
+import MixerVolumeMeter from './MixerVolumeMeter.vue';
 import CompactPlayerSpeakingIndicator from './CompactPlayerSpeakingIndicator.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
@@ -120,8 +118,13 @@ import { faYoutube } from '@fortawesome/free-brands-svg-icons/faYoutube';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { isBlank } from 'shared/StringHelper';
 import { GameLayoutFeedIndexInjectionKey, PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
+import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
+import { MixerChannelAssignment } from 'types/schemas';
+import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
 
 library.add(faTwitch, faYoutube);
+
+type NormalizedTalentItem = { id: string, teamName?: string, teamId: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null };
 
 const props = withDefaults(defineProps<{
     index: number
@@ -134,10 +137,73 @@ const props = withDefaults(defineProps<{
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
+const mixerStore = useMixerStore();
 
 const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
-type NormalizedTalentList = { id: string, teamName?: string, teamId: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null }[];
+type NormalizedTalentList = NormalizedTalentItem[];
+
+// If the volume meter is only assigned to a team, look for the team's channel then try to get the highest level out of all team players
+function getGlobalTeamVolumeMeterAssignments(teamId: string): MixerVolumeMeterChannelAssignment {
+    let assignments: MixerChannelAssignment[] | undefined = undefined;
+
+    const teamAssignment = mixerStore.mixerChannelAssignments.speedrunTeams[teamId];
+    if (teamAssignment != null) {
+        assignments = [teamAssignment];
+    }
+
+    if (assignments == null) {
+        const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === teamId);
+        if (team != null) {
+            assignments = team.playerIds
+                .map(playerId => mixerStore.mixerChannelAssignments.speedrunTalent[playerId.id])
+                .filter(assignment => assignment != null);
+        }
+    }
+
+    if (assignments == null || assignments.length === 0) {
+        return {
+            channelIds: [],
+            speakingThresholdDB: defaultSpeakingThreshold
+        };
+    } else {
+        return {
+            channelIds: assignments.map(assignment => assignment.channelId),
+            speakingThresholdDB: Math.max(...assignments.map(assignment => assignment.speakingThresholdDB ?? defaultSpeakingThreshold))
+        };
+    }
+}
+
+// If the volume meter is assigned to a player, look for the player's mixer channel then the team's channel
+function getPlayerVolumeMeterChannelAssignments(talentItem: NormalizedTalentItem): MixerVolumeMeterChannelAssignment {
+    let assignments: MixerChannelAssignment[] | undefined = undefined;
+
+    if (talentItem.id != null) {
+        const talentAssignment = mixerStore.mixerChannelAssignments.speedrunTalent[talentItem.id];
+        if (talentAssignment != null) {
+            assignments = [talentAssignment];
+        }
+    }
+
+    if (assignments == null && talentItem.teamId != null) {
+        const teamAssignment = mixerStore.mixerChannelAssignments.speedrunTeams[talentItem.teamId];
+        if (teamAssignment != null) {
+            assignments = [teamAssignment];
+        }
+    }
+
+    if (assignments == null || assignments.length === 0) {
+        return {
+            channelIds: [],
+            speakingThresholdDB: defaultSpeakingThreshold
+        };
+    } else {
+        return {
+            channelIds: assignments.map(assignment => assignment.channelId),
+            speakingThresholdDB: Math.max(...assignments.map(assignment => assignment.speakingThresholdDB ?? defaultSpeakingThreshold))
+        };
+    }
+}
 
 function normalizeTalentList(players: { talentId: string, teamId: string }[]): NormalizedTalentList {
     return players.map(playerItem => {
@@ -346,11 +412,11 @@ const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIn
     line-height: 19px;
     text-align: center;
     font-weight: 600;
-    margin-right: 0;
+    margin-right: 8px;
 }
 
-.talent-index + *:not(.compact-speaking-indicator) {
-    margin-right: 6px;
+.talent-index:has(+ .compact-speaking-indicator) {
+    margin-right: 0;
 }
 
 .compact-speaking-indicator {

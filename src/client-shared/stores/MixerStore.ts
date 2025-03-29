@@ -8,6 +8,7 @@ import {
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
+import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
 const mixerState = nodecg.Replicant<MixerState>('mixerState');
 const mixerChannelAssignments = nodecg.Replicant<MixerChannelAssignments>('mixerChannelAssignments');
@@ -37,6 +38,9 @@ export const useMixerStore = defineStore('mixer', {
         }
     },
     getters: {
+        disableVolumeMeters() {
+            return disableVolumeMeters || useSpeedrunPlaylistStore().speedrunPlaylistState.isRunning;
+        },
         mixerChannelOptions(state) {
             // Channel IDs:
             // 0-31 = Ch 1-32

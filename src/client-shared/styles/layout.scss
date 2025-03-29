@@ -8,8 +8,20 @@
             justify-content: center;
         }
 
+        &.space-between-horizontal {
+            justify-content: space-between;
+        }
+
         &.center-vertical {
             align-items: center;
+        }
+
+        &.end-vertical {
+            align-items: flex-end;
+        }
+
+        &.start-vertical {
+            align-items: flex-start;
         }
 
         &.even-spacing > * {

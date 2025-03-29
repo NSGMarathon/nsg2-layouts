@@ -1,5 +1,29 @@
 <template>
-    <div class="other-nameplate-grid">
+    <div class="other-nameplate-grid layout vertical">
+        <div
+            class="speedrun-playlist-data-layout m-b-8"
+            :class="{ 'without-volume-meter': speedrunPlaylistChannelAssignment == null }"
+        >
+            <div class="max-width">
+                <div class="pre-recorded-label">
+                    Pre-recorded
+                    <svg viewBox="0 0 15 15">
+                        <path d="M0,0L15,7.5L0,15Z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="speedrun-playlist-data max-width layout horizontal center-horizontal end-vertical">
+                <mixer-volume-meter
+                    v-if="speedrunPlaylistChannelAssignment != null"
+                    :channel-assignments="speedrunPlaylistChannelAssignment"
+                    class="speedrun-playlist-volume-meter"
+                />
+                <div class="playlist-index-indicator layout vertical end-vertical m-t-8">
+                    <span>TRACK</span>
+                    <seven-segment-digits :digit-count="2" :value="activeSpeedrunIndexInSpeedrunPlaylist + 1" />
+                </div>
+            </div>
+        </div>
         <table>
             <tbody>
                 <tr
@@ -52,14 +76,35 @@ import FittedContent from 'components/FittedContent.vue';
 import CountryFlag from 'components/CountryFlag.vue';
 import { isBlank } from 'shared/StringHelper';
 import Badge from 'components/Badge.vue';
-import { useMixerStore } from 'client-shared/stores/MixerStore';
+import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import { GameLayoutFeedIndexInjectionKey } from '../../helpers/Injections';
 import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
+import MixerVolumeMeter from './MixerVolumeMeter.vue';
+import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
+import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
+import { disableVolumeMeters } from 'client-shared/stores/MixerStore';
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 const mixerStore = useMixerStore();
 const speedrunPlaylistStore = useSpeedrunPlaylistStore();
+
+const activeSpeedrunIndexInSpeedrunPlaylist = computed(() => {
+    if (scheduleStore.activeSpeedrun == null || scheduleStore.speedrunPlaylist.length === 0) return -1;
+
+    return scheduleStore.speedrunPlaylist.findIndex(scheduleItem => scheduleItem.id === scheduleStore.activeSpeedrun!.id);
+});
+
+const speedrunPlaylistChannelAssignment = computed<MixerVolumeMeterChannelAssignment | null>(() => {
+    if (mixerStore.mixerChannelAssignments.speedrunPlaylist == null || disableVolumeMeters) {
+        return null;
+    } else {
+        return {
+            channelIds: [mixerStore.mixerChannelAssignments.speedrunPlaylist.channelId!],
+            speakingThresholdDB: mixerStore.mixerChannelAssignments.speedrunPlaylist.speakingThresholdDB ?? defaultSpeakingThreshold
+        };
+    }
+});
 
 const columnCount = 2;
 const rowCount = 2;
@@ -101,7 +146,7 @@ const talent = computed(() => {
 
 table {
     width: 100%;
-    height: 100%;
+    flex-grow: 1;
     border-collapse: collapse;
     table-layout: fixed;
 
@@ -141,6 +186,38 @@ table {
     font-weight: 700;
 }
 
+.speedrun-playlist-data-layout {
+    border: 2px solid colors.$vfd-red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &.without-volume-meter {
+        flex-direction: row;
+        border: 0;
+
+        .speedrun-playlist-data {
+            justify-content: flex-end;
+        }
+
+        .playlist-index-indicator {
+            flex-direction: row;
+            align-items: flex-end;
+
+            > span {
+                position: static;
+                margin-right: 8px;
+            }
+        }
+    }
+}
+
+.speedrun-playlist-data {
+    max-width: 450px;
+    margin: -8px 0 6px;
+    padding: 0 8px;
+}
+
 .commentator-flag {
     height: 22px;
 }
@@ -152,5 +229,38 @@ table {
 .commentator-pronouns {
     font-size: 17.5px !important;
     transform: translateY(-0.5px);
+}
+
+.pre-recorded-label {
+    color: colors.$vfd-background;
+    background-color: colors.$vfd-red;
+    font-weight: 700;
+    padding: 1px 12px;
+    text-transform: uppercase;
+    font-size: 22px;
+    width: max-content;
+
+    svg {
+        height: 15px;
+    }
+}
+
+.playlist-index-indicator {
+    position: relative;
+    font-size: 32px;
+
+    > span {
+        font-size: 18px;
+        font-weight: 700;
+        position: absolute;
+        text-wrap: nowrap;
+        right: 0;
+        top: -22px;
+    }
+}
+
+.speedrun-playlist-volume-meter {
+    height: 18px;
+    width: 100%;
 }
 </style>
