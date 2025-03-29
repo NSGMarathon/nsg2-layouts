@@ -22,9 +22,6 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
     private activeSpeedrunTimerStartTimeMillis: number | undefined;
     private activeSpeedrunTimerStopTimeMillis: number | undefined;
 
-    // todo:
-    // - indicate that the run is pre-recorded on twitch stream title
-
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, speedrunService: SpeedrunService, timerService: TimerService) {
         super(nodecg);
 

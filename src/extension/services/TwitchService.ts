@@ -1,5 +1,12 @@
 import type NodeCG from '@nodecg/types';
-import type { ActiveSpeedrun, Configschema, Schedule, Talent, TwitchCommercialState, TwitchData } from 'types/schemas';
+import {
+    ActiveSpeedrun,
+    Configschema,
+    Schedule,
+    Talent,
+    TwitchCommercialState,
+    TwitchData
+} from 'types/schemas';
 import { TwitchOauthClient } from '../clients/TwitchOauthClient';
 import { TwitchClient } from '../clients/TwitchClient';
 import { TalentService } from './TalentService';
@@ -118,6 +125,7 @@ export class TwitchService extends HasNodecgLogger {
                         title: item.title,
                         category: item.category,
                         twitchCategory: item.twitchCategory,
+                        hasVideoFile: item.videoFile != null,
                         teams: item.teams.map(team => team.playerIds.map(playerId => this.talentService.findTalentItemById(playerId.id)?.name))
                     };
                 } else {
@@ -125,6 +133,7 @@ export class TwitchService extends HasNodecgLogger {
                         id: item.id,
                         title: item.title,
                         twitchCategory: item.twitchCategory,
+                        hasVideoFile: false,
                         talentIds: item.talentIds.map(talentId => this.talentService.findTalentItemById(talentId.id)?.name)
                     };
                 }
@@ -150,7 +159,7 @@ export class TwitchService extends HasNodecgLogger {
             if (!isEqual(newTalentNames, oldTalentNames)) {
                 await this.setStreamInfo(activeScheduleItem);
             }
-        })
+        });
     }
 
     async setStreamInfo(activeScheduleItem: ScheduleItem | null) {
@@ -193,14 +202,18 @@ export class TwitchService extends HasNodecgLogger {
         if (scheduleItem == null) {
             return titleTemplates.fallback;
         } else if (scheduleItem.type === 'SPEEDRUN') {
-            const newTitleTemplate = titleTemplates.race != null && scheduleItem.teams.length > 1 ? titleTemplates.race : titleTemplates.speedrun;
+            let titleTemplate = titleTemplates.race != null && scheduleItem.teams.length > 1 ? titleTemplates.race : titleTemplates.speedrun;
+            if (scheduleItem.videoFile != null) {
+                titleTemplate = `[PRE-RECORDED] ${titleTemplate}`;
+            }
 
-            const newTitle = newTitleTemplate
+            const result = titleTemplate
                 .replace('{{talent}}', this.talentService.formatScheduleItemTalentList(scheduleItem))
                 .replace('{{category}}', scheduleItem.category?.trim() ?? '???')
                 .replace('{{title}}', scheduleItem.title.trim());
 
-            if (newTitle.length > TWITCH_STREAM_TITLE_LENGTH_CAP) {
+            // Attempt to shorten very long titles
+            if (result.length > TWITCH_STREAM_TITLE_LENGTH_CAP) {
                 let firstTalentItem: TalentItem | null = null;
                 let talentCount = 0;
                 for (let i = 0; i < scheduleItem.teams.length; i++) {
@@ -221,7 +234,7 @@ export class TwitchService extends HasNodecgLogger {
                     talentCount--;
                 }
 
-                return newTitleTemplate
+                return titleTemplate
                     .replace('{{talent}}',
                         firstTalentItem == null
                             ? `${talentCount} player${talentCount === 1 ? '' : 's'}`
@@ -229,7 +242,7 @@ export class TwitchService extends HasNodecgLogger {
                     .replace('{{category}}', scheduleItem.category?.trim() ?? '???')
                     .replace('{{title}}', scheduleItem.title.trim());
             }
-            return newTitle;
+            return result;
         } else if (scheduleItem.talentIds.length === 0) {
             return titleTemplates.withoutTalent
                 .replace('{{title}}', scheduleItem.title.trim());
