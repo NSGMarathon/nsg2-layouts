@@ -1,5 +1,22 @@
 <template>
-    <ipl-space v-if="scheduleStore.speedrunPlaylist.length === 0">
+    <mixer-channel-assignment-space
+        :assigned-channel="playlistMixerChannel.channelId"
+        :speaking-threshold="playlistMixerChannel.speakingThresholdDB"
+        label="Playlist mixer channel"
+        visible
+        show-all-channels
+        class="m-b-8"
+        color="primary"
+        @update:assigned-channel="playlistMixerChannel.channelId = $event"
+        @update:speaking-threshold="playlistMixerChannel.speakingThresholdDB = $event"
+    >
+        <ipl-button
+            class="m-t-8"
+            label="Update"
+            @click="updateMixerChannel"
+        />
+    </mixer-channel-assignment-space>
+    <ipl-space>
         <ipl-message
             v-if="scheduleStore.speedrunPlaylist.length === 0"
             type="warning"
@@ -15,26 +32,7 @@
                 - Active speedrun has no video file
             </template>
         </ipl-message>
-    </ipl-space>
-    <template v-else>
-        <mixer-channel-assignment-space
-            :assigned-channel="playlistMixerChannel.channelId"
-            :speaking-threshold="playlistMixerChannel.speakingThresholdDB"
-            label="Playlist mixer channel"
-            visible
-            show-all-channels
-            class="m-b-8"
-            color="primary"
-            @update:assigned-channel="playlistMixerChannel.channelId = $event"
-            @update:speaking-threshold="playlistMixerChannel.speakingThresholdDB = $event"
-        >
-            <ipl-button
-                class="m-t-8"
-                label="Update"
-                @click="updateMixerChannel"
-            />
-        </mixer-channel-assignment-space>
-        <ipl-space>
+        <template v-else>
             <div class="title">Active speedrun playlist</div>
             <ipl-space
                 v-for="speedrun of scheduleStore.speedrunPlaylist"
@@ -69,8 +67,8 @@
                     Stop
                 </ipl-button>
             </div>
-        </ipl-space>
-    </template>
+        </template>
+    </ipl-space>
 </template>
 
 <script setup lang="ts">
