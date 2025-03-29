@@ -1,6 +1,7 @@
 <template>
     <div class="other-nameplate-grid layout vertical">
         <div
+            v-if="speedrunPlaylistStore.speedrunPlaylistState.isRunning"
             class="speedrun-playlist-data-layout m-b-8"
             :class="{ 'without-volume-meter': speedrunPlaylistChannelAssignment == null }"
         >
