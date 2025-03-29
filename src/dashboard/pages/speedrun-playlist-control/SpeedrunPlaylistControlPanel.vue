@@ -66,13 +66,13 @@ import { faStop } from '@fortawesome/free-solid-svg-icons/faStop';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
-import { useVideoFileStore } from 'client-shared/stores/VideoFileStore';
+import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
 library.add(faPlay, faStop);
 
 const scheduleStore = useScheduleStore();
 const obsStore = useObsStore();
-const videoFileStore = useVideoFileStore();
+const speedrunPlaylistStore = useSpeedrunPlaylistStore();
 
 const speedrunPlaylist = computed(() => {
     if (scheduleStore.activeSpeedrunIndex === -1 || scheduleStore.activeSpeedrun?.videoFile == null) return [];
@@ -94,14 +94,14 @@ const speedrunPlaylist = computed(() => {
 });
 
 const canStartPlaylist = computed(() =>
-    !videoFileStore.speedrunPlaylistState.isRunning
+    !speedrunPlaylistStore.speedrunPlaylistState.isRunning
     && obsStore.obsState.status === 'CONNECTED'
     && !obsStore.obsState.transitionInProgress
     && !obsStore.obsConfig.gameplayScenes.filter(Boolean).some(gameplaySceneName => obsStore.obsState.currentScene === gameplaySceneName));
 
 const canStopPlaylist = computed(() =>
     !obsStore.obsState.transitionInProgress
-    && videoFileStore.speedrunPlaylistState.isRunning);
+    && speedrunPlaylistStore.speedrunPlaylistState.isRunning);
 
 async function playPlaylist() {
     return sendMessage('speedrunPlaylist:play');

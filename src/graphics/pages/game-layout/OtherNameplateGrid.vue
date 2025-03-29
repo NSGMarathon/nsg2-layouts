@@ -54,10 +54,12 @@ import { isBlank } from 'shared/StringHelper';
 import Badge from 'components/Badge.vue';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 import { GameLayoutFeedIndexInjectionKey } from '../../helpers/Injections';
+import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 const mixerStore = useMixerStore();
+const speedrunPlaylistStore = useSpeedrunPlaylistStore();
 
 const columnCount = 2;
 const rowCount = 2;
@@ -74,7 +76,7 @@ const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIn
 const talent = computed(() => {
     const result: (TalentItem | null)[] = [
         ...((scheduleStore.activeSpeedrun?.commentatorIds ?? [])).map(commentatorId => commentatorId.id),
-        talentStore.currentHostId
+        speedrunPlaylistStore.speedrunPlaylistState.isRunning ? null : talentStore.currentHostId
     ]
         .map(talentId => talentStore.findTalentItemById(talentId))
         .filter(talent => talent != null) ?? [];

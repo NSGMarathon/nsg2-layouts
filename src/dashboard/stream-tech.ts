@@ -14,6 +14,7 @@ import { initMusicStore } from 'client-shared/stores/MusicStore';
 import { initMixerStore } from 'client-shared/stores/MixerStore';
 import { initCountdownStore } from 'client-shared/stores/CountdownStore';
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
+import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
 (async () => {
     const app = createApp(StreamTechPanel);
@@ -30,7 +31,8 @@ import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
         initMusicStore(),
         initMixerStore(),
         initCountdownStore(),
-        initVideoFileStore()
+        initVideoFileStore(),
+        initSpeedrunPlaylistStore()
     ]);
     app.mount('#app');
 })();

@@ -22,6 +22,12 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
     private activeSpeedrunTimerStartTimeMillis: number | undefined;
     private activeSpeedrunTimerStopTimeMillis: number | undefined;
 
+    // todo:
+    // - assign a mixer channel to the video
+    // - show that mixer channel on graphics, along with other pre-recorded video stuff
+    // - indicate that the run is pre-recorded on twitch stream title
+    // - hide host during playlist
+
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, speedrunService: SpeedrunService, timerService: TimerService) {
         super(nodecg);
 
@@ -183,9 +189,9 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
             throw new Error('The intermission scene is unknown!');
         }
         if (willSwitchScene) {
-            this.speedrunPlaylistState.value.isRunning = false;
             await this.obsConnectorService.setCurrentScene(intermissionScene);
             await this.obsConnectorService.waitForSceneSwitch();
+            this.speedrunPlaylistState.value.isRunning = false;
         }
         await this.cleanUpPlaylistMediaSource();
     }

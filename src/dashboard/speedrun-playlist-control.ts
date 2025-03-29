@@ -7,6 +7,7 @@ import { initScheduleStore } from 'client-shared/stores/ScheduleStore';
 import SpeedrunPlaylistControlPanel from './pages/speedrun-playlist-control/SpeedrunPlaylistControlPanel.vue';
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 import { initObsStore } from 'client-shared/stores/ObsStore';
+import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
 (async () => {
     const app = createApp(SpeedrunPlaylistControlPanel);
@@ -16,6 +17,7 @@ import { initObsStore } from 'client-shared/stores/ObsStore';
     await Promise.all([
         initScheduleStore(),
         initVideoFileStore(),
+        initSpeedrunPlaylistStore(),
         initObsStore()
     ]);
     app.mount('#app');
