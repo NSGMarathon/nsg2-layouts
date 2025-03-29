@@ -26,7 +26,6 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
     // - assign a mixer channel to the video
     // - show that mixer channel on graphics, along with other pre-recorded video stuff
     // - indicate that the run is pre-recorded on twitch stream title
-    // - hide host during playlist
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, speedrunService: SpeedrunService, timerService: TimerService) {
         super(nodecg);
@@ -299,6 +298,10 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
             positionY: 0,
             cropToBounds: true
         });
+        // This is required for our audio setup. The monitoring output from OBS is routed into our audio mixer,
+        // from where we read the audio levels to display on stream and optionally route the video's audio to
+        // the house speakers.
+        await this.obsConnectorService.setInputAudioMonitorType(this.playlistMediaSourceName, 'OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT');
 
         if (existingSceneItems.length > 0) {
             // sceneItemIndex is read bottom-to-top; the item with the highest sceneItemIndex is displayed on top of all others

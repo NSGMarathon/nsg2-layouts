@@ -32,6 +32,8 @@ const OBS_INPUT_KINDS_WITHOUT_VIDEO = [
     'sndio_output_capture'
 ];
 
+export type ObsAudioMonitorType = 'OBS_MONITORING_TYPE_NONE' | 'OBS_MONITORING_TYPE_MONITOR_ONLY' | 'OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT';
+
 export class ObsConnectorService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI;
     private readonly socket: OBSWebSocket;
@@ -235,6 +237,10 @@ export class ObsConnectorService extends HasNodecgLogger {
             // @ts-ignore: TypeScript doesn't like this, even if it is correct.
             inputSettings
         });
+    }
+
+    async setInputAudioMonitorType(inputName: string, monitorType: ObsAudioMonitorType): Promise<void> {
+        return this.socket.call('SetInputAudioMonitorType', { inputName, monitorType })
     }
 
     async removeInput(inputName: string): Promise<void> {
