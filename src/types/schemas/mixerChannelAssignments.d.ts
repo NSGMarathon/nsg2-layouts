@@ -5,7 +5,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface TalentMixerChannelAssignments {
+export interface MixerChannelAssignments {
 	speedrunTeams: {
 		[k: string]: MixerChannelAssignment;
 	};
@@ -13,6 +13,7 @@ export interface TalentMixerChannelAssignments {
 		[k: string]: MixerChannelAssignment;
 	};
 	host?: MixerChannelAssignment;
+	speedrunPlaylist?: MixerChannelAssignment;
 }
 export interface MixerChannelAssignment {
 	channelId: number;

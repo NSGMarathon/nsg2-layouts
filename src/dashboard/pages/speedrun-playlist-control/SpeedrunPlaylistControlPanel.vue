@@ -1,5 +1,5 @@
 <template>
-    <ipl-space>
+    <ipl-space v-if="speedrunPlaylist.length === 0">
         <ipl-message
             v-if="speedrunPlaylist.length === 0"
             type="warning"
@@ -15,7 +15,26 @@
                 - Active speedrun has no video file
             </template>
         </ipl-message>
-        <template v-else>
+    </ipl-space>
+    <template v-else>
+        <mixer-channel-assignment-space
+            :assigned-channel="playlistMixerChannel.channelId"
+            :speaking-threshold="playlistMixerChannel.speakingThresholdDB"
+            label="Playlist mixer channel"
+            visible
+            show-all-channels
+            class="m-b-8"
+            color="primary"
+            @update:assigned-channel="playlistMixerChannel.channelId = $event"
+            @update:speaking-threshold="playlistMixerChannel.speakingThresholdDB = $event"
+        >
+            <ipl-button
+                class="m-t-8"
+                label="Update"
+                @click="updateMixerChannel"
+            />
+        </mixer-channel-assignment-space>
+        <ipl-space>
             <div class="title">Active speedrun playlist</div>
             <ipl-space
                 v-for="speedrun of speedrunPlaylist"
@@ -50,15 +69,15 @@
                     Stop
                 </ipl-button>
             </div>
-        </template>
-    </ipl-space>
+        </ipl-space>
+    </template>
 </template>
 
 <script setup lang="ts">
 import { IplButton, IplMessage, IplSpace } from '@iplsplatoon/vue-components';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
-import { computed } from 'vue';
-import { Speedrun } from 'types/schemas';
+import { computed, ref, watch } from 'vue';
+import { MixerChannelAssignment, Speedrun } from 'types/schemas';
 import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
@@ -67,12 +86,28 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
+import MixerChannelAssignmentSpace from '../../components/MixerChannelAssignmentSpace.vue';
+import { useMixerStore } from 'client-shared/stores/MixerStore';
 
 library.add(faPlay, faStop);
 
 const scheduleStore = useScheduleStore();
 const obsStore = useObsStore();
 const speedrunPlaylistStore = useSpeedrunPlaylistStore();
+const mixerStore = useMixerStore();
+
+const playlistMixerChannel = ref<Partial<MixerChannelAssignment>>({ });
+watch(() => mixerStore.mixerChannelAssignments.speedrunPlaylist, newValue => {
+    if (newValue == null) {
+        playlistMixerChannel.value = { };
+    } else {
+        playlistMixerChannel.value = newValue;
+    }
+}, { immediate: true });
+
+function updateMixerChannel() {
+    mixerStore.setSpeedrunPlaylistChannel(playlistMixerChannel.value.channelId == null ? undefined : (playlistMixerChannel.value as MixerChannelAssignment));
+}
 
 const speedrunPlaylist = computed(() => {
     if (scheduleStore.activeSpeedrunIndex === -1 || scheduleStore.activeSpeedrun?.videoFile == null) return [];

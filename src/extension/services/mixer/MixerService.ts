@@ -5,7 +5,7 @@ import {
     Configschema,
     MixerChannelLevels,
     MixerState,
-    TalentMixerChannelAssignments
+    MixerChannelAssignments
 } from 'types/schemas';
 import { MetaArgument, UDPPort } from 'osc';
 import PQueue from 'p-queue';
@@ -19,7 +19,7 @@ import { HasNodecgLogger } from '../../helpers/HasNodecgLogger';
 
 export class MixerService extends HasNodecgLogger {
     private readonly mixerState: NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
-    private readonly talentMixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<TalentMixerChannelAssignments>;
+    private readonly mixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly mixerChannelLevels: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelLevels>;
     private readonly localMixerChannelLevels: Map<string, number> = new Map();
@@ -46,7 +46,7 @@ export class MixerService extends HasNodecgLogger {
         super(nodecg);
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.mixerState = nodecg.Replicant('mixerState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
-        this.talentMixerChannelAssignments = nodecg.Replicant('talentMixerChannelAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<TalentMixerChannelAssignments>;
+        this.mixerChannelAssignments = nodecg.Replicant('mixerChannelAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
         this.mixerChannelLevels = nodecg.Replicant('mixerChannelLevels', { persistent: false }) as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelLevels>;
         this.unmuteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.unmute ?? 500;
         this.muteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.mute ?? 500;
@@ -88,15 +88,12 @@ export class MixerService extends HasNodecgLogger {
         }
 
         this.activeSpeedrun.on('change', (newValue, oldValue) => {
-            if (newValue == null) {
-                this.talentMixerChannelAssignments.value.speedrunTalent = { };
-                return;
-            }
-            if (oldValue != null && newValue.id !== oldValue.id) {
-                this.talentMixerChannelAssignments.value = {
+            if (newValue == null || (oldValue != null && newValue.id !== oldValue.id)) {
+                this.mixerChannelAssignments.value = {
                     speedrunTeams: { },
                     speedrunTalent: { },
-                    host: this.talentMixerChannelAssignments.value.host
+                    host: this.mixerChannelAssignments.value.host,
+                    speedrunPlaylist: this.mixerChannelAssignments.value.speedrunPlaylist
                 };
                 return;
             }
@@ -111,7 +108,7 @@ export class MixerService extends HasNodecgLogger {
             newValue.commentatorIds.forEach(commentatorId => {
                 speedrunTalentIds.add(commentatorId.id);
             });
-            const newChannelAssignments = cloneDeep(this.talentMixerChannelAssignments.value);
+            const newChannelAssignments = cloneDeep(this.mixerChannelAssignments.value);
             Object.keys(newChannelAssignments.speedrunTalent).forEach(talentId => {
                 if (!speedrunTalentIds.has(talentId)) {
                     delete newChannelAssignments.speedrunTalent[talentId];
@@ -122,10 +119,10 @@ export class MixerService extends HasNodecgLogger {
                     delete newChannelAssignments.speedrunTeams[teamId];
                 }
             });
-            this.talentMixerChannelAssignments.value = newChannelAssignments;
+            this.mixerChannelAssignments.value = newChannelAssignments;
         });
 
-        this.talentMixerChannelAssignments.on('change', newValue => {
+        this.mixerChannelAssignments.on('change', newValue => {
             const assignedChannels = new Set<number>();
             Object.values(newValue.speedrunTalent).forEach(assignment => {
                 assignedChannels.add(assignment.channelId);
@@ -135,6 +132,9 @@ export class MixerService extends HasNodecgLogger {
             });
             if (newValue.host != null) {
                 assignedChannels.add(newValue.host.channelId);
+            }
+            if (newValue.speedrunPlaylist != null) {
+                assignedChannels.add(newValue.speedrunPlaylist.channelId);
             }
             this.assignedChannels = Array.from(assignedChannels.values());
         });

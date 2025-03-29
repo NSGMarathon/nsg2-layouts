@@ -142,7 +142,7 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 
 const hostSpeaking = computed(() => {
     if (disableVolumeMeters || talentStore.currentHostId == null) return false;
-    const assignment = mixerStore.talentMixerChannelAssignments.host;
+    const assignment = mixerStore.mixerChannelAssignments.host;
     if (assignment == null) return false;
     return (mixerStore.mixerChannelLevels[assignment.channelId] ?? -90) > (assignment.speakingThresholdDB ?? defaultSpeakingThreshold);
 });

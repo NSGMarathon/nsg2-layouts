@@ -79,20 +79,20 @@ onMounted(() => {
     watch(() => [
         props.talentId,
         props.teamId,
-        mixerStore.talentMixerChannelAssignments,
+        mixerStore.mixerChannelAssignments,
         scheduleStore.activeSpeedrun?.teams
     ], () => {
         let assignments: MixerChannelAssignment[] | undefined = undefined;
 
         if (props.talentId != null) {
-            const talentAssignment = mixerStore.talentMixerChannelAssignments.speedrunTalent[props.talentId];
+            const talentAssignment = mixerStore.mixerChannelAssignments.speedrunTalent[props.talentId];
             if (talentAssignment != null) {
                 assignments = [talentAssignment];
             }
         }
 
         if (assignments == null && props.teamId != null) {
-            const teamAssignment = mixerStore.talentMixerChannelAssignments.speedrunTeams[props.teamId];
+            const teamAssignment = mixerStore.mixerChannelAssignments.speedrunTeams[props.teamId];
             if (teamAssignment != null) {
                 assignments = [teamAssignment];
             }
@@ -101,7 +101,7 @@ onMounted(() => {
                 const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === props.teamId);
                 if (team != null) {
                     assignments = team.playerIds
-                        .map(playerId => mixerStore.talentMixerChannelAssignments.speedrunTalent[playerId.id])
+                        .map(playerId => mixerStore.mixerChannelAssignments.speedrunTalent[playerId.id])
                         .filter(assignment => assignment != null);
                 }
             }

@@ -3,19 +3,19 @@ import {
     Configschema,
     MixerChannelLevels,
     MixerState,
-    TalentMixerChannelAssignments
+    MixerChannelAssignments, MixerChannelAssignment
 } from 'types/schemas';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 
 const mixerState = nodecg.Replicant<MixerState>('mixerState');
-const talentMixerChannelAssignments = nodecg.Replicant<TalentMixerChannelAssignments>('talentMixerChannelAssignments');
+const mixerChannelAssignments = nodecg.Replicant<MixerChannelAssignments>('mixerChannelAssignments');
 const mixerChannelLevels = nodecg.Replicant<MixerChannelLevels>('mixerChannelLevels', { persistent: false });
 
 interface MixerStore {
     mixerState: MixerState
-    talentMixerChannelAssignments: TalentMixerChannelAssignments
+    mixerChannelAssignments: MixerChannelAssignments
     mixerChannelLevels: MixerChannelLevels
 }
 
@@ -25,12 +25,15 @@ export const disableVolumeMeters = (nodecg.bundleConfig as Configschema).x32?.di
 export const useMixerStore = defineStore('mixer', {
     state: () => ({
         mixerState: null,
-        talentMixerChannelAssignments: null,
+        mixerChannelAssignments: null,
         mixerChannelLevels: null
     } as unknown as MixerStore),
     actions: {
-        updateTalentChannelAssignments(newValue: TalentMixerChannelAssignments) {
-            talentMixerChannelAssignments.value = newValue;
+        updateTalentChannelAssignments(newValue: MixerChannelAssignments) {
+            mixerChannelAssignments.value = newValue;
+        },
+        setSpeedrunPlaylistChannel(newValue: MixerChannelAssignment | undefined) {
+            mixerChannelAssignments.value!.speedrunPlaylist = newValue;
         }
     },
     getters: {
@@ -117,8 +120,8 @@ export const useMixerStore = defineStore('mixer', {
             return (talentId: string | null | undefined, teamId: string | null | undefined) => {
                 if (disableVolumeMeters || talentId == null) return false;
                 const assignment = talentId === talentStore.currentHostId
-                    ? state.talentMixerChannelAssignments.host
-                    : state.talentMixerChannelAssignments.speedrunTalent[talentId] ?? (teamId == null ? null : state.talentMixerChannelAssignments.speedrunTeams[teamId]);
+                    ? state.mixerChannelAssignments.host
+                    : state.mixerChannelAssignments.speedrunTalent[talentId] ?? (teamId == null ? null : state.mixerChannelAssignments.speedrunTeams[teamId]);
                 return assignment == null
                     ? false
                     : (state.mixerChannelLevels[assignment.channelId] ?? -90) > (assignment.speakingThresholdDB ?? defaultSpeakingThreshold);
@@ -127,4 +130,4 @@ export const useMixerStore = defineStore('mixer', {
     }
 });
 
-export const initMixerStore = createReplicantStoreInitializer([mixerState, talentMixerChannelAssignments, mixerChannelLevels], useMixerStore);
+export const initMixerStore = createReplicantStoreInitializer([mixerState, mixerChannelAssignments, mixerChannelLevels], useMixerStore);

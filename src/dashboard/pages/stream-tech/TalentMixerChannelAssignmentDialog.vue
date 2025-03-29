@@ -22,41 +22,37 @@
         <template v-if="scheduleStore.activeSpeedrun?.relay">
             <div class="m-t-8">Teams</div>
             <hr class="m-y-2">
-            <talent-mixer-channel-assignment-space
+            <mixer-channel-assignment-space
                 v-for="(team, i) in scheduleStore.activeSpeedrun.teams"
                 :speaking-threshold="teamChannels[team.id]?.speakingThresholdDB"
-                :team-id="team.id"
                 :assigned-channel="teamChannels[team.id]?.channelId"
                 :visible="isOpen"
                 class="m-t-8"
                 :show-all-channels="showAllChannels"
-                :fallback-label="`Team ${i + 1}`"
+                :label="getTeamAssignmentLabel(i, team)"
                 @update:assigned-channel="selectChannel('team', team.id, $event)"
                 @update:speaking-threshold="updateSpeakingThreshold('team', team.id, $event)"
             />
             <div class="m-t-8">Players</div>
             <hr class="m-y-2">
         </template>
-        <talent-mixer-channel-assignment-space
+        <mixer-channel-assignment-space
             v-for="talentId in scheduleStore.activeSpeedrunTalentIds"
             :speaking-threshold="talentChannels[talentId]?.speakingThresholdDB"
-            :talent-id="talentId"
             :assigned-channel="talentChannels[talentId]?.channelId"
             :visible="isOpen"
             class="m-t-8"
+            :label="getTalentAssignmentLabel(talentId)"
             :show-all-channels="showAllChannels"
-            :fallback-label="`Unknown talent ${talentId}`"
             @update:assigned-channel="selectChannel('talent', talentId, $event)"
             @update:speaking-threshold="updateSpeakingThreshold('talent', talentId, $event)"
         />
-        <talent-mixer-channel-assignment-space
+        <mixer-channel-assignment-space
             :speaking-threshold="hostChannel.speakingThresholdDB"
-            :talent-id="talentStore.currentHostId"
             :assigned-channel="hostChannel.channelId"
+            :label="hostAssignmentLabel"
             class="m-t-8"
             :show-all-channels="showAllChannels"
-            fallback-label="Host (None currently assigned)"
-            talent-name-suffix="(Host)"
             :visible="isOpen"
             @update:assigned-channel="hostChannel.channelId = $event"
             @update:speaking-threshold="hostChannel.speakingThresholdDB = $event"
@@ -83,12 +79,13 @@
 
 <script setup lang="ts">
 import { IplButton, IplCheckbox, IplDialog, IplDialogTitle, IplSpace } from '@iplsplatoon/vue-components';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { MixerChannelAssignment } from 'types/schemas';
-import TalentMixerChannelAssignmentSpace from './TalentMixerChannelAssignmentSpace.vue';
+import { MixerChannelAssignment, Speedrun } from 'types/schemas';
+import MixerChannelAssignmentSpace from '../../components/MixerChannelAssignmentSpace.vue';
+import { isBlank } from 'shared/StringHelper';
 
 const mixerStore = useMixerStore();
 const scheduleStore = useScheduleStore();
@@ -140,16 +137,32 @@ function save() {
     });
 }
 
+function getTalentAssignmentLabel(talentId: string): string {
+    return talentStore.findTalentItemById(talentId)?.name ?? `[Unknown Name]`;
+}
+
+function getTeamAssignmentLabel(teamIndex: number, team: Speedrun['teams'][number]): string {
+    return isBlank(team.name) ? `Team ${teamIndex + 1} - ${talentStore.formatTalentIdList(team.playerIds)}` : team.name!;
+}
+
+const hostAssignmentLabel = computed(() => {
+    if (talentStore.currentHostId == null) {
+        return 'Host (None currently assigned)';
+    } else {
+        return `${talentStore.findTalentItemById(talentStore.currentHostId)?.name ?? `[Unknown Name]`} (Host)`;
+    }
+});
+
 const isOpen = ref(false);
 function open() {
-    talentChannels.value = Object.entries(mixerStore.talentMixerChannelAssignments.speedrunTalent).reduce((result, [talentId, assignment]) => {
+    talentChannels.value = Object.entries(mixerStore.mixerChannelAssignments.speedrunTalent).reduce((result, [talentId, assignment]) => {
         result[talentId] = {
             channelId: assignment.channelId,
             speakingThresholdDB: assignment.speakingThresholdDB
         };
         return result;
     }, {} as Record<string, ChannelAssignment>);
-    const existingHostChannel = mixerStore.talentMixerChannelAssignments.host;
+    const existingHostChannel = mixerStore.mixerChannelAssignments.host;
     if (existingHostChannel == null) {
         hostChannel.value = { };
     } else {

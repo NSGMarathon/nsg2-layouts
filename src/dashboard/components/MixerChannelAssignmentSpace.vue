@@ -1,8 +1,8 @@
 <template>
-    <ipl-space color="secondary">
+    <ipl-space :color="props.color">
         <ipl-select
             :model-value="props.assignedChannel == null ? 'none' : String(props.assignedChannel)"
-            :label="talentName"
+            :label="props.label"
             :option-groups="mixerStore.mixerChannelOptions(props.showAllChannels, String(props.assignedChannel))"
             class="max-width"
             @update:model-value="selectTalentChannel($event)"
@@ -29,20 +29,17 @@
             class="channel-volume-display"
             :style="{ transform: `scaleX(${volumeDisplayScale})` }"
         />
+        <slot />
     </ipl-space>
 </template>
 
 <script setup lang="ts">
 import { IplInput, IplSelect, IplSpace } from '@iplsplatoon/vue-components';
-import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import { computed, ref, watch } from 'vue';
-import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
 
-const talentStore = useTalentStore();
 const mixerStore = useMixerStore();
-const scheduleStore = useScheduleStore();
 
 const volumeDisplayScale = computed(() => {
     if (props.visible) {
@@ -52,34 +49,16 @@ const volumeDisplayScale = computed(() => {
     return '0';
 });
 
-const talentName = computed(() => {
-    if (props.teamId != null) {
-        const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === props.teamId);
-        if (team == null) {
-            return props.fallbackLabel;
-        } else {
-            return team.name || talentStore.formatTalentIdList(team.playerIds, 4);
-        }
-    } else {
-        const talentItem = talentStore.findTalentItemById(props.talentId);
-        if (talentItem == null) {
-            return props.fallbackLabel;
-        } else {
-            return `${talentItem.name} ${props.talentNameSuffix ?? ''}`;
-        }
-    }
-});
-
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     assignedChannel: number | undefined
     speakingThreshold: number | undefined
-    talentId?: string | null
-    teamId?: string
+    label: string
     visible: boolean
-    fallbackLabel: string
-    talentNameSuffix?: string
     showAllChannels: boolean
-}>();
+    color?: 'primary' | 'secondary'
+}>(), {
+    color: 'secondary'
+});
 
 const emit = defineEmits<{
     'update:assignedChannel': [newValue: number | undefined]
@@ -109,7 +88,7 @@ function updateSpeakingThreshold(threshold: string) {
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/dashboard-colors';
+@use '../styles/dashboard-colors';
 
 .channel-volume-display {
     width: 100%;

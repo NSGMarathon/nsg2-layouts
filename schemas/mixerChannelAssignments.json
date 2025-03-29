@@ -28,6 +28,9 @@
         },
         "host": {
             "$ref": "#/definitions/mixerChannelAssignment"
+        },
+        "speedrunPlaylist": {
+            "$ref": "#/definitions/mixerChannelAssignment"
         }
     },
     "required": ["speedrunTalent", "speedrunTeams"],

@@ -131,12 +131,12 @@ const mixerStore = useMixerStore();
 const scheduleItemEditor = inject(ScheduleItemEditorInjectionKey);
 
 const someMixerAssignmentsMissing = computed(() => {
-    if (mixerStore.talentMixerChannelAssignments.host == null) return true;
+    if (mixerStore.mixerChannelAssignments.host == null) return true;
     return scheduleStore.activeSpeedrun?.teams.some(team => {
-        if (mixerStore.talentMixerChannelAssignments.speedrunTeams[team.id] != null) return false;
-        return team.playerIds.some(talentId => mixerStore.talentMixerChannelAssignments.speedrunTalent[talentId.id] == null);
+        if (mixerStore.mixerChannelAssignments.speedrunTeams[team.id] != null) return false;
+        return team.playerIds.some(talentId => mixerStore.mixerChannelAssignments.speedrunTalent[talentId.id] == null);
     }) || scheduleStore.activeSpeedrun?.commentatorIds.some(commentatorId =>
-        mixerStore.talentMixerChannelAssignments.speedrunTalent[commentatorId.id] == null);
+        mixerStore.mixerChannelAssignments.speedrunTalent[commentatorId.id] == null);
 });
 
 const canSeekBackwards = computed(() => {

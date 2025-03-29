@@ -26,6 +26,8 @@ export * from './donationTotal';
 // @ts-ignore
 export * from './milestones';
 // @ts-ignore
+export * from './mixerChannelAssignments';
+// @ts-ignore
 export * from './mixerChannelLevels';
 // @ts-ignore
 export * from './mixerState';
@@ -55,8 +57,6 @@ export * from './scheduleImportStatus';
 export * from './speedrunPlaylistState';
 // @ts-ignore
 export * from './talent';
-// @ts-ignore
-export * from './talentMixerChannelAssignments';
 // @ts-ignore
 export * from './timer';
 // @ts-ignore
