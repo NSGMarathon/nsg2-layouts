@@ -131,7 +131,7 @@ one another.
 Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/game-layout.html?is-layout-leader`
 
 To use the secondary and tertiary game layout feeds, add the `feed` query parameter.  
-Example: `http://localhost:9090/bundles/hekathon-layouts/graphics/game-layout.html?is-layout-leader&feed=1` shows the secondary game layout feed
+Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/game-layout.html?is-layout-leader&feed=1` shows the secondary game layout feed
 (Shown as "Feed 2" in the stream tech dashboard.)
 
 ### Scene name rules
