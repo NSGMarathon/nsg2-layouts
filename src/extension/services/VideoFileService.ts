@@ -7,27 +7,30 @@ import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 export class VideoFileService extends HasNodecgLogger {
     private readonly videoFiles: NodeCG.ServerReplicantWithSchemaDefault<VideoFiles>;
     private readonly preRecordedSpeedrunDirectory: string | undefined;
+    private readonly interstitialVideoDirectory: string | undefined;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         super(nodecg);
         this.videoFiles = nodecg.Replicant('videoFiles') as unknown as NodeCG.ServerReplicantWithSchemaDefault<VideoFiles>;
         this.preRecordedSpeedrunDirectory = nodecg.bundleConfig?.videos?.preRecordedSpeedrunDirectory;
+        this.interstitialVideoDirectory = nodecg.bundleConfig?.videos?.interstitialVideoDirectory;
 
-        this.loadSpeedruns();
+        this.loadVideoFilesOfType('speedruns');
+        this.loadVideoFilesOfType('interstitials');
     }
 
-    async loadSpeedruns() {
+    async loadVideoFilesOfType(type: keyof VideoFiles) {
         try {
-            this.videoFiles.value.speedruns = await this.loadVideoFiles(this.preRecordedSpeedrunDirectory);
+            this.videoFiles.value[type] = await this.loadVideoFiles(type === 'speedruns' ? this.preRecordedSpeedrunDirectory : this.interstitialVideoDirectory);
         } catch (e) {
-            this.logError('Failed to load pre-recorded speedruns', e);
-            this.videoFiles.value.speedruns = [];
+            this.logError('Failed to load interstitial videos', e);
+            this.videoFiles.value[type] = [];
         }
     }
 
     private async loadVideoFiles(dir: string | undefined): Promise<VideoFile[]> {
         if (dir == null) {
-            throw new Error('Video file path is not configured.');
+            return [];
         }
 
         const dirContents = await readdir(dir);

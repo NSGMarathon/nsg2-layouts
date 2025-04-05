@@ -6,17 +6,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface VideoFiles {
-	speedruns: VideoFile[];
-	interstitials: VideoFile1[];
-}
-export interface VideoFile {
-	name: string;
-	path: string;
-	type: 'LOCAL_FILE';
-}
-export interface VideoFile1 {
-	name: string;
-	path: string;
-	type: 'LOCAL_FILE';
+export interface InterstitialVideoState {
+	isRunning: boolean;
+	returnToScene: 'INTERMISSION' | 'PREVIEW';
 }

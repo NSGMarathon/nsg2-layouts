@@ -12,7 +12,8 @@
             "type": "array",
             "items": { "type": ["string", "null"] }
         },
-        "intermissionScene": { "type": "string" }
+        "intermissionScene": { "type": "string" },
+        "interstitialVideoScene": { "type": "string" }
     },
     "required": ["gameLayoutVideoFeedScenes", "gameplayScenes"],
     "default": {

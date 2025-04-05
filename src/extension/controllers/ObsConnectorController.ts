@@ -41,7 +41,13 @@ export class ObsConnectorController extends BaseController {
         this.listen('obs:setConfig', async (data) => {
             if (
                 obsState.value.scenes == null
-                || [data.videoInputsScene, ...data.gameLayoutVideoFeedScenes, ...data.gameplayScenes].some(newScene => newScene != null && !obsState.value.scenes!.some(scene => scene === newScene))
+                || [
+                    data.videoInputsScene,
+                    data.intermissionScene,
+                    data.interstitialVideoScene,
+                    ...data.gameLayoutVideoFeedScenes,
+                    ...data.gameplayScenes
+                ].some(newScene => newScene != null && !obsState.value.scenes!.some(scene => scene === newScene))
             ) {
                 throw new Error('Could not find one or more of the provided scenes');
             }

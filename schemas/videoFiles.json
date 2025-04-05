@@ -9,10 +9,18 @@
                 "$ref": "defs/VideoFile.json",
                 "additionalProperties": false
             }
+        },
+        "interstitials": {
+            "type": "array",
+            "items": {
+                "$ref": "defs/VideoFile.json",
+                "additionalProperties": false
+            }
         }
     },
-    "required": ["speedruns"],
+    "required": ["speedruns", "interstitials"],
     "default": {
-        "speedruns": []
+        "speedruns": [],
+        "interstitials": []
     }
 }

@@ -12,6 +12,7 @@ import { initObsStore } from 'client-shared/stores/ObsStore';
 import { initAllTrackerDataStore } from 'client-shared/stores/AllTrackerDataStore';
 import { initCurrentTrackerDataStore } from 'client-shared/stores/CurrentTrackerDataStore';
 import { initTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
+import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 
 (async () => {
     const app = createApp(HostPanel);
@@ -26,7 +27,8 @@ import { initTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
         initObsStore(),
         initAllTrackerDataStore(),
         initCurrentTrackerDataStore(),
-        initTwitchDataStore()
+        initTwitchDataStore(),
+        initVideoFileStore()
     ]);
     app.mount('#app');
 })();

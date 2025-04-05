@@ -35,6 +35,7 @@
     <talent-item-edit-dialog ref="talentItemEditDialog" />
     <twitch-category-search-dialog ref="twitchCategorySearchDialog" />
     <video-file-select-dialog ref="videoFileSelectDialog" />
+    <interstitial-video-player-dialog ref="interstitialVideoPlayerDialog" />
 </template>
 
 <script setup lang="ts">
@@ -43,7 +44,7 @@ import ActiveRunManager from './ActiveRunManager.vue';
 import ScheduleItemEditor from '../../components/ScheduleItemEditor.vue';
 import { computed, provide, ref } from 'vue';
 import {
-    CountrySelectDialogInjectionKey,
+    CountrySelectDialogInjectionKey, InterstitialVideoPlayerDialogInjectionKey,
     ScheduleItemEditorInjectionKey,
     TalentItemEditDialogInjectionKey,
     TwitchCategorySearchDialogInjectionKey,
@@ -60,6 +61,7 @@ import SystemStatusDisplay from './SystemStatusDisplay.vue';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import CountdownManager from './CountdownManager.vue';
 import VideoFileSelectDialog from '../../components/VideoFileSelectDialog.vue';
+import InterstitialVideoPlayerDialog from '../../components/InterstitialVideoPlayerDialog.vue';
 
 const scheduleItemEditor = ref<InstanceType<typeof ScheduleItemEditor>>();
 provide(ScheduleItemEditorInjectionKey, scheduleItemEditor);
@@ -71,6 +73,8 @@ const twitchCategorySearchDialog = ref<InstanceType<typeof TwitchCategorySearchD
 provide(TwitchCategorySearchDialogInjectionKey, twitchCategorySearchDialog);
 const videoFileSelectDialog = ref<InstanceType<typeof VideoFileSelectDialog>>();
 provide(VideoFileSelectDialogInjectionKey, videoFileSelectDialog);
+const interstitialVideoPlayerDialog = ref<InstanceType<typeof InterstitialVideoPlayerDialog>>();
+provide(InterstitialVideoPlayerDialogInjectionKey, interstitialVideoPlayerDialog);
 
 const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();

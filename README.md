@@ -90,6 +90,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
   },
   "videos": {
     "preRecordedSpeedrunDirectory": "/Users/inkfarer/Movies/speedruns",
+    "interstitialVideoDirectory": "/Users/inkfarer/Movies/interstitials",
     "speedrunPlaylistCyclesRecording": true
   },
   "errorReporting": {

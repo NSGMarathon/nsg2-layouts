@@ -30,6 +30,12 @@
             color="red"
             @click="switchScene(obsStore.obsConfig.intermissionScene)"
         />
+        <ipl-button
+            class="m-t-8"
+            label="Play video"
+            :disabled="obsStore.obsState.transitionInProgress || obsStore.obsState.status !== 'CONNECTED' || videoFileStore.interstitialVideoState.isRunning"
+            @click="interstitialVideoPlayerDialog?.open()"
+        />
     </ipl-space>
 </template>
 
@@ -40,10 +46,16 @@ import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { inject } from 'vue';
+import { InterstitialVideoPlayerDialogInjectionKey } from '../helpers/Injections';
+import { useVideoFileStore } from 'client-shared/stores/VideoFileStore';
 
 library.add(faGamepad);
 
+const interstitialVideoPlayerDialog = inject(InterstitialVideoPlayerDialogInjectionKey);
+
 const obsStore = useObsStore();
+const videoFileStore = useVideoFileStore();
 
 function shouldAllowSceneSwitch(sceneName?: string | null) {
     return sceneName != null

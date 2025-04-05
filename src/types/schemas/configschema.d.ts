@@ -79,6 +79,7 @@ export interface Configschema {
 	};
 	videos?: {
 		preRecordedSpeedrunDirectory?: string;
+		interstitialVideoDirectory?: string;
 		speedrunPlaylistCyclesRecording?: boolean;
 		[k: string]: unknown;
 	};

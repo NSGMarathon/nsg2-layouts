@@ -1,13 +1,30 @@
 <template>
     <ipl-space>
         <div class="layout horizontal">
+            <ipl-select
+                v-model="videoInputsScene"
+                label="Video inputs scene"
+                :options="sceneOptions"
+                class="max-width m-r-8"
+            />
+            <ipl-select
+                v-model="intermissionScene"
+                label="Intermission scene"
+                :options="sceneOptions"
+                class="max-width"
+            />
+        </div>
+        <div class="layout horizontal center-horizontal m-b-16">
+            <ipl-select
+                v-model="interstitialVideoScene"
+                label="Interstitial video scene"
+                :options="sceneOptions"
+                class="m-t-4"
+                style="width: 50%"
+            />
+        </div>
+        <div class="layout horizontal">
             <div class="m-r-8 max-width">
-                <ipl-select
-                    v-model="videoInputsScene"
-                    label="Video inputs scene"
-                    :options="sceneOptions"
-                    class="m-b-16"
-                />
                 <ipl-select
                     v-model="gameLayoutVideoFeedScenes[0]"
                     label="Main feed inputs scene"
@@ -27,12 +44,6 @@
                 />
             </div>
             <div class="max-width">
-                <ipl-select
-                    v-model="intermissionScene"
-                    label="Intermission scene"
-                    :options="sceneOptions"
-                    class="m-b-16"
-                />
                 <ipl-select
                     v-model="gameplayScenes[0]"
                     label="Main feed gameplay scene"
@@ -80,15 +91,18 @@ const videoInputsScene = ref('');
 const gameLayoutVideoFeedScenes = ref<(string | null)[]>([]);
 const gameplayScenes = ref<(string | null)[]>([]);
 const intermissionScene = ref('');
+const interstitialVideoScene = ref('');
 updateRefOnValueChange(() => obsStore.obsConfig.gameplayScenes, gameplayScenes);
 updateRefOnValueChange(() => obsStore.obsConfig.intermissionScene, intermissionScene);
 updateRefOnValueChange(() => obsStore.obsConfig.videoInputsScene, videoInputsScene);
 updateRefOnValueChange(() => obsStore.obsConfig.gameLayoutVideoFeedScenes, gameLayoutVideoFeedScenes);
+updateRefOnValueChange(() => obsStore.obsConfig.interstitialVideoScene, interstitialVideoScene);
 
 const isChanged = computed(() =>
     videoInputsScene.value !== obsStore.obsConfig.videoInputsScene
     || gameLayoutVideoFeedScenes.value.some((scene, i) => obsStore.obsConfig.gameLayoutVideoFeedScenes[i] !== scene)
     || intermissionScene.value !== obsStore.obsConfig.intermissionScene
+    || interstitialVideoScene.value !== obsStore.obsConfig.interstitialVideoScene
     || gameplayScenes.value.some((scene, i) => obsStore.obsConfig.gameplayScenes[i] !== scene));
 
 async function update() {
@@ -96,7 +110,8 @@ async function update() {
         videoInputsScene: videoInputsScene.value,
         gameLayoutVideoFeedScenes: gameLayoutVideoFeedScenes.value,
         intermissionScene: intermissionScene.value,
-        gameplayScenes: gameplayScenes.value
+        gameplayScenes: gameplayScenes.value,
+        interstitialVideoScene: interstitialVideoScene.value
     });
 }
 </script>

@@ -1,7 +1,8 @@
-import { ObsConfig, ObsConnectionInfo, Talent, VideoInputAssignment } from '../schemas';
+import { ObsConfig, ObsConnectionInfo, Talent, VideoFile, VideoInputAssignment } from '../schemas';
 import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
+import { InterstitialVideoState } from '../schemas/interstitialVideoState';
 
 export interface MessageInputMap {
     'log:warning': string
@@ -48,6 +49,8 @@ export interface MessageInputMap {
     'igdb:findGame': { name: string }
 
     'videos:loadSpeedruns': never
+    'videos:loadInterstitials': never
+    'videos:playInterstitial': { file: VideoFile, returnToScene: InterstitialVideoState['returnToScene'] }
 
     'speedrunPlaylist:play': never
     'speedrunPlaylist:stop': never

@@ -19,9 +19,8 @@
         <rundown-display readonly />
     </div>
     <country-select-dialog ref="countrySelectDialog" />
-    <talent-item-edit-dialog
-        ref="talentItemEditDialog"
-    />
+    <talent-item-edit-dialog ref="talentItemEditDialog" />
+    <interstitial-video-player-dialog ref="interstitialVideoPlayerDialog" />
 </template>
 
 <script setup lang="ts">
@@ -29,7 +28,11 @@ import RundownDisplay from '../../components/RundownDisplay.vue';
 import CurrentHostManager from './CurrentHostManager.vue';
 import CountrySelectDialog from '../../components/CountrySelectDialog.vue';
 import { provide, ref } from 'vue';
-import { CountrySelectDialogInjectionKey, TalentItemEditDialogInjectionKey } from '../../helpers/Injections';
+import {
+    CountrySelectDialogInjectionKey,
+    InterstitialVideoPlayerDialogInjectionKey,
+    TalentItemEditDialogInjectionKey
+} from '../../helpers/Injections';
 import TalentItemEditDialog from '../../components/TalentItemEditDialog.vue';
 import SceneSwitcher from '../../components/SceneSwitcher.vue';
 import BidList from './BidList.vue';
@@ -40,6 +43,7 @@ import PrizeList from './PrizeList.vue';
 import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
 import HostActiveRunDisplay from './HostActiveRunDisplay.vue';
 import TwitchCommercialPlayer from '../../components/TwitchCommercialPlayer.vue';
+import InterstitialVideoPlayerDialog from '../../components/InterstitialVideoPlayerDialog.vue';
 
 const donationStore = useDonationStore();
 
@@ -47,6 +51,8 @@ const countrySelectDialog = ref<InstanceType<typeof CountrySelectDialog>>();
 provide(CountrySelectDialogInjectionKey, countrySelectDialog);
 const talentItemEditDialog = ref<InstanceType<typeof TalentItemEditDialog>>();
 provide(TalentItemEditDialogInjectionKey, talentItemEditDialog);
+const interstitialVideoPlayerDialog = ref<InstanceType<typeof InterstitialVideoPlayerDialog>>();
+provide(InterstitialVideoPlayerDialogInjectionKey, interstitialVideoPlayerDialog);
 </script>
 
 <style lang="scss">

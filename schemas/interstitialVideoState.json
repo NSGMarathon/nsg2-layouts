@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["isRunning", "returnToScene"],
+    "properties": {
+        "isRunning": { "type": "boolean" },
+        "returnToScene": {
+            "type": "string",
+            "enum": ["INTERMISSION", "PREVIEW"]
+        }
+    },
+    "default": {
+        "isRunning": false,
+        "returnToScene": "INTERMISSION"
+    }
+}

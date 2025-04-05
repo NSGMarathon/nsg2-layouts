@@ -131,6 +131,7 @@
             "type": "object",
             "properties": {
                 "preRecordedSpeedrunDirectory": { "type": "string" },
+                "interstitialVideoDirectory": { "type": "string" },
                 "speedrunPlaylistCyclesRecording": { "type": "boolean" }
             }
         },

@@ -32,6 +32,8 @@ import { VideoFileController } from './controllers/VideoFileController';
 import { SpeedrunPlaylistService } from './services/SpeedrunPlaylistService';
 import { SpeedrunPlaylistController } from './controllers/SpeedrunPlaylistController';
 import { DiscordWebhookClient } from './clients/DiscordWebhookClient';
+import { InterstitialVideoPlayerService } from './services/InterstitialVideoPlayerService';
+import { InterstitialVideoPlayerController } from './controllers/InterstitialVideoPlayerController';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -58,6 +60,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new CountdownService(nodecg);
     const videoFileService = new VideoFileService(nodecg);
     const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
+    const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);
@@ -71,4 +74,5 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new IgdbController(nodecg, igdbService);
     new VideoFileController(nodecg, videoFileService);
     new SpeedrunPlaylistController(nodecg, speedrunPlaylistService);
+    new InterstitialVideoPlayerController(nodecg, interstitialVideoPlayerService);
 };

@@ -7,6 +7,8 @@ export class VideoFileController extends BaseController {
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, videoFileService: VideoFileService) {
         super(nodecg);
 
-        this.listen('videos:loadSpeedruns', async () => videoFileService.loadSpeedruns());
+        this.listen('videos:loadSpeedruns', async () => videoFileService.loadVideoFilesOfType('speedruns'));
+
+        this.listen('videos:loadInterstitials', async () => videoFileService.loadVideoFilesOfType('interstitials'));
     }
 }

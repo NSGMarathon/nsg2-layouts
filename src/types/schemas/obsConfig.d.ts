@@ -11,4 +11,5 @@ export interface ObsConfig {
 	gameLayoutVideoFeedScenes: (string | null)[];
 	gameplayScenes: (string | null)[];
 	intermissionScene?: string;
+	interstitialVideoScene?: string;
 }
