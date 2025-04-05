@@ -72,6 +72,8 @@ export class ObsConnectorService extends HasNodecgLogger {
                 });
             })
             .on('CurrentProgramSceneChanged', e => this.handleProgramSceneChange(e))
+            .on('CurrentPreviewSceneChanged', e => this.handlePreviewSceneChange(e))
+            .on('StudioModeStateChanged', e => this.handleStudioModeStatechange(e))
             .on('CurrentSceneCollectionChanged', this.handleSceneCollectionChange.bind(this))
             .on('SceneTransitionStarted', this.handleSceneTransitionStart.bind(this));
 
@@ -149,6 +151,7 @@ export class ObsConnectorService extends HasNodecgLogger {
             ...this.obsState.value,
             scenes: scenes.scenes,
             currentScene: scenes.currentScene,
+            previewScene: scenes.previewScene,
             currentSceneCollection,
             videoInputs,
             status: 'CONNECTED',
@@ -471,12 +474,21 @@ export class ObsConnectorService extends HasNodecgLogger {
         }
     }
 
-    private async getScenes(): Promise<{ currentScene: string, scenes: string[] }> {
+    private handlePreviewSceneChange(event: EventTypes['CurrentPreviewSceneChanged']): void {
+        this.obsState.value.previewScene = event.sceneName;
+    }
+
+    private handleStudioModeStatechange(event: EventTypes['StudioModeStateChanged']): void {
+        this.obsState.value.previewScene = event.studioModeEnabled ? this.obsState.value.currentScene : null;
+    }
+
+    private async getScenes(): Promise<{ currentScene: string, previewScene: string | null, scenes: string[] }> {
         const sceneList = await this.socket.call('GetSceneList');
         const scenes = sceneList.scenes.map(scene => String(scene.sceneName));
 
         return {
             currentScene: sceneList.currentProgramSceneName,
+            previewScene: sceneList.currentPreviewSceneName,
             scenes
         };
     }

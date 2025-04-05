@@ -16,6 +16,7 @@ export interface ObsState {
 		sourceUuid?: string | null;
 	}[];
 	currentScene?: string;
+	previewScene?: string | null;
 	currentSceneCollection?: string;
 	transitionInProgress: boolean;
 	recording?: boolean;

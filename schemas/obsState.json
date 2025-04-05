@@ -32,6 +32,9 @@
         "currentScene": {
             "type": "string"
         },
+        "previewScene": {
+            "type": ["string", "null"]
+        },
         "currentSceneCollection": {
             "type": "string"
         },
