@@ -1,4 +1,3 @@
-import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import type NodeCG from '@nodecg/types';
 import { Configschema, ObsState, SpeedrunPlaylistState } from 'types/schemas';
 import { ObsConnectorService } from './ObsConnectorService';
@@ -7,11 +6,13 @@ import { JsonObject } from 'type-fest';
 import { SpeedrunService } from './SpeedrunService';
 import { TimerService } from './TimerService';
 import { Duration } from 'luxon';
+import { DiscordWebhookClient } from '../clients/DiscordWebhookClient';
+import { HasDiscordWebhookLogger } from '../helpers/HasDiscordWebhookLogger';
 
 const DELAY_BETWEEN_PLAYLIST_ITEMS_MILLIS = 20000;
 const TIME_REMAINING_BEFORE_PLAYLIST_ITEM_STOP_MILLIS = 1500;
 
-export class SpeedrunPlaylistService extends HasNodecgLogger {
+export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
     private readonly speedrunPlaylistState: NodeCG.ServerReplicantWithSchemaDefault<SpeedrunPlaylistState>;
     private readonly obsConnectorService: ObsConnectorService;
     private readonly speedrunService: SpeedrunService;
@@ -22,8 +23,14 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
     private activeSpeedrunTimerStartTimeMillis: number | undefined;
     private activeSpeedrunTimerStopTimeMillis: number | undefined;
 
-    constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, speedrunService: SpeedrunService, timerService: TimerService) {
-        super(nodecg);
+    constructor(
+        nodecg: NodeCG.ServerAPI<Configschema>,
+        obsConnectorService: ObsConnectorService,
+        speedrunService: SpeedrunService,
+        timerService: TimerService,
+        discordWebhookClient: DiscordWebhookClient | null
+    ) {
+        super(nodecg, discordWebhookClient);
 
         this.speedrunPlaylistState = nodecg.Replicant('speedrunPlaylistState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<SpeedrunPlaylistState>;
         this.obsConnectorService = obsConnectorService;
@@ -34,6 +41,8 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
         this.playlistPlayTimeout = undefined;
         this.activeSpeedrunTimerStartTimeMillis = undefined;
         this.activeSpeedrunTimerStopTimeMillis = undefined;
+
+        this.setObsConnectionReporter();
 
         this.speedrunService.activeSpeedrun.on('change', newValue => {
             if (newValue?.videoFile == null) {
@@ -192,6 +201,11 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
 
     private setMediaSourceUpdateInterval() {
         this.playlistMediaSourceUpdateInterval = setInterval(() => {
+            if (this.obsConnectorService.obsState.value.status !== 'CONNECTED') {
+                this.logger.warn('OBS is not connected; skipping playlist media source update');
+                return;
+            }
+
             this.obsConnectorService.getMediaInputStatus(this.playlistMediaSourceName)
                 .then(result => {
                     if (result.mediaState !== 'OBS_MEDIA_STATE_PLAYING') return;
@@ -223,9 +237,6 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
                         clearInterval(this.playlistMediaSourceUpdateInterval);
                         this.switchToNextSpeedrun()
                             .catch(e => {
-                                // If we encounter an error at this point, we might end up in a pretty bad spot,
-                                // as we expect to be able to leave this running overnight.
-                                // todo: maybe come up with some more involved error reporting here? discord webhooks are very low-effort
                                 this.logError('Failed to seek to next speedrun in playlist', e);
                             });
                     }
@@ -320,5 +331,26 @@ export class SpeedrunPlaylistService extends HasNodecgLogger {
             clear_on_media_end: true,
             restart_on_activate: true
         };
+    }
+
+    private setObsConnectionReporter() {
+        let connectionReportTimeout: NodeJS.Timeout | undefined = undefined;
+
+        this.obsConnectorService.obsState.on('change', (newValue, oldValue) => {
+            if (!oldValue || !this.speedrunPlaylistState.value.isRunning || newValue.status === 'CONNECTED') {
+                clearTimeout(connectionReportTimeout);
+                connectionReportTimeout = undefined;
+                return;
+            }
+
+            // Wait to see if we reconnect automatically before causing an alert.
+            // The OBS connector attempts to reconnect after 10 seconds.
+            if (newValue.status === 'NOT_CONNECTED' && oldValue.status === 'CONNECTED' && connectionReportTimeout == null) {
+                connectionReportTimeout = setTimeout(() => {
+                    this.logError('OBS has disconnected from layouts!', null);
+                    connectionReportTimeout = undefined;
+                }, 15000);
+            }
+        });
     }
 }
