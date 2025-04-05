@@ -90,6 +90,12 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
   },
   "videos": {
     "preRecordedSpeedrunDirectory": "/Users/inkfarer/Movies/speedruns"
+  },
+  "errorReporting": {
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/{...}",
+      "mentions": ["87494390724964352", "&152019430073827328"]
+    }
   }
 }
 ```
@@ -120,6 +126,16 @@ graphic, intended for an audio visualizer. This hasn't been used in any live NSG
 
 Set `intermission.addCameraSpace` to `false` in the configuration file to remove the cutout intended for a camera feed
 from the intermission graphic, useful for online events.
+
+#### Error Reporting
+
+nsg2-layouts may use a Discord webhook to report encountered errors to broadcast staff. 
+**Currently, this is only in use to report errors encountered during speedrun playlist playback.** The stream is 
+expected to run automatically without human intervention as long as the playlist is running, so it is important that any 
+anomalies are spotted and reported, even when nobody is actively monitoring the status of the show.
+
+Configure the `errorReporting.mentions` property to define Discord user IDs to receive alerts. 
+Roles may be alerted by adding the `&` character before the role ID.
 
 ## Usage
 

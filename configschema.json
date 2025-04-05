@@ -132,6 +132,23 @@
             "properties": {
                 "preRecordedSpeedrunDirectory": { "type": "string" }
             }
+        },
+        "errorReporting": {
+            "type": "object",
+            "properties": {
+                "discord": {
+                    "type": "object",
+                    "properties": {
+                        "webhookUrl": { "type": "string" },
+                        "mentions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -31,9 +31,11 @@ import { VideoFileService } from './services/VideoFileService';
 import { VideoFileController } from './controllers/VideoFileController';
 import { SpeedrunPlaylistService } from './services/SpeedrunPlaylistService';
 import { SpeedrunPlaylistController } from './controllers/SpeedrunPlaylistController';
+import { DiscordWebhookClient } from './clients/DiscordWebhookClient';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
+    const discordWebhookClient = DiscordWebhookClient.hasRequiredConfig(nodecg) ? new DiscordWebhookClient(nodecg) : null;
 
     const hasTwitchConfig = TwitchOauthClient.hasRequiredConfig(nodecg);
     const twitchOauthClient = hasTwitchConfig ? new TwitchOauthClient(nodecg) : null;
@@ -55,7 +57,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusService = new OengusService(nodecg, oengusClient);
     new CountdownService(nodecg);
     const videoFileService = new VideoFileService(nodecg);
-    const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService);
+    const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);

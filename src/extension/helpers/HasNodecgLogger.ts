@@ -19,7 +19,11 @@ export abstract class HasNodecgLogger {
         if (this.usingDebugLogging) {
             this.logger.error(message + ':', error);
         } else {
-            this.logger.error(message + ':', typeof error === 'object' && error != null && 'message' in error ? error.message : String(error));
+            this.logger.error(message + ':', this.formatError(error));
         }
+    }
+
+    protected formatError(error: unknown) {
+        return typeof error === 'object' && error != null && 'message' in error ? error.message : String(error);
     }
 }
