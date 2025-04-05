@@ -37,6 +37,9 @@
         },
         "transitionInProgress": {
             "type": "boolean"
+        },
+        "recording": {
+            "type": "boolean"
         }
     },
     "additionalProperties": false,

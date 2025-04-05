@@ -130,7 +130,8 @@
         "videos": {
             "type": "object",
             "properties": {
-                "preRecordedSpeedrunDirectory": { "type": "string" }
+                "preRecordedSpeedrunDirectory": { "type": "string" },
+                "speedrunPlaylistCyclesRecording": { "type": "boolean" }
             }
         },
         "errorReporting": {

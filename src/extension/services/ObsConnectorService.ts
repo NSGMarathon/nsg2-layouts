@@ -113,7 +113,8 @@ export class ObsConnectorService extends HasNodecgLogger {
             .off('SceneNameChanged')
             .off('InputCreated')
             .off('InputRemoved')
-            .off('InputNameChanged');
+            .off('InputNameChanged')
+            .off('RecordStateChanged');
     }
 
     private async handleIdentification(): Promise<void> {
@@ -127,7 +128,8 @@ export class ObsConnectorService extends HasNodecgLogger {
             .on('SceneNameChanged', this.handleSceneNameChange.bind(this))
             .on('SceneItemCreated', this.handleSceneItemCreation.bind(this))
             .on('SceneItemRemoved', this.handleSceneItemRemoval.bind(this))
-            .on('InputNameChanged', this.handleInputNameChange.bind(this));
+            .on('InputNameChanged', this.handleInputNameChange.bind(this))
+            .on('RecordStateChanged', this.handleRecordStateChange.bind(this));
     }
 
     private handleSceneCollectionChange(event: EventTypes['CurrentSceneCollectionChanged']): void {
@@ -139,6 +141,7 @@ export class ObsConnectorService extends HasNodecgLogger {
     private async loadState(currentSceneCollection: string): Promise<void> {
         const scenes = await this.getScenes();
         const videoInputs = await this.getVideoInputs();
+        const recordStatus = await this.socket.call('GetRecordStatus');
 
         this.callProgramSceneChangeListeners(scenes.currentScene);
 
@@ -148,7 +151,8 @@ export class ObsConnectorService extends HasNodecgLogger {
             currentScene: scenes.currentScene,
             currentSceneCollection,
             videoInputs,
-            status: 'CONNECTED'
+            status: 'CONNECTED',
+            recording: recordStatus.outputActive
         };
     }
 
@@ -555,6 +559,18 @@ export class ObsConnectorService extends HasNodecgLogger {
         return this.obsState.value.status !== 'NOT_CONNECTED'
             && this.obsState.value.currentScene != null
             && this.isGameplayScene(this.obsState.value.currentScene);
+    }
+
+    private handleRecordStateChange(event: EventTypes['RecordStateChanged']) {
+        this.obsState.value.recording = event.outputActive;
+    }
+
+    async startRecording() {
+        return this.socket.call('StartRecord');
+    }
+
+    async stopRecording() {
+        return this.socket.call('StopRecord');
     }
 
     static sceneNameTagPresent(tag: string, sceneName: string): boolean {

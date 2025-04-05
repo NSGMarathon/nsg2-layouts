@@ -20,8 +20,10 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
     private readonly playlistMediaSourceName: string;
     private playlistMediaSourceUpdateInterval: NodeJS.Timeout | undefined;
     private playlistPlayTimeout: NodeJS.Timeout | undefined;
+    private playlistRecordingTimeout: NodeJS.Timeout | undefined;
     private activeSpeedrunTimerStartTimeMillis: number | undefined;
     private activeSpeedrunTimerStopTimeMillis: number | undefined;
+    private speedrunPlaylistCyclesRecording: boolean;
 
     constructor(
         nodecg: NodeCG.ServerAPI<Configschema>,
@@ -39,8 +41,10 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
         this.playlistMediaSourceName = `${nodecg.bundleName} - Speedrun Playlist`;
         this.playlistMediaSourceUpdateInterval = undefined;
         this.playlistPlayTimeout = undefined;
+        this.playlistRecordingTimeout = undefined;
         this.activeSpeedrunTimerStartTimeMillis = undefined;
         this.activeSpeedrunTimerStopTimeMillis = undefined;
+        this.speedrunPlaylistCyclesRecording = nodecg.bundleConfig.videos?.speedrunPlaylistCyclesRecording ?? false;
 
         this.setObsConnectionReporter();
 
@@ -141,7 +145,10 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
         }
     }
 
-    async play(delay = 500) {
+    async play(delay = 2000) {
+        clearTimeout(this.playlistPlayTimeout);
+        clearTimeout(this.playlistRecordingTimeout);
+
         if (this.speedrunService.activeSpeedrun.value == null) {
             throw new Error('The active speedrun is unknown.');
         }
@@ -162,9 +169,27 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
         this.speedrunPlaylistState.value.isRunning = true;
         await this.configurePlaylistMediaSource(mainGameplayScene, videoFile.path);
         this.logger.debug('Configured playlist media source');
+
+        if (this.speedrunPlaylistCyclesRecording) {
+            if (this.obsConnectorService.obsState.value.recording) {
+                try {
+                    await this.obsConnectorService.stopRecording();
+                } catch (e) {
+                    this.logError('Failed to stop OBS recording', e);
+                }
+            }
+
+            this.playlistRecordingTimeout = setTimeout(() => {
+                if (!this.obsConnectorService.obsState.value.recording) {
+                    this.obsConnectorService.startRecording().catch(e => this.logError('Failed to start OBS recording', e));
+                }
+            }, delay - 1000);
+        }
+
         return new Promise<void>((resolve, reject) => {
             this.playlistPlayTimeout = setTimeout(() => {
                 this.logger.debug('Speedrun playlist launching!');
+
                 this.setMediaSourceUpdateInterval();
                 this.obsConnectorService.setCurrentScene(mainGameplayScene).then(resolve).catch(reject);
             }, delay);
@@ -183,6 +208,7 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
 
         clearInterval(this.playlistMediaSourceUpdateInterval);
         clearTimeout(this.playlistPlayTimeout);
+        clearTimeout(this.playlistRecordingTimeout);
 
         if (this.timerService.isActive()) {
             this.timerService.stopAll();
@@ -264,6 +290,13 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
         } else {
             this.logger.debug('This was the last run in this playlist. Goodbye for now!');
             this.speedrunPlaylistState.value.isRunning = false;
+            if (this.speedrunPlaylistCyclesRecording && this.obsConnectorService.obsState.value.recording) {
+                try {
+                    await this.obsConnectorService.stopRecording();
+                } catch (e) {
+                    this.logError('Failed to stop OBS recording', e);
+                }
+            }
             try {
                 await this.cleanUpPlaylistMediaSource();
             } catch (e) {
