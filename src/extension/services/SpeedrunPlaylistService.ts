@@ -9,7 +9,7 @@ import { Duration } from 'luxon';
 import { DiscordWebhookClient } from '../clients/DiscordWebhookClient';
 import { HasDiscordWebhookLogger } from '../helpers/HasDiscordWebhookLogger';
 
-const DELAY_BETWEEN_PLAYLIST_ITEMS_MILLIS = 20000;
+const DEFAULT_DELAY_BETWEEN_PLAYLIST_ITEMS_MILLIS = 20000;
 const TIME_REMAINING_BEFORE_PLAYLIST_ITEM_STOP_MILLIS = 1500;
 
 export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
@@ -284,9 +284,17 @@ export class SpeedrunPlaylistService extends HasDiscordWebhookLogger {
         }
         await this.obsConnectorService.setCurrentScene(intermissionScene);
         await this.obsConnectorService.waitForSceneSwitch();
-        this.speedrunService.seekToNextRun();
         if (this.speedrunService.activeSpeedrun.value?.videoFile != null) {
-            await this.play(DELAY_BETWEEN_PLAYLIST_ITEMS_MILLIS);
+            const activeSpeedrunSetupTime = this.speedrunService.activeSpeedrun.value?.setupTime;
+            const parsedActiveSpeedrunSetupTime = activeSpeedrunSetupTime == null
+                ? 0
+                : Duration.fromISO(activeSpeedrunSetupTime).as('milliseconds');
+            this.speedrunService.seekToNextRun();
+            const nextRunDelayMillis = parsedActiveSpeedrunSetupTime == null || parsedActiveSpeedrunSetupTime < 1000
+                ? DEFAULT_DELAY_BETWEEN_PLAYLIST_ITEMS_MILLIS
+                : parsedActiveSpeedrunSetupTime;
+            this.logger.debug(`Next run begins in ${nextRunDelayMillis}ms`);
+            await this.play(nextRunDelayMillis);
         } else {
             this.logger.debug('This was the last run in this playlist. Goodbye for now!');
             this.speedrunPlaylistState.value.isRunning = false;
