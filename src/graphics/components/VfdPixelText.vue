@@ -9,35 +9,42 @@
             justifyContent
         }"
     >
-        <span class="background">{{ '▓'.repeat(characterCount) }}</span>
+        <span
+            class="background"
+            :style="{ width: textWidth }"
+        >
+            {{ '▓'.repeat(characterCount) }}
+        </span>
         <fitted-content
             v-if="useFittedContent"
             :align="props.textAlign"
             :style="{
-                width: `${characterWidth * characterCount}px`,
-                whiteSpace: props.progressBar != null ? 'pre' : undefined
+                maxWidth: `${characterWidth * characterCount - 1}px`,
+                whiteSpace: 'pre'
             }"
         >
             <template v-if="progressBarInfo != null">
                 {{ progressBarInfo.formattedText }}
-            </template>
-            <template v-else>
-                {{ props.textContent }}
             </template>
         </fitted-content>
         <span
             v-else
-            style="white-space: pre; width: 100%"
+            style="white-space: pre; overflow: hidden"
             :style="{
-                width: `${characterWidth * characterCount}px`
+                width: textWidth,
             }"
         >
-            <template v-if="progressBarInfo != null">
-                {{ progressBarInfo.formattedText }}
-            </template>
-            <template v-else>
-                {{ visibleText }}
-            </template>
+            <span
+                style="display: inline-block"
+                ref="scrollingTextRef"
+            >
+                <template v-if="progressBarInfo != null">
+                    {{ progressBarInfo.formattedText }}
+                </template>
+                <template v-else>
+                    {{ visibleText }}
+                </template>
+            </span>
         </span>
     </div>
 </template>
@@ -81,6 +88,15 @@ onUnmounted(() => {
 const characterHeight = computed(() => Math.round(props.fontSize * 1.1425));
 const characterWidth = computed(() => props.fontSize * 0.857);
 const characterCount = computed(() => Math.floor(wrapperWidth.value / characterWidth.value));
+const textWidth = computed(() => {
+    if (characterCount.value >= (props.textContent?.length ?? 0)) {
+        return characterWidth.value * characterCount.value + 'px';
+    } else {
+        // If the text is wider than the container, the first few pixels of the first overflowing
+        // character may be visible. We cut off a little margin to hide that.
+        return characterWidth.value * characterCount.value - props.fontSize / 10 + 'px';
+    }
+});
 const justifyContent = computed(() => {
     switch (props.align) {
         case 'center':
@@ -92,28 +108,35 @@ const justifyContent = computed(() => {
     }
 });
 
-const useFittedContent = computed(() => props.textContent != null && props.textContent.length - characterCount.value < 0);
+const scrollingTextRef = ref<HTMLSpanElement>();
+const useFittedContent = computed(() => progressBarInfo.value != null);
 let textScrollUnpauseTimeout: number | undefined = undefined;
 let currentTextPosition = 0;
-let formattedText: string = '';
-const visibleText = ref('');
+const visibleText = computed(() => {
+    if (props.textContent == null) {
+        return '';
+    } else if (props.textContent.length > characterCount.value) {
+        return `${props.textContent} --- ${props.textContent} ---`;
+    } else if ((characterCount.value - props.textContent.length) % 2 === 1) {
+        return `${props.textContent} `;
+    } else {
+        return props.textContent;
+    }
+});
 const textEndPauseDuration = 10000;
 const scrollText = () => {
-    if (formattedText.length - currentTextPosition > characterCount.value) {
-        currentTextPosition++;
-        visibleText.value = formattedText.slice(currentTextPosition, characterCount.value + currentTextPosition);
+    const originalTextSize = props.textContent?.length ?? 0;
+
+    if (currentTextPosition >= originalTextSize + 5) {
+        scrollingTextRef.value!.style.transform = 'translate3D(0, 0, 0)';
+        currentTextPosition = 0;
+        textScrollEventBus.off('scroll', scrollText);
+        clearTimeout(textScrollUnpauseTimeout);
+        textScrollUnpauseTimeout = window.setTimeout(() => textScrollEventBus.on('scroll', scrollText), textEndPauseDuration);
+        emit('scrollEndReached');
     } else {
+        scrollingTextRef.value!.style.transform = `translate3D(${currentTextPosition * characterWidth.value * -1}px, 0, 0)`;
         currentTextPosition++;
-        const firstHalf = formattedText.slice(currentTextPosition, characterCount.value + currentTextPosition);
-        visibleText.value = firstHalf + formattedText.slice(0, characterCount.value - firstHalf.length);
-        if (firstHalf.length === 0) {
-            currentTextPosition = 0;
-            textScrollEventBus.off('scroll', scrollText);
-            clearTimeout(textScrollUnpauseTimeout);
-            textScrollUnpauseTimeout = window.setTimeout(() => textScrollEventBus.on('scroll', scrollText), textEndPauseDuration);
-            emit('scrollEndReached');
-            return;
-        }
     }
 };
 watch(() => [props.textContent, characterCount.value] as [string | undefined | null, number], ([newText, newCharacterCount]) => {
@@ -122,15 +145,11 @@ watch(() => [props.textContent, characterCount.value] as [string | undefined | n
     clearTimeout(textScrollUnpauseTimeout);
 
     if (newText == null || useFittedContent.value) {
-        visibleText.value = '';
         textScrollEventBus.off('scroll', scrollText);
         return;
     }
 
-    visibleText.value = newText.slice(0, newCharacterCount);
-
     if (newText.length > newCharacterCount) {
-        formattedText = newText.trim() + ' --- ';
         textScrollUnpauseTimeout = window.setTimeout(() => textScrollEventBus.on('scroll', scrollText), textEndPauseDuration);
         emit('scrollStarted');
     }
