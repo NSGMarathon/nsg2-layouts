@@ -64,6 +64,8 @@ onMounted(() => {
     const smallDotVerticalSpacing = 2;
     const dotDiameter = 10;
     const dotSpacing = 3;
+    const meterAlphaValues: number[] = [];
+    const meterAlphaSpeed = 0.2;
     let lastTime = 0;
     let currentLevel = 0;
     let targetLevel = 0;
@@ -120,12 +122,6 @@ onMounted(() => {
                 ctx.fill();
             }
 
-            if (i >= litDotCount) {
-                ctx.fillStyle = color === 'peak' ? colors.vfdRedUnlit : colors.vfdTealUnlit;
-            } else {
-                ctx.fillStyle = color === 'peak' ? colors.vfdRed : colors.vfdTeal;
-            }
-
             ctx.beginPath();
             ctx.arc(
                 i * (dotDiameter + dotSpacing) + xOffset,
@@ -133,6 +129,15 @@ onMounted(() => {
                 dotDiameter / 2,
                 0,
                 Math.PI * 2);
+            ctx.fillStyle = color === 'peak' ? colors.vfdRedUnlit : colors.vfdTealUnlit;
+            ctx.fill();
+
+            const existingAlphaValue = meterAlphaValues[i] ?? 0;
+            const litPortionAlpha = i < litDotCount
+                ? meterAlphaValues[i] = Math.min(1, existingAlphaValue + meterAlphaSpeed)
+                : meterAlphaValues[i] = Math.max(0, existingAlphaValue - meterAlphaSpeed);
+
+            ctx.fillStyle = color === 'peak' ? `rgba(239, 53, 50, ${litPortionAlpha})` : `rgba(153, 251, 249, ${litPortionAlpha})`;
             ctx.fill();
         }
 
