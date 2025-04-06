@@ -133,7 +133,8 @@ function save() {
     mixerStore.updateTalentChannelAssignments({
         speedrunTeams: channelMapToReplicant(teamChannels.value),
         speedrunTalent: channelMapToReplicant(talentChannels.value),
-        host: hostChannel.value.channelId == null ? undefined : (hostChannel.value as MixerChannelAssignment)
+        host: hostChannel.value.channelId == null ? undefined : (hostChannel.value as MixerChannelAssignment),
+        speedrunPlaylist: mixerStore.mixerChannelAssignments.speedrunPlaylist
     });
 }
 
