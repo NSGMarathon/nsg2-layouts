@@ -65,7 +65,7 @@ onMounted(() => {
     const dotDiameter = 10;
     const dotSpacing = 3;
     const meterAlphaValues: number[] = [];
-    const meterAlphaSpeed = 0.2;
+    const meterAlphaSpeed = 0.25;
     let lastTime = 0;
     let currentLevel = 0;
     let targetLevel = 0;
@@ -98,7 +98,7 @@ onMounted(() => {
         if (currentLevel > targetLevel) {
             currentLevel = Math.max(targetLevel, currentLevel - deltaTime / 250);
         } else if (currentLevel < targetLevel) {
-            currentLevel = Math.min(targetLevel, currentLevel + deltaTime / 100);
+            currentLevel = Math.min(targetLevel, currentLevel + deltaTime / 25);
         }
 
         ctx.fillStyle = colors.vfdTealUnlit;
