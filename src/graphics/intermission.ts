@@ -11,7 +11,7 @@ import { initCurrentTrackerDataStore } from 'client-shared/stores/CurrentTracker
 import { initTimerStore } from 'client-shared/stores/TimerStore';
 import { initAssetStore } from 'client-shared/stores/AssetStore';
 import { initMusicStore } from 'client-shared/stores/MusicStore';
-import { initMixerStore } from 'client-shared/stores/MixerStore';
+import { initMixerStore, useMixerStore } from 'client-shared/stores/MixerStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
 
 (async () => {
@@ -29,5 +29,6 @@ import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
         initMixerStore()
     ]);
     initTextScrollEventBus(app);
+    useMixerStore().listenForMixerLevels();
     app.mount('#app');
 })();

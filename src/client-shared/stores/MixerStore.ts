@@ -1,7 +1,6 @@
 import {
     ChannelItem,
     Configschema,
-    MixerChannelLevels,
     MixerState,
     MixerChannelAssignments, MixerChannelAssignment
 } from 'types/schemas';
@@ -12,12 +11,11 @@ import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistS
 
 const mixerState = nodecg.Replicant<MixerState>('mixerState');
 const mixerChannelAssignments = nodecg.Replicant<MixerChannelAssignments>('mixerChannelAssignments');
-const mixerChannelLevels = nodecg.Replicant<MixerChannelLevels>('mixerChannelLevels', { persistent: false });
 
 interface MixerStore {
     mixerState: MixerState
     mixerChannelAssignments: MixerChannelAssignments
-    mixerChannelLevels: MixerChannelLevels
+    mixerChannelLevels: Record<number, number>
 }
 
 export const defaultSpeakingThreshold = (nodecg.bundleConfig as Configschema).x32?.defaultSpeakingDBThreshold ?? -65;
@@ -27,7 +25,7 @@ export const useMixerStore = defineStore('mixer', {
     state: () => ({
         mixerState: null,
         mixerChannelAssignments: null,
-        mixerChannelLevels: null
+        mixerChannelLevels: {}
     } as unknown as MixerStore),
     actions: {
         updateTalentChannelAssignments(newValue: MixerChannelAssignments) {
@@ -35,6 +33,11 @@ export const useMixerStore = defineStore('mixer', {
         },
         setSpeedrunPlaylistChannel(newValue: MixerChannelAssignment | undefined) {
             mixerChannelAssignments.value!.speedrunPlaylist = newValue;
+        },
+        listenForMixerLevels() {
+            nodecg.listenFor('level:mixer', ([channelId, level]) => {
+                this.mixerChannelLevels[channelId] = level;
+            });
         }
     },
     getters: {
@@ -134,4 +137,4 @@ export const useMixerStore = defineStore('mixer', {
     }
 });
 
-export const initMixerStore = createReplicantStoreInitializer([mixerState, mixerChannelAssignments, mixerChannelLevels], useMixerStore);
+export const initMixerStore = createReplicantStoreInitializer([mixerState, mixerChannelAssignments], useMixerStore);

@@ -9,7 +9,7 @@ import { initScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { initTalentStore } from 'client-shared/stores/TalentStore';
 import { initTimerStore } from 'client-shared/stores/TimerStore';
 import { initAssetStore } from 'client-shared/stores/AssetStore';
-import { initMixerStore } from 'client-shared/stores/MixerStore';
+import { initMixerStore, useMixerStore } from 'client-shared/stores/MixerStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
 import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 
@@ -27,5 +27,6 @@ import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylist
         initSpeedrunPlaylistStore()
     ]);
     initTextScrollEventBus(app);
+    useMixerStore().listenForMixerLevels();
     app.mount('#app');
 })();

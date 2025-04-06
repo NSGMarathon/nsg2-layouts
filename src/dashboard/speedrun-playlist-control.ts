@@ -8,7 +8,7 @@ import SpeedrunPlaylistControlPanel from './pages/speedrun-playlist-control/Spee
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 import { initObsStore } from 'client-shared/stores/ObsStore';
 import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
-import { initMixerStore } from 'client-shared/stores/MixerStore';
+import { initMixerStore, useMixerStore } from 'client-shared/stores/MixerStore';
 
 (async () => {
     const app = createApp(SpeedrunPlaylistControlPanel);
@@ -22,5 +22,6 @@ import { initMixerStore } from 'client-shared/stores/MixerStore';
         initObsStore(),
         initMixerStore()
     ]);
+    useMixerStore().listenForMixerLevels();
     app.mount('#app');
 })();

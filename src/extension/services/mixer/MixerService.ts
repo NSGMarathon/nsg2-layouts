@@ -3,7 +3,6 @@ import {
     ActiveSpeedrun,
     ChannelItem,
     Configschema,
-    MixerChannelLevels,
     MixerState,
     MixerChannelAssignments
 } from 'types/schemas';
@@ -18,10 +17,10 @@ import cloneDeep from 'lodash/cloneDeep';
 import { HasNodecgLogger } from '../../helpers/HasNodecgLogger';
 
 export class MixerService extends HasNodecgLogger {
+    private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly mixerState: NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
     private readonly mixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
-    private readonly mixerChannelLevels: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelLevels>;
     private readonly localMixerChannelLevels: Map<string, number> = new Map();
     private readonly mixerAddress?: string;
     private osc: UDPPort | null;
@@ -44,10 +43,10 @@ export class MixerService extends HasNodecgLogger {
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
         super(nodecg);
+        this.nodecg = nodecg;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.mixerState = nodecg.Replicant('mixerState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
         this.mixerChannelAssignments = nodecg.Replicant('mixerChannelAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
-        this.mixerChannelLevels = nodecg.Replicant('mixerChannelLevels', { persistent: false }) as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelLevels>;
         this.unmuteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.unmute ?? 500;
         this.muteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.mute ?? 500;
         this.debouncedUpdateStateReplicant = debounce(
@@ -264,11 +263,14 @@ export class MixerService extends HasNodecgLogger {
     }
 
     private updateMixerLevelsReplicant() {
-        this.mixerChannelLevels.value = Object.fromEntries(this.assignedChannels.map(channelId => {
+        this.assignedChannels.forEach(channelId => {
             const muteState = this.oscState.get(`${this.channelIdToAddressPrefix[channelId]}/mix/on`);
-            if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) return [channelId, -90];
-            return [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90];
-        }));
+            if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) {
+                this.nodecg.sendMessage('level:mixer', [channelId, -90]);
+            } else {
+                this.nodecg.sendMessage('level:mixer', [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90]);
+            }
+        });
     }
 
     private static getChannelAddresses(suffix: string): string[] {
