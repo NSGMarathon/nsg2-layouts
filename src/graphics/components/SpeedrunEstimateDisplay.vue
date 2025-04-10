@@ -14,7 +14,7 @@
         </div>
         <seven-segment-digits
             :digit-count="2"
-            :value="parsedEstimate?.minutes"
+            :value="Math.round(parsedEstimate?.minutes ?? 0)"
             pad-digits
             class="estimate-digits"
         />

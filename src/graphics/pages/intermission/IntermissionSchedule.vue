@@ -129,7 +129,7 @@ const scheduleItemTimeDeltas = computed(() => {
          }
          const parsedEstimate = Duration.fromISO(scheduleItem.estimate).shiftTo('minutes');
          const parsedSetupTime = Duration.fromISO(scheduleItem.setupTime ?? 'PT0M').shiftTo('minutes');
-         minutes += parsedEstimate.minutes + parsedSetupTime.minutes;
+         minutes += Math.round(parsedEstimate.minutes + parsedSetupTime.minutes);
          result.push(minutes);
      });
      return result;
