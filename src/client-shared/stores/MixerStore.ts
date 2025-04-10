@@ -35,8 +35,10 @@ export const useMixerStore = defineStore('mixer', {
             mixerChannelAssignments.value!.speedrunPlaylist = newValue;
         },
         listenForMixerLevels() {
-            nodecg.listenFor('level:mixer', ([channelId, level]) => {
-                this.mixerChannelLevels[channelId] = level;
+            nodecg.listenFor('level:mixer', (newLevels: [string, number][]) => {
+                newLevels.forEach(([channelId, level]) => {
+                    this.mixerChannelLevels[channelId] = level;
+                });
             });
         }
     },

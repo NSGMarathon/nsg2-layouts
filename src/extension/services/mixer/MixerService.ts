@@ -263,14 +263,14 @@ export class MixerService extends HasNodecgLogger {
     }
 
     private updateMixerLevelsReplicant() {
-        this.assignedChannels.forEach(channelId => {
+        this.nodecg.sendMessage('level:mixer', this.assignedChannels.map(channelId => {
             const muteState = this.oscState.get(`${this.channelIdToAddressPrefix[channelId]}/mix/on`);
             if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) {
-                this.nodecg.sendMessage('level:mixer', [channelId, -90]);
+                return [channelId, -90];
             } else {
-                this.nodecg.sendMessage('level:mixer', [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90]);
+                return [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90];
             }
-        });
+        }));
     }
 
     private static getChannelAddresses(suffix: string): string[] {
