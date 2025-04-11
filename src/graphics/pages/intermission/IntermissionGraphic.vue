@@ -17,7 +17,7 @@
                 class="max-width prize-display"
             />
             <div class="bg-inset m-t-16 layout vertical center-horizontal">
-                <div class="m-b-8 layout horizontal center-vertical">
+                <div class="layout horizontal center-vertical">
                     <donation-total class="donation-total" />
                     <div class="pointer-icon">»</div>
                     <img
