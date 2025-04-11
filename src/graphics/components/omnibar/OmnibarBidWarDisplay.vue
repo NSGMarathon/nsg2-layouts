@@ -1,10 +1,10 @@
 <template>
     <div class="omnibar-bid-war-display layout horizontal">
         <div
-            class="bid-war-title m-r-16"
+            class="bid-war-title layout vertical center-vertical m-r-16"
             :style="{ maxWidth: `${maxTitleWidth}px` }"
         >
-            <fitted-content v-if="!isBlank(props.bidWar.speedrunName)">
+            <fitted-content>
                 {{ props.bidWar.speedrunName }}
             </fitted-content>
             <fitted-content>
@@ -63,7 +63,6 @@
 <script setup lang="ts">
 import { CurrentBids } from 'types/schemas';
 import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
-import { isBlank } from 'shared/StringHelper';
 import FittedContent from 'components/FittedContent.vue';
 import { computed, inject } from 'vue';
 import {
@@ -86,6 +85,7 @@ const maxTitleWidth = inject(MaxOmnibarBidWarTitleWidthInjectionKey, 275);
 
 .omnibar-bid-war-display {
     width: 100%;
+    height: 58px;
 }
 
 .bid-war-title {
