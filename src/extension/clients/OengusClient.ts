@@ -339,7 +339,7 @@ export class OengusClient extends HasNodecgLogger {
     private async getScheduleLinesV2(marathonId: string, scheduleSlug: string, scheduleId: number): Promise<OengusV2ScheduleLine[]> {
         if (this.oengusData.value.token != null) {
             try {
-                const privateScheduleResponse = await this.axios.get<OengusV2CachelessScheduleResponse>(`/v2/marathons/${marathonId}/schedules/${scheduleId}/lines`);
+                const privateScheduleResponse = await this.axios.get<OengusV2CachelessScheduleResponse>(`/v2/marathons/${marathonId}/schedules/${scheduleId}/manage/lines`);
                 this.logger.debug('Got Oengus schedule without cache');
                 return privateScheduleResponse.data.data;
             } catch (e) {
