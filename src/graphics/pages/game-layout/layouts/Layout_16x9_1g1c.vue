@@ -7,8 +7,10 @@
             />
             <div class="grow layout vertical bg-panel">
                 <player-nameplate :index="0" :max-concurrent-players="4" />
-                <other-nameplate-grid class="m-y-12 m-x-16" />
-                <media-box class="grow m-b-12 m-x-12" />
+                <other-nameplate-grid class="m-t-12 m-b-64 m-x-16" />
+                <div class="layout vertical center-vertical grow m-b-64 m-x-16">
+                    <media-box class="max-height" style="max-height: 275px" />
+                </div>
             </div>
         </div>
         <large-separator direction="vertical" />

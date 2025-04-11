@@ -7,8 +7,8 @@
             />
             <div class="grow layout vertical bg-panel">
                 <player-nameplate :index="0" fixed-height />
-                <other-nameplate-grid class="m-y-8 m-x-16" />
-                <media-box class="grow m-b-8 m-x-12" />
+                <other-nameplate-grid class="m-t-8 m-x-16" />
+                <media-box class="grow m-y-16 m-x-12" />
             </div>
         </div>
         <large-separator direction="vertical" />

@@ -14,8 +14,8 @@
                             <speedrun-timer hide-run-number class="m-t-16" />
                         </div>
                     </div>
-                    <other-nameplate-grid class="m-y-8 m-x-16" />
-                    <media-box class="grow m-b-8 m-x-12" />
+                    <other-nameplate-grid class="m-t-8 m-x-16" />
+                    <media-box class="grow m-y-32 m-x-32" />
                 </div>
             </div>
             <large-separator direction="vertical" />

@@ -57,7 +57,7 @@
             <div class="column">
                 <div class="max-height bg-panel layout vertical">
                     <other-nameplate-grid class="m-t-8 m-x-16" />
-                    <media-box class="grow m-x-8 m-y-8" />
+                    <media-box class="grow m-x-32 m-y-48" />
                 </div>
             </div>
         </div>

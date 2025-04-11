@@ -41,7 +41,7 @@
                 </div>
                 <div class="bg-panel layout vertical">
                     <other-nameplate-grid class="m-x-16 m-t-8" />
-                    <media-box class="max-height m-y-8 m-x-8" />
+                    <media-box class="max-height m-y-64 m-x-64" />
                 </div>
             </div>
             <div class="layout vertical center-horizontal">

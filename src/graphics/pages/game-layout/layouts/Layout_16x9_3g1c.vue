@@ -35,7 +35,9 @@
                 </div>
                 <div class="bg-panel layout vertical">
                     <other-nameplate-grid class="m-x-16 m-t-8" style="min-height: 150px;" />
-                    <media-box class="m-y-8 m-x-8 grow" />
+                    <div class="layout vertical center-vertical grow m-y-64 m-x-16">
+                        <media-box class="max-height" style="max-height: 275px" />
+                    </div>
                 </div>
             </div>
             <div class="layout vertical center-horizontal">

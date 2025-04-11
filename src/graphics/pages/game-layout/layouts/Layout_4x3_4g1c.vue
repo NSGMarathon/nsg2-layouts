@@ -47,7 +47,7 @@
                         <player-nameplate :index="3" class="max-width" fixed-height />
                     </div>
                     <other-nameplate-grid class="m-x-16 m-t-4" />
-                    <media-box class="max-height m-y-8 m-x-8" />
+                    <media-box class="max-height m-y-16 m-x-16" />
                 </div>
             </div>
             <div class="layout vertical">
