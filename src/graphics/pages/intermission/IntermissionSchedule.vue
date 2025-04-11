@@ -65,7 +65,7 @@
             <div class="layout horizontal center-vertical">
                 <div class="full-schedule-label">Full Schedule</div>
                 <div class="full-schedule-pointer-icon m-x-8">»</div>
-                <div class="full-schedule-link">schedule.nsgmarathon.com</div>
+                <div class="full-schedule-link">{{ scheduleUrl }}</div>
             </div>
         </div>
     </div>
@@ -83,6 +83,7 @@ import { Duration } from 'luxon';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { Configschema } from 'types/schemas';
 
+const scheduleUrl = (nodecg.bundleConfig as Configschema).event?.scheduleUrl ?? 'schedule.nsgmarathon.com';
 const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
 const maxScheduleItemCount = addCameraSpace ? 4 : 6;
 

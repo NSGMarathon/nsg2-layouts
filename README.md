@@ -34,6 +34,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "timezone": "Europe/Oslo",
     "name": "NSG Fall 2024",
     "donationUrl": "donate.nsgmarathon.com",
+    "scheduleUrl": "schedule.nsgmarathon.com",
     "currency": {
       "code": "NOK",
       "unit": " kr"
