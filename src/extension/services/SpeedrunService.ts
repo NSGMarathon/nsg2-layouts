@@ -125,9 +125,6 @@ export class SpeedrunService {
         if (scheduleItem != null && scheduleItem.type !== 'SPEEDRUN') {
             throw new Error(`Schedule item is type "${scheduleItem.type}"; Expected "SPEEDRUN"`);
         }
-        if (this.timerService.isActive() && scheduleItem?.id !== this.nextSpeedrun.value?.id) {
-            throw new Error('Cannot change next speedrun while timer is running');
-        }
         this.nextSpeedrun.value = cloneDeep(scheduleItem);
     }
 }
