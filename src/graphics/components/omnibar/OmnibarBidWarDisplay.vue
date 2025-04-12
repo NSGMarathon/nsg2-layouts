@@ -20,7 +20,7 @@
             </fitted-content>
         </div>
         <div
-            v-else-if="props.bidWar.options?.length === 2"
+            v-else-if="props.bidWar.options?.length === 2 && !props.bidWar.userOptionsAllowed"
             class="bid-war-duel-options layout horizontal m-r-8"
         >
             <div
@@ -55,6 +55,15 @@
                 class="extra-option-box"
             >
                 <div class="extra-option-count">+{{ props.bidWar.options!.length - maxOptions }}</div>
+            </div>
+            <div
+                v-else-if="(props.bidWar.options?.length ?? 0) <= maxOptions - 1 && props.bidWar.userOptionsAllowed"
+                class="no-options-message"
+                :style="{ gridColumn: `span ${Math.min(maxOptions - (props.bidWar.options?.length ?? 0), 2)}` }"
+            >
+                <fitted-content align="center">
+                    <span>{{ props.bidWar.options?.length === 0 ? 'No options submitted. Donate now to add your own!' : 'Submissions open!' }}</span>
+                </fitted-content>
             </div>
         </div>
     </div>
@@ -100,10 +109,13 @@ const maxTitleWidth = inject(MaxOmnibarBidWarTitleWidthInjectionKey, 275);
     font-weight: 700;
     overflow: hidden;
     width: 100%;
+    grid-column: span 2;
+    line-height: 43px;
 
     > * {
         border: 2px solid colors.$vfd-teal;
         padding: 6px 16px;
+        height: 100%;
     }
 }
 
