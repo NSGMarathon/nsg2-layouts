@@ -16,7 +16,7 @@ import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 
 export class ScheduleService extends HasNodecgLogger {
     private readonly scheduleImportStatus: NodeCG.ServerReplicantWithSchemaDefault<ScheduleImportStatus>;
-    private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
+    readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
     private readonly talent: NodeCG.ServerReplicantWithSchemaDefault<Talent>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly oengusClient: OengusClient;

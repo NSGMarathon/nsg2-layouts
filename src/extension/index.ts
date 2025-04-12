@@ -58,7 +58,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new MixerService(nodecg, obsConnectorService);
     const oengusService = new OengusService(nodecg, oengusClient);
     new CountdownService(nodecg);
-    const videoFileService = new VideoFileService(nodecg);
+    const videoFileService = new VideoFileService(nodecg, scheduleService);
     const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
     const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService);
 
