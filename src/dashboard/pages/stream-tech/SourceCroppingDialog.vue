@@ -144,7 +144,6 @@ import {
     IplBadge,
     IplButton,
     IplDialog,
-    IplLabel,
     IplMessage,
     IplRadio,
     IplSpace,
@@ -181,7 +180,8 @@ const aspectRatioOptions = [
     { name: '16:9', value: '169' },
     { name: '4:3', value: '43' },
     { name: '3:2', value: '32' },
-    { name: '2:1', value: '21' }
+    { name: '2:1', value: '21' },
+    { name: 'Source', value: 'source' }
 ];
 function getNumericAspectRatio() {
     switch (selectedAspectRatio.value) {
@@ -193,6 +193,8 @@ function getNumericAspectRatio() {
             return 3 / 2;
         case '21':
             return 2;
+        case 'source':
+            return sceneItemTransform == null ? null : sceneItemTransform.sourceWidth / sceneItemTransform.sourceHeight;
         default:
             return null;
     }
