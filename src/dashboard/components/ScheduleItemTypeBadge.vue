@@ -18,10 +18,10 @@
         </ipl-badge>
         <ipl-badge
             v-if="props.scheduleItem.videoFile != null"
-            color="blue"
+            :color="props.scheduleItem.layout == null ? 'red' : 'blue'"
         >
             <font-awesome-icon icon="video" size="xs" />
-            Has video
+            Has video{{ props.scheduleItem.layout == null ? ' (No layout!)' : '' }}
         </ipl-badge>
     </span>
 </template>
