@@ -91,6 +91,11 @@
                     class="layout horizontal max-width center-horizontal"
                     style="max-width: 850px; margin: 8px 0 auto;"
                 >
+                    <div class="m-r-16">
+                        <ipl-badge>◀▶▲▼</ipl-badge>Move crop
+                        <br>
+                        <ipl-badge>Shift</ipl-badge>Resize precisely (Hold)
+                    </div>
                     <ipl-button
                         icon="rotate"
                         async
@@ -135,7 +140,16 @@
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplDialog, IplMessage, IplRadio, IplSpace, IplSpinner } from '@iplsplatoon/vue-components';
+import {
+    IplBadge,
+    IplButton,
+    IplDialog,
+    IplLabel,
+    IplMessage,
+    IplRadio,
+    IplSpace,
+    IplSpinner
+} from '@iplsplatoon/vue-components';
 import { onUnmounted, ref, watch } from 'vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useObsStore } from 'client-shared/stores/ObsStore';
@@ -258,7 +272,7 @@ watch(isOpen, async (newValue) => {
         window.document.removeEventListener('mousemove', onWindowMouseMove);
         window.document.removeEventListener('keydown', onWindowKeydown);
         window.document.removeEventListener('keyup', onWindowKeyup);
-        heldArrowKeys = { left: false, right: false, up: false, down: false };
+        heldKeys = { left: false, right: false, up: false, down: false, shift: false };
         clearInterval(arrowKeyUpdateInterval);
         arrowKeyUpdateInterval = undefined;
     }
@@ -337,7 +351,7 @@ function onCropOutlineClick(e: PointerEvent) {
     }
 }
 
-let heldArrowKeys = { left: false, right: false, up: false, down: false };
+let heldKeys = { left: false, right: false, up: false, down: false, shift: false };
 let arrowKeyUpdateInterval: number | undefined = undefined;
 
 function doArrowKeyUpdate() {
@@ -347,7 +361,7 @@ function doArrowKeyUpdate() {
         return;
     }
 
-    Object.entries(heldArrowKeys).filter(([_, isHeld]) => isHeld).forEach(([key]) => {
+    Object.entries(heldKeys).filter(([_, isHeld]) => isHeld).forEach(([key]) => {
         switch (key) {
             case 'up': {
                 cropOutlineData!.top = Math.max(0, cropOutlineData!.top - 1 / sceneItemTransform!.height);
@@ -372,6 +386,10 @@ function doArrowKeyUpdate() {
 function onWindowKeydown(event: KeyboardEvent) {
     if (cropOutlineData == null || sceneItemTransform == null) return;
 
+    if (event.key === 'Shift') {
+        heldKeys.shift = true;
+    }
+
     if (
         event.key === 'ArrowRight'
         || event.key === 'ArrowLeft'
@@ -382,22 +400,22 @@ function onWindowKeydown(event: KeyboardEvent) {
 
         switch (event.key) {
             case 'ArrowUp': {
-                heldArrowKeys.up = true;
+                heldKeys.up = true;
                 cropOutlineData.top = Math.max(0, cropOutlineData.top - 1 / sceneItemTransform.sourceHeight);
                 break;
             }
             case 'ArrowDown': {
-                heldArrowKeys.down = true;
+                heldKeys.down = true;
                 cropOutlineData.top = Math.min(1 - cropOutlineData.height, cropOutlineData.top + 1 / sceneItemTransform.sourceHeight);
                 break;
             }
             case 'ArrowLeft': {
-                heldArrowKeys.left = true;
+                heldKeys.left = true;
                 cropOutlineData.left = Math.max(0, cropOutlineData.left - 1 / sceneItemTransform.sourceWidth);
                 break;
             }
             case 'ArrowRight': {
-                heldArrowKeys.right = true;
+                heldKeys.right = true;
                 cropOutlineData.left = Math.min(1 - cropOutlineData.width, cropOutlineData.left + 1 / sceneItemTransform.sourceWidth);
                 break;
             }
@@ -410,6 +428,10 @@ function onWindowKeydown(event: KeyboardEvent) {
     }
 }
 function onWindowKeyup(event: KeyboardEvent) {
+    if (event.key === 'Shift') {
+        heldKeys.shift = false;
+    }
+
     if (
         event.key === 'ArrowRight'
         || event.key === 'ArrowLeft'
@@ -420,24 +442,24 @@ function onWindowKeyup(event: KeyboardEvent) {
 
         switch (event.key) {
             case 'ArrowUp': {
-                heldArrowKeys.up = false;
+                heldKeys.up = false;
                 break;
             }
             case 'ArrowDown': {
-                heldArrowKeys.down = false;
+                heldKeys.down = false;
                 break;
             }
             case 'ArrowLeft': {
-                heldArrowKeys.left = false;
+                heldKeys.left = false;
                 break;
             }
             case 'ArrowRight': {
-                heldArrowKeys.right = false;
+                heldKeys.right = false;
                 break;
             }
         }
 
-        if (Object.values(heldArrowKeys).every(value => !value)) {
+        if (Object.values(heldKeys).every(value => !value)) {
             clearInterval(arrowKeyUpdateInterval);
             arrowKeyUpdateInterval = undefined;
         }
@@ -457,32 +479,34 @@ function onWindowMouseMove(e: PointerEvent) {
 
     // i hate this logic with a passion but it _works_ so i won't touch it any further. i've got an event to run, maybe three...
 
+    const dragSpeedDivisor = heldKeys.shift ? 10 : 1;
+
     if (dragSideX == null && dragSideY == null) {
-        newCropOutline.left = Math.min(1 - newCropOutline.width, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
-        newCropOutline.top = Math.min(1 - newCropOutline.height, Math.max(0, newCropOutline.top - (dragStartPosition.y - e.clientY) / zoom.value / cropWrapperSize.height));
+        newCropOutline.left = Math.min(1 - newCropOutline.width, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / dragSpeedDivisor  / zoom.value / cropWrapperSize.width));
+        newCropOutline.top = Math.min(1 - newCropOutline.height, Math.max(0, newCropOutline.top - (dragStartPosition.y - e.clientY) / dragSpeedDivisor  / zoom.value / cropWrapperSize.height));
     } else if (aspectRatio == null) {
         // handle dragging with no aspect ratio constraints
         if (dragSideX === 'right') {
-            newCropOutline.width = Math.min(1 - newCropOutline.left, Math.max(0, newCropOutline.width - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
+            newCropOutline.width = Math.min(1 - newCropOutline.left, Math.max(0, newCropOutline.width - (dragStartPosition.x - e.clientX) / dragSpeedDivisor / zoom.value / cropWrapperSize.width));
         } else if (dragSideX === 'left') {
-            newCropOutline.width = Math.min(newCropOutline.left + newCropOutline.width, Math.max(0, newCropOutline.width + (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
-            newCropOutline.left = Math.min(initialCropOutline.width + initialCropOutline.left, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
+            newCropOutline.width = Math.min(newCropOutline.left + newCropOutline.width, Math.max(0, newCropOutline.width + (dragStartPosition.x - e.clientX) / dragSpeedDivisor / zoom.value / cropWrapperSize.width));
+            newCropOutline.left = Math.min(initialCropOutline.width + initialCropOutline.left, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / dragSpeedDivisor  / zoom.value / cropWrapperSize.width));
         }
         if (dragSideY === 'bottom') {
-            newCropOutline.height = Math.min(1 - newCropOutline.top, Math.max(0, newCropOutline.height - (dragStartPosition.y - e.clientY) / zoom.value / cropWrapperSize.height));
+            newCropOutline.height = Math.min(1 - newCropOutline.top, Math.max(0, newCropOutline.height - (dragStartPosition.y - e.clientY) / dragSpeedDivisor / zoom.value / cropWrapperSize.height));
         } else if (dragSideY === 'top') {
-            newCropOutline.height = Math.min(newCropOutline.top + newCropOutline.height, Math.max(0, newCropOutline.height + (dragStartPosition.y - e.clientY) / zoom.value / cropWrapperSize.height));
-            newCropOutline.top = Math.min(initialCropOutline.height + initialCropOutline.top, Math.max(0, newCropOutline.top - (dragStartPosition.y - e.clientY) / zoom.value / cropWrapperSize.height));
+            newCropOutline.height = Math.min(newCropOutline.top + newCropOutline.height, Math.max(0, newCropOutline.height + (dragStartPosition.y - e.clientY) / dragSpeedDivisor / zoom.value / cropWrapperSize.height));
+            newCropOutline.top = Math.min(initialCropOutline.height + initialCropOutline.top, Math.max(0, newCropOutline.top - (dragStartPosition.y - e.clientY) / dragSpeedDivisor  / zoom.value / cropWrapperSize.height));
         }
     } else {
         // handle dragging WITH aspect ratio constraints
         const sourceAspectRatio = sceneItemTransform.sourceWidth / sceneItemTransform.sourceHeight;
         if (dragSideX != null) {
             if (dragSideX === 'left') {
-                newCropOutline.left = Math.min(initialCropOutline.width + initialCropOutline.left, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width))
-                newCropOutline.width = Math.min(initialCropOutline.left + initialCropOutline.width, Math.max(0, newCropOutline.width + (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
+                newCropOutline.left = Math.min(initialCropOutline.width + initialCropOutline.left, Math.max(0, newCropOutline.left - (dragStartPosition.x - e.clientX) / dragSpeedDivisor  / zoom.value / cropWrapperSize.width))
+                newCropOutline.width = Math.min(initialCropOutline.left + initialCropOutline.width, Math.max(0, newCropOutline.width + (dragStartPosition.x - e.clientX) / dragSpeedDivisor  / zoom.value / cropWrapperSize.width));
             } else {
-                newCropOutline.width = Math.min(1 - newCropOutline.left, Math.max(0, newCropOutline.width - (dragStartPosition.x - e.clientX) / zoom.value / cropWrapperSize.width));
+                newCropOutline.width = Math.min(1 - newCropOutline.left, Math.max(0, newCropOutline.width - (dragStartPosition.x - e.clientX) / dragSpeedDivisor  / zoom.value / cropWrapperSize.width));
             }
             newCropOutline.height = newCropOutline.width / aspectRatio * sourceAspectRatio;
             if (dragSideY === 'top') {
@@ -523,10 +547,10 @@ function onWindowMouseMove(e: PointerEvent) {
             }
         } else {
             if (dragSideY === 'top') {
-                newCropOutline.height = Math.min(initialCropOutline.top + initialCropOutline.height, Math.max(0, newCropOutline.height + ((dragStartPosition.y - e.clientY)) / zoom.value / cropWrapperSize.height));
+                newCropOutline.height = Math.min(initialCropOutline.top + initialCropOutline.height, Math.max(0, newCropOutline.height + (dragStartPosition.y - e.clientY) / dragSpeedDivisor  / zoom.value / cropWrapperSize.height));
                 newCropOutline.top = Math.max(0, newCropOutline.top - (newCropOutline.height - initialCropOutline.height));
             } else {
-                newCropOutline.height = Math.min(1 - initialCropOutline.top, Math.max(0, newCropOutline.height - ((dragStartPosition.y - e.clientY)) / zoom.value / cropWrapperSize.height));
+                newCropOutline.height = Math.min(1 - initialCropOutline.top, Math.max(0, newCropOutline.height - (dragStartPosition.y - e.clientY) / dragSpeedDivisor  / zoom.value / cropWrapperSize.height));
             }
             newCropOutline.width = newCropOutline.height / (1 / aspectRatio) * (1 / sourceAspectRatio);
             newCropOutline.left = newCropOutline.left - (newCropOutline.width - initialCropOutline.width) / 2;
@@ -558,7 +582,7 @@ onUnmounted(() => {
     window.document.removeEventListener('mousemove', onWindowMouseMove);
     window.document.removeEventListener('keydown', onWindowKeydown);
     window.document.removeEventListener('keyup', onWindowKeyup);
-    heldArrowKeys = { left: false, right: false, up: false, down: false };
+    heldKeys = { left: false, right: false, up: false, down: false, shift: false };
     clearInterval(arrowKeyUpdateInterval);
     arrowKeyUpdateInterval = undefined;
 });
