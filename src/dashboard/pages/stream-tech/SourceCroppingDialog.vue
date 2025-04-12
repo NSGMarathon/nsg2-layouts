@@ -151,6 +151,8 @@ import { faRotate } from '@fortawesome/free-solid-svg-icons/faRotate';
 
 library.add(faMagnifyingGlassPlus, faMagnifyingGlassMinus, faUpDown, faLeftRight, faRotate);
 
+const ARROW_KEY_UPDATE_SPEED = 150;
+
 const props = defineProps<{
     selectedFeedIndex: number
 }>();
@@ -248,10 +250,17 @@ watch(isOpen, async (newValue) => {
     if (newValue) {
         window.document.addEventListener('mouseup', onWindowMouseup);
         window.document.addEventListener('mousemove', onWindowMouseMove);
+        window.document.addEventListener('keydown', onWindowKeydown);
+        window.document.addEventListener('keyup', onWindowKeyup);
         await loadSourceScreenshot();
     } else {
         window.document.removeEventListener('mouseup', onWindowMouseup);
         window.document.removeEventListener('mousemove', onWindowMouseMove);
+        window.document.removeEventListener('keydown', onWindowKeydown);
+        window.document.removeEventListener('keyup', onWindowKeyup);
+        heldArrowKeys = { left: false, right: false, up: false, down: false };
+        clearInterval(arrowKeyUpdateInterval);
+        arrowKeyUpdateInterval = undefined;
     }
 });
 
@@ -324,6 +333,113 @@ function onCropOutlineClick(e: PointerEvent) {
             cropWrapperSize = { width: cropWrapper.clientWidth, height: cropWrapper.clientHeight };
         } else {
             cropWrapperSize = null;
+        }
+    }
+}
+
+let heldArrowKeys = { left: false, right: false, up: false, down: false };
+let arrowKeyUpdateInterval: number | undefined = undefined;
+
+function doArrowKeyUpdate() {
+    if (cropOutlineData == null || sceneItemTransform == null) {
+        clearInterval(arrowKeyUpdateInterval);
+        arrowKeyUpdateInterval = undefined;
+        return;
+    }
+
+    Object.entries(heldArrowKeys).filter(([_, isHeld]) => isHeld).forEach(([key]) => {
+        switch (key) {
+            case 'up': {
+                cropOutlineData!.top = Math.max(0, cropOutlineData!.top - 1 / sceneItemTransform!.height);
+                break;
+            }
+            case 'down': {
+                cropOutlineData!.top = Math.min(1 - cropOutlineData!.height, cropOutlineData!.top + 1 / sceneItemTransform!.height);
+                break;
+            }
+            case 'left': {
+                cropOutlineData!.left = Math.max(0, cropOutlineData!.left - 1 / sceneItemTransform!.width);
+                break;
+            }
+            case 'right': {
+                cropOutlineData!.left = Math.min(1 - cropOutlineData!.width, cropOutlineData!.left + 1 / sceneItemTransform!.width);
+                break;
+            }
+        }
+    });
+    updateCropOutlineRef();
+}
+function onWindowKeydown(event: KeyboardEvent) {
+    if (cropOutlineData == null || sceneItemTransform == null) return;
+
+    if (
+        event.key === 'ArrowRight'
+        || event.key === 'ArrowLeft'
+        || event.key === 'ArrowUp'
+        || event.key === 'ArrowDown'
+    ) {
+        event.preventDefault();
+
+        switch (event.key) {
+            case 'ArrowUp': {
+                heldArrowKeys.up = true;
+                cropOutlineData.top = Math.max(0, cropOutlineData.top - 1 / sceneItemTransform.sourceHeight);
+                break;
+            }
+            case 'ArrowDown': {
+                heldArrowKeys.down = true;
+                cropOutlineData.top = Math.min(1 - cropOutlineData.height, cropOutlineData.top + 1 / sceneItemTransform.sourceHeight);
+                break;
+            }
+            case 'ArrowLeft': {
+                heldArrowKeys.left = true;
+                cropOutlineData.left = Math.max(0, cropOutlineData.left - 1 / sceneItemTransform.sourceWidth);
+                break;
+            }
+            case 'ArrowRight': {
+                heldArrowKeys.right = true;
+                cropOutlineData.left = Math.min(1 - cropOutlineData.width, cropOutlineData.left + 1 / sceneItemTransform.sourceWidth);
+                break;
+            }
+        }
+
+        if (arrowKeyUpdateInterval == null) {
+            doArrowKeyUpdate();
+            arrowKeyUpdateInterval = window.setInterval(doArrowKeyUpdate, ARROW_KEY_UPDATE_SPEED);
+        }
+    }
+}
+function onWindowKeyup(event: KeyboardEvent) {
+    if (
+        event.key === 'ArrowRight'
+        || event.key === 'ArrowLeft'
+        || event.key === 'ArrowUp'
+        || event.key === 'ArrowDown'
+    ) {
+        event.preventDefault();
+
+        switch (event.key) {
+            case 'ArrowUp': {
+                heldArrowKeys.up = false;
+                break;
+            }
+            case 'ArrowDown': {
+                heldArrowKeys.down = false;
+                break;
+            }
+            case 'ArrowLeft': {
+                heldArrowKeys.left = false;
+                break;
+            }
+            case 'ArrowRight': {
+                heldArrowKeys.right = false;
+                break;
+            }
+        }
+
+        if (Object.values(heldArrowKeys).every(value => !value)) {
+            clearInterval(arrowKeyUpdateInterval);
+            arrowKeyUpdateInterval = undefined;
         }
     }
 }
@@ -440,6 +556,11 @@ function onWindowMouseMove(e: PointerEvent) {
 onUnmounted(() => {
     window.document.removeEventListener('mouseup', onWindowMouseup);
     window.document.removeEventListener('mousemove', onWindowMouseMove);
+    window.document.removeEventListener('keydown', onWindowKeydown);
+    window.document.removeEventListener('keyup', onWindowKeyup);
+    heldArrowKeys = { left: false, right: false, up: false, down: false };
+    clearInterval(arrowKeyUpdateInterval);
+    arrowKeyUpdateInterval = undefined;
 });
 
 function centerHorizontal() {
