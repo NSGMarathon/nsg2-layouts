@@ -1,6 +1,16 @@
 <template>
-    <ipl-space v-if="twitchDataStore.twitchData.state !== 'NOT_LOGGED_IN'">
-        <div class="title">Play Twitch commercial</div>
+    <component
+        v-if="twitchDataStore.twitchData.state !== 'NOT_LOGGED_IN'"
+        :is="collapsible ? IplExpandingSpace : IplSpace"
+        :title="collapsible ? 'Play Twitch commercial' : undefined"
+        key="twitch-commercial-player"
+    >
+        <div
+            v-if="!collapsible"
+            class="title"
+        >
+            Play Twitch commercial
+        </div>
         <div class="m-b-8 m-t-2">
             <template v-if="!!endTimeText">
                 Ads end in {{ endTimeText }}
@@ -53,11 +63,11 @@
                 @click="startCommercial(180)"
             />
         </div>
-    </ipl-space>
+    </component>
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplMessage, IplSpace } from '@iplsplatoon/vue-components';
+import { IplButton, IplExpandingSpace, IplMessage, IplSpace } from '@iplsplatoon/vue-components';
 import { useTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 import { computed, ref, watch } from 'vue';
 import { DateTime } from 'luxon';
@@ -65,6 +75,12 @@ import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { TwitchCommercialState } from 'types/schemas';
 
 const twitchDataStore = useTwitchDataStore();
+
+const props = withDefaults(defineProps<{
+    collapsible: boolean
+}>(), {
+    collapsible: false
+});
 
 const endTimeText = ref('');
 const retryTimeText = ref('');

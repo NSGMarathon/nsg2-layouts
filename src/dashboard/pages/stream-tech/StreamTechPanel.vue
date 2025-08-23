@@ -26,7 +26,13 @@
                 class="m-t-8"
                 style="max-width: 285px; margin: 8px auto 0; box-sizing: border-box"
             />
-            <countdown-manager style="max-width: 285px; margin: 8px auto 0;" />
+            <ipl-expanding-space-group model-value="twitch-commercial-player">
+                <twitch-commercial-player
+                    collapsible
+                    style="max-width: 285px; margin: 8px auto 0; box-sizing: border-box"
+                />
+                <countdown-manager style="max-width: 285px; margin: 8px auto 0;" />
+            </ipl-expanding-space-group>
         </div>
         <rundown-display class="rundown-display" />
     </div>
@@ -55,13 +61,14 @@ import NextRunManager from './NextRunManager.vue';
 import LayoutManager from './LayoutManager.vue';
 import TalentItemEditDialog from '../../components/TalentItemEditDialog.vue';
 import TwitchCategorySearchDialog from '../../components/TwitchCategorySearchDialog.vue';
-import { IplMessage } from '@iplsplatoon/vue-components';
+import { IplExpandingSpaceGroup, IplMessage } from '@iplsplatoon/vue-components';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import SystemStatusDisplay from './SystemStatusDisplay.vue';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import CountdownManager from './CountdownManager.vue';
 import VideoFileSelectDialog from '../../components/VideoFileSelectDialog.vue';
 import InterstitialVideoPlayerDialog from '../../components/InterstitialVideoPlayerDialog.vue';
+import TwitchCommercialPlayer from '../../components/TwitchCommercialPlayer.vue';
 
 const scheduleItemEditor = ref<InstanceType<typeof ScheduleItemEditor>>();
 provide(ScheduleItemEditorInjectionKey, scheduleItemEditor);

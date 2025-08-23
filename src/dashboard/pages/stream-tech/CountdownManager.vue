@@ -1,6 +1,7 @@
 <template>
     <ipl-expanding-space
         title="Countdown"
+        key="countdown"
     >
         <ipl-input
             v-model="countdownMessage"
