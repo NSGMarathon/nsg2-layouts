@@ -97,7 +97,6 @@
             />
         </ipl-space>
         <scene-switcher />
-        <twitch-commercial-player />
         <source-cropping-dialog
             ref="sourceCroppingDialog"
             :selected-feed-index="selectedFeedIndex"
@@ -121,7 +120,7 @@ import { faCrop } from '@fortawesome/free-solid-svg-icons/faCrop';
 import SourceCroppingDialog from './SourceCroppingDialog.vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { VideoInputAssignment } from 'types/schemas';
-import TwitchCommercialPlayer from '../../components/TwitchCommercialPlayer.vue';
+import { onClickOutside } from '../../helpers/onClickOutside';
 
 library.add(faVideo, faGamepad, faCrop);
 
@@ -152,16 +151,8 @@ function selectCapture(type: 'camera' | 'game', index: number) {
     selectedCapture.value = { type, index };
 }
 
-const captureSelectDismissListener = (event: MouseEvent) => {
-    if (!wrapper.value?.contains(event.target as HTMLElement)) {
-        selectedCapture.value = null;
-    }
-}
-onMounted(() => {
-    window.addEventListener('click', captureSelectDismissListener);
-});
-onUnmounted(() => {
-    window.removeEventListener('click', captureSelectDismissListener);
+onClickOutside(wrapper, () => {
+    selectedCapture.value = null;
 });
 
 function isAssignedInput(assignment: VideoInputAssignment | null) {
