@@ -3,14 +3,15 @@
         v-model:is-open="isOpen"
         style="width: 400px"
     >
-        <ipl-dialog-title
-            title="Assign mixer channels"
-            color="secondary"
-            @close="isOpen = false"
-        />
+        <template #header>
+            <ipl-dialog-title
+                title="Assign mixer channels"
+                @close="isOpen = false"
+            />
+        </template>
 
         <ipl-space
-            class="m-t-8 layout horizontal center-horizontal"
+            class="layout horizontal center-horizontal"
             color="secondary"
         >
             <ipl-checkbox
@@ -58,22 +59,21 @@
             @update:speaking-threshold="hostChannel.speakingThresholdDB = $event"
         />
 
-        <ipl-space
-            class="m-t-8 layout horizontal"
-            color="secondary"
-        >
-            <ipl-button
-                color="green"
-                label="Save"
-                @click="save"
-            />
-            <ipl-button
-                color="red"
-                label="Close"
-                class="m-l-8"
-                @click="isOpen = false"
-            />
-        </ipl-space>
+        <template #footer>
+            <div class="layout horizontal">
+                <ipl-button
+                    color="green"
+                    label="Save"
+                    @click="save"
+                />
+                <ipl-button
+                    color="red"
+                    label="Close"
+                    class="m-l-8"
+                    @click="isOpen = false"
+                />
+            </div>
+        </template>
     </ipl-dialog>
 </template>
 

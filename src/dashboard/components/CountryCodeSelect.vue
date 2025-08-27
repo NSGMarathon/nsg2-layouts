@@ -49,8 +49,8 @@ const flagExists = computed(() => props.modelValue != null && Object.keys(region
 const bundleName = nodecg.bundleName;
 
 const countrySelectDialog = inject(CountrySelectDialogInjectionKey);
-function onClick() {
-    countrySelectDialog?.value?.open(newValue => emit('update:modelValue', newValue));
+function onClick(event: Event) {
+    countrySelectDialog?.value?.open(newValue => emit('update:modelValue', newValue), event.target as HTMLElement);
 }
 </script>
 

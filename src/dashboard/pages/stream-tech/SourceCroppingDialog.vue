@@ -61,14 +61,16 @@
                     />
                 </div>
             </div>
-            <div class="m-t-8 cropping-controls layout vertical center-horizontal">
+        </template>
+        <template #footer>
+            <div class="cropping-controls layout vertical center-horizontal">
                 <div class="layout horizontal max-width center-vertical center-horizontal">
                     <ipl-radio
                         v-model="selectedAspectRatio"
                         :options="aspectRatioOptions"
                         name="aspect-ratio"
                         label="Lock aspect ratio"
-                        style="min-width: 200px; margin-top: -8px;"
+                        style="min-width: 200px; margin-top: -8px; transform: translateY(2px)"
                     />
                     <ipl-button
                         class="m-l-8"
@@ -92,7 +94,7 @@
                     style="max-width: 850px; margin: 8px 0 auto;"
                 >
                     <div class="m-r-16">
-                        <ipl-badge>◀▶▲▼</ipl-badge>Move crop
+                        <ipl-badge>Arrow keys</ipl-badge>Move crop
                         <br>
                         <ipl-badge>Shift</ipl-badge>Resize precisely (Hold)
                     </div>
@@ -106,7 +108,7 @@
                         icon="magnifying-glass-plus"
                         @click="zoom = Math.min(10, zoom + 0.5)"
                     />
-                    <ipl-space color="secondary" class="m-l-8 text-center" style="min-width: 40px">{{ zoom }}x</ipl-space>
+                    <ipl-space class="m-l-8 text-center" style="min-width: 40px; line-height: 150%">{{ zoom }}x</ipl-space>
                     <ipl-button
                         icon="magnifying-glass-minus"
                         class="m-l-8"
@@ -704,7 +706,6 @@ defineExpose({
 <style lang="scss">
 .source-cropping-dialog {
     width: 90vw;
-    height: 90vh;
     overflow: hidden !important;
 
     > .content {
@@ -715,12 +716,6 @@ defineExpose({
 </style>
 
 <style scoped lang="scss">
-.cropping-controls {
-    position: sticky;
-    left: 0;
-    bottom: 0;
-}
-
 .zoom-overflow-wrapper {
     height: calc(90vh - 115px);
     width: calc(90vw - 50px);

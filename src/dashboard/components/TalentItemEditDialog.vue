@@ -1,18 +1,16 @@
 <template>
     <ipl-dialog
         :is-open="isOpen"
-        @update:is-open="isOpen = $event"
         style="width: 500px"
+        @update:is-open="isOpen = $event"
     >
-        <ipl-dialog-title
-            title="Edit talent"
-            color="secondary"
-            @close="isOpen = $event"
-        />
-        <ipl-space
-            color="secondary"
-            class="m-t-8"
-        >
+        <template #header>
+            <ipl-dialog-title
+                title="Edit talent"
+                @close="isOpen = $event"
+            />
+        </template>
+        <ipl-space color="secondary">
             <ipl-message
                 v-if="talentItem == null"
                 type="warning"
@@ -22,23 +20,26 @@
             <template v-else>
                 <talent-item-editor-form
                     v-model="talentItem"
-                    color="secondary"
+                    ref="editorForm"
                 />
+            </template>
+        </ipl-space>
+        <template #footer>
+            <div style="max-width: 200px; margin: 0 auto">
                 <ipl-button
-                    class="m-t-8"
                     color="green"
                     label="Save"
                     @click="onSave"
                 />
-            </template>
-        </ipl-space>
+            </div>
+        </template>
     </ipl-dialog>
 </template>
 
 <script setup lang="ts">
 import { IplButton, IplDialog, IplDialogTitle, IplMessage, IplSpace } from '@iplsplatoon/vue-components';
 import TalentItemEditorForm from './TalentItemEditorForm.vue';
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { v4 as uuidV4 } from 'uuid';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import cloneDeep from 'lodash/cloneDeep';
@@ -48,6 +49,7 @@ const talentStore = useTalentStore();
 
 const isOpen = ref(false);
 const talentItem = ref<TalentItem | null>(null);
+const editorForm = ref<InstanceType<typeof TalentItemEditorForm>>();
 let selectCallback: ((talentItem: TalentItem) => void) | null = null;
 
 watch(isOpen, newValue => {
@@ -56,7 +58,7 @@ watch(isOpen, newValue => {
     }
 });
 
-function openForNew(cb: (talentItem: TalentItem) => void, name?: string) {
+function openForNew(cb: (talentItem: TalentItem) => void, name: string | undefined | null) {
     talentItem.value = {
         id: uuidV4(),
         name: name ?? '',
@@ -64,12 +66,18 @@ function openForNew(cb: (talentItem: TalentItem) => void, name?: string) {
     };
     isOpen.value = true;
     selectCallback = cb;
+    nextTick(() => {
+        editorForm.value?.focus();
+    });
 }
 
 function openForExisting(cb: (talentItem: TalentItem) => void, talentItemId: string) {
     talentItem.value = cloneDeep(talentStore.findTalentItemById(talentItemId) ?? null);
     selectCallback = cb;
     isOpen.value = true;
+    nextTick(() => {
+        editorForm.value?.focus();
+    });
 }
 
 function onSave() {

@@ -3,36 +3,34 @@
         v-model:is-open="isOpen"
         style="width: 600px"
     >
-        <ipl-dialog-title
-            title="Select video"
-            class="m-b-8"
-            color="secondary"
-            @close="isOpen = false"
-        >
-            <template #end>
-                <ipl-button
-                    small
-                    async
-                    @click="onRefresh"
-                >
-                    <font-awesome-icon icon="rotate" />
-                    Refresh
-                </ipl-button>
-            </template>
-        </ipl-dialog-title>
-        <ipl-space
-            color="secondary"
-            class="video-file-list"
-        >
+        <template #header>
+            <ipl-dialog-title
+                title="Select video"
+                @close="isOpen = false"
+            >
+                <template #end>
+                    <ipl-button
+                        small
+                        async
+                        @click="onRefresh"
+                    >
+                        <font-awesome-icon icon="rotate" />
+                        Refresh
+                    </ipl-button>
+                </template>
+            </ipl-dialog-title>
+        </template>
+        <div class="video-file-list">
             <ipl-space
                 v-for="(file, i) in videoFileStore.videoFiles.speedruns"
                 :key="i"
                 clickable
+                color="secondary"
                 @click="onSelect(file)"
             >
                 {{ file.name }}
             </ipl-space>
-        </ipl-space>
+        </div>
     </ipl-dialog>
 </template>
 
@@ -82,12 +80,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.video-file-list {
-    height: 75vh;
-    overflow-y: auto;
-
-    > *:not(:last-child) {
-        margin-bottom: 8px;
-    }
+.video-file-list > *:not(:last-child) {
+    margin-bottom: 8px;
 }
 </style>

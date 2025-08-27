@@ -4,6 +4,7 @@
             v-model="props.modelValue.name"
             name="name"
             label="Name"
+            ref="nameInput"
         />
         <div class="layout horizontal m-t-4">
             <ipl-input
@@ -14,7 +15,7 @@
             />
             <country-code-select
                 v-model="props.modelValue.countryCode"
-                :color="props.color === 'secondary' ? 'primary' : 'secondary'"
+                color="primary"
                 class="max-width m-l-8"
             />
             <ipl-input
@@ -51,9 +52,19 @@
 import { IplInput } from '@iplsplatoon/vue-components';
 import { Talent } from 'types/schemas';
 import CountryCodeSelect from './CountryCodeSelect.vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     modelValue: Talent[number]
-    color: 'primary' | 'secondary'
 }>();
+
+const nameInput = ref<InstanceType<typeof IplInput>>();
+
+function focus() {
+    nameInput.value?.focus();
+}
+
+defineExpose({
+    focus
+});
 </script>

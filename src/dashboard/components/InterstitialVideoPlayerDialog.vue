@@ -3,36 +3,32 @@
         v-model:is-open="isOpen"
         style="width: 600px"
     >
-        <ipl-dialog-title
-            title="Select video"
-            class="m-b-8"
-            color="secondary"
-            @close="isOpen = false"
-        >
-            <template #end>
-                <ipl-button
-                    small
-                    async
-                    @click="onRefresh"
-                >
-                    <font-awesome-icon icon="rotate" />
-                    Refresh
-                </ipl-button>
-            </template>
-        </ipl-dialog-title>
-        <ipl-space
-            color="secondary"
-            class="m-b-8 layout horizontal center-horizontal"
-        >
-            <ipl-radio
-                v-model="returnToScene"
-                label="After video, return to..."
-                :options="returnToSceneOptions"
-                name="returnToScene"
-            />
-        </ipl-space>
-        <ipl-space
-            color="secondary"
+        <template #header>
+            <ipl-dialog-title
+                title="Select video"
+                @close="isOpen = false"
+            >
+                <template #end>
+                    <ipl-button
+                        small
+                        async
+                        @click="onRefresh"
+                    >
+                        <font-awesome-icon icon="rotate" />
+                        Refresh
+                    </ipl-button>
+                </template>
+            </ipl-dialog-title>
+            <div class="layout horizontal center-horizontal">
+                <ipl-radio
+                    v-model="returnToScene"
+                    label="After video, return to..."
+                    :options="returnToSceneOptions"
+                    name="returnToScene"
+                />
+            </div>
+        </template>
+        <div
             class="video-file-list"
             :class="{ loading: isLoading }"
         >
@@ -40,11 +36,12 @@
                 v-for="(file, i) in videoFileStore.videoFiles.interstitials"
                 :key="i"
                 clickable
+                color="secondary"
                 @click="onSelect(file)"
             >
                 {{ file.name }}
             </ipl-space>
-        </ipl-space>
+        </div>
     </ipl-dialog>
 </template>
 
@@ -107,9 +104,6 @@ defineExpose({
 
 <style scoped lang="scss">
 .video-file-list {
-    height: 75vh;
-    overflow-y: auto;
-
     > * {
         transition: opacity 250ms;
 

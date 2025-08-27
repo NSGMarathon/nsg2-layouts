@@ -69,25 +69,23 @@
         v-model:is-open="playerSelectOpen"
         style="width: 300px;"
     >
-        <ipl-dialog-title
-            title="Select Relay Player"
-            class="m-b-8"
-            color="secondary"
-            @close="playerSelectOpen = false"
-        />
-        <ipl-space
-            color="secondary"
-            class="relay-player-list"
-        >
+        <template #header>
+            <ipl-dialog-title
+                title="Select Relay Player"
+                @close="playerSelectOpen = false"
+            />
+        </template>
+        <div class="relay-player-list">
             <ipl-space
                 v-for="(player, i) in props.team.playerIds"
                 clickable
                 class="relay-select-player"
+                color="secondary"
                 @click="selectRelayPlayer(i)"
             >
                 #{{ i + 1 }} - {{ talentStore.findTalentItemById(player.id)?.name ?? `Unknown talent ${player.id}` }}
             </ipl-space>
-        </ipl-space>
+        </div>
     </ipl-dialog>
 </template>
 
@@ -207,10 +205,5 @@ async function selectRelayPlayer(playerIndex: number) {
 
 .relay-select-player:not(:first-child) {
     margin-top: 8px;
-}
-
-.relay-player-list {
-    max-height: 75vh;
-    overflow-y: auto;
 }
 </style>

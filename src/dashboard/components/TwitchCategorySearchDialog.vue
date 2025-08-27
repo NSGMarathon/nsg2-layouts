@@ -2,7 +2,28 @@
     <ipl-dialog
         v-model:is-open="isOpen"
         style="width: 400px"
+        anchor-y="start"
     >
+        <template #header>
+            <ipl-input
+                v-model="query"
+                name="categoryName"
+                :loading="searchLoading"
+                theme="large"
+                placeholder="Search for a game or category..."
+                type="search"
+                class="max-width"
+                ref="queryInput"
+            />
+            <div class="layout vertical center-horizontal m-t-8 m-b-4">
+                <ipl-radio
+                    v-model="dataSource"
+                    :options="dataSourceOptions"
+                    label="Search from..."
+                    name="dataSource"
+                />
+            </div>
+        </template>
         <ipl-message
             v-if="!twitchIntegrationEnabled"
             type="warning"
@@ -10,34 +31,12 @@
             Not logged in to Twitch
         </ipl-message>
         <template v-else>
-            <ipl-space
-                color="secondary"
-                class="layout vertical center-horizontal"
-            >
-                <ipl-input
-                    v-model="query"
-                    name="categoryName"
-                    :loading="searchLoading"
-                    theme="large"
-                    placeholder="Search for a game or category..."
-                    type="search"
-                    class="max-width"
-                />
-                <ipl-radio
-                    v-model="dataSource"
-                    :options="dataSourceOptions"
-                    label="Search from..."
-                    name="dataSource"
-                    class="m-t-4"
-                />
-            </ipl-space>
-            <ipl-space
-                color="secondary"
-                class="m-t-8 results-display"
-            >
+            <div class="results-display">
                 <ipl-space
                     v-for="result in searchResults"
                     :key="result.category.id"
+                    color="secondary"
+                    class="result-item"
                     clickable
                     @click="onSelect(result)"
                 >
@@ -75,14 +74,14 @@
                         </div>
                     </div>
                 </ipl-space>
-            </ipl-space>
+            </div>
         </template>
     </ipl-dialog>
 </template>
 
 <script setup lang="ts">
 import { IplDialog, IplInput, IplMessage, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { isBlank } from 'shared/StringHelper';
 import debounce from 'lodash/debounce';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
@@ -92,6 +91,10 @@ type SelectCallbackData = { category: { id: string, name: string, boxArtUrl?: st
 
 const twitchDataStore = useTwitchDataStore();
 
+const props = defineProps<{
+    scheduleItemTitle: string
+}>();
+
 const dataSource = ref('igdb');
 const dataSourceOptions = [
     { value: 'igdb', name: 'IGDB (Games)' },
@@ -100,6 +103,7 @@ const dataSourceOptions = [
 
 const isOpen = ref(false);
 const query = ref('');
+const queryInput = ref<InstanceType<typeof IplInput>>();
 let selectCallback: ((game: SelectCallbackData) => void) | null = null;
 
 const twitchIntegrationEnabled = computed(() => twitchDataStore.twitchData.state !== 'NOT_LOGGED_IN');
@@ -158,8 +162,13 @@ watch(isOpen, newValue => {
 });
 
 function open(onSelect: (game: SelectCallbackData) => void) {
+    query.value = props.scheduleItemTitle;
     selectCallback = onSelect;
     isOpen.value = true;
+    nextTick(() => {
+        queryInput.value?.focus();
+        queryInput.value?.select();
+    });
 }
 
 function onSelect(data: SelectCallbackData) {
@@ -176,8 +185,7 @@ defineExpose({
 
 <style scoped lang="scss">
 .results-display {
-    height: 75vh;
-    overflow-y: auto;
+    min-height: 61px;
 
     > * {
         display: grid !important;

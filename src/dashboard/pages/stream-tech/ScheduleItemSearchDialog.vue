@@ -2,8 +2,9 @@
     <ipl-dialog
         v-model:is-open="isOpen"
         style="width: 750px"
+        anchor-y="start"
     >
-        <ipl-space color="secondary">
+        <template #header>
             <ipl-input
                 v-model="query"
                 name="query"
@@ -24,11 +25,8 @@
                     label="Search by title"
                 />
             </div>
-        </ipl-space>
-        <ipl-space
-            color="secondary"
-            class="m-t-8 results-display"
-        >
+        </template>
+        <div class="results-display">
             <div
                 v-if="searchResults.length === 0"
                 class="text-low-emphasis text-center"
@@ -38,6 +36,7 @@
             <ipl-expanding-space
                 v-for="result in searchResults"
                 :key="result.id"
+                color="secondary"
             >
                 <template #title>
                     <span class="item-index">#{{ result.index + 1 }}: </span>
@@ -107,7 +106,7 @@
                     </div>
                 </div>
             </ipl-expanding-space>
-        </ipl-space>
+        </div>
     </ipl-dialog>
 </template>
 
@@ -244,13 +243,8 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.results-display {
-    height: 75vh;
-    overflow-y: auto;
-
-    > *:not(:last-child) {
-        margin-bottom: 8px;
-    }
+.results-display > *:not(:last-child) {
+    margin-bottom: 8px;
 }
 
 .title-additional-details {

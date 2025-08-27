@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div ref="wrapper">
         <ipl-label>Twitch category</ipl-label>
         <div class="layout horizontal center-vertical">
             <ipl-space
@@ -18,6 +18,11 @@
                 @click="emit('update:modelValue', undefined)"
             />
         </div>
+        <twitch-category-search-dialog
+            ref="searchDialog"
+            :schedule-item-title="props.scheduleItemTitle"
+            :style="floatingStyles"
+        />
     </div>
 </template>
 
@@ -26,14 +31,16 @@ import { IplButton, IplLabel, IplSpace } from '@iplsplatoon/vue-components';
 import { ScheduleItem } from 'types/ScheduleHelpers';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
-import { inject } from 'vue';
-import { TwitchCategorySearchDialogInjectionKey } from '../helpers/Injections';
+import { ref } from 'vue';
+import TwitchCategorySearchDialog from './TwitchCategorySearchDialog.vue';
+import { offset, shift, size, useFloating } from '@floating-ui/vue';
 
 library.add(faXmark);
 
 const props = defineProps<{
     modelValue: ScheduleItem['twitchCategory']
     color: 'secondary' | 'primary'
+    scheduleItemTitle: string
 }>();
 
 const emit = defineEmits<{
@@ -41,9 +48,29 @@ const emit = defineEmits<{
     'update:releaseYear': [newValue: string]
 }>();
 
-const twitchCategorySelectDialog = inject(TwitchCategorySearchDialogInjectionKey);
+const wrapper = ref<HTMLElement>();
+const searchDialog = ref<InstanceType<typeof TwitchCategorySearchDialog>>();
+const { floatingStyles, update } = useFloating(wrapper, searchDialog, {
+    placement: 'left',
+    middleware: [
+        offset(8),
+        shift({
+            crossAxis: true,
+            mainAxis: true,
+            padding: 8
+        }),
+        size({
+            padding: 8,
+            apply(args: any) {
+                args.elements.floating.style.maxHeight = args.availableHeight - args.y + 'px';
+            }
+        })
+    ]
+});
+
 function onClick() {
-    twitchCategorySelectDialog?.value?.open(newValue => {
+    update();
+    searchDialog?.value?.open(newValue => {
         emit('update:modelValue', {
             id: newValue.category.id,
             name: newValue.category.name,

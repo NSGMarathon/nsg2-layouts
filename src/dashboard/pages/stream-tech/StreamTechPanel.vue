@@ -39,7 +39,6 @@
     <schedule-item-editor ref="scheduleItemEditor" />
     <country-select-dialog ref="countrySelectDialog" />
     <talent-item-edit-dialog ref="talentItemEditDialog" />
-    <twitch-category-search-dialog ref="twitchCategorySearchDialog" />
     <video-file-select-dialog ref="videoFileSelectDialog" />
     <interstitial-video-player-dialog ref="interstitialVideoPlayerDialog" />
 </template>
@@ -50,17 +49,16 @@ import ActiveRunManager from './ActiveRunManager.vue';
 import ScheduleItemEditor from '../../components/ScheduleItemEditor.vue';
 import { computed, provide, ref } from 'vue';
 import {
-    CountrySelectDialogInjectionKey, InterstitialVideoPlayerDialogInjectionKey,
+    CountrySelectDialogInjectionKey,
+    InterstitialVideoPlayerDialogInjectionKey,
     ScheduleItemEditorInjectionKey,
     TalentItemEditDialogInjectionKey,
-    TwitchCategorySearchDialogInjectionKey,
     VideoFileSelectDialogInjectionKey
 } from '../../helpers/Injections';
 import CountrySelectDialog from '../../components/CountrySelectDialog.vue';
 import NextRunManager from './NextRunManager.vue';
 import LayoutManager from './LayoutManager.vue';
 import TalentItemEditDialog from '../../components/TalentItemEditDialog.vue';
-import TwitchCategorySearchDialog from '../../components/TwitchCategorySearchDialog.vue';
 import { IplExpandingSpaceGroup, IplMessage } from '@iplsplatoon/vue-components';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import SystemStatusDisplay from './SystemStatusDisplay.vue';
@@ -76,8 +74,6 @@ const countrySelectDialog = ref<InstanceType<typeof CountrySelectDialog>>();
 provide(CountrySelectDialogInjectionKey, countrySelectDialog);
 const talentItemEditDialog = ref<InstanceType<typeof TalentItemEditDialog>>();
 provide(TalentItemEditDialogInjectionKey, talentItemEditDialog);
-const twitchCategorySearchDialog = ref<InstanceType<typeof TwitchCategorySearchDialog>>();
-provide(TwitchCategorySearchDialogInjectionKey, twitchCategorySearchDialog);
 const videoFileSelectDialog = ref<InstanceType<typeof VideoFileSelectDialog>>();
 provide(VideoFileSelectDialogInjectionKey, videoFileSelectDialog);
 const interstitialVideoPlayerDialog = ref<InstanceType<typeof InterstitialVideoPlayerDialog>>();

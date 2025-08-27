@@ -3,73 +3,120 @@
         v-model:is-open="isOpen"
         style="width: 600px"
     >
-        <ipl-message
-            v-if="saveError"
-            type="error"
-            class="m-b-8"
-            closeable
-            @close="saveError = null"
-        >
-            {{ saveError }}
-        </ipl-message>
-        <ipl-dialog-title
-            title="Edit schedule item"
-            color="secondary"
-            class="m-b-8"
-            @close="isOpen = false"
-        />
+        <template #header>
+            <ipl-message
+                v-if="saveError"
+                type="error"
+                class="m-b-8"
+                closeable
+                @close="saveError = null"
+            >
+                {{ saveError }}
+            </ipl-message>
+            <ipl-dialog-title
+                title="Edit schedule item"
+                color="secondary"
+                @close="isOpen = false"
+            />
+        </template>
         <ipl-message
             v-if="selectedScheduleItem == null"
             type="warning"
         >
             The selected item could not be found in the schedule.
         </ipl-message>
-        <ipl-space
-            v-else
-            color="secondary"
-        >
-            <ipl-input
-                v-model="selectedScheduleItem.title"
-                name="title"
-                label="Title"
-            />
-            <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
-                <div
-                    class="layout horizontal m-t-4"
-                    style="align-items: flex-end"
-                >
+        <template v-else>
+            <ipl-space color="secondary">
+                <ipl-input
+                    v-model="selectedScheduleItem.title"
+                    name="title"
+                    label="Title"
+                />
+                <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                    <div
+                        class="layout horizontal m-t-4"
+                        style="align-items: flex-end"
+                    >
+                        <twitch-category-select
+                            v-model="selectedScheduleItem.twitchCategory"
+                            color="primary"
+                            :schedule-item-title="selectedScheduleItem.title"
+                            class="max-width"
+                            @update:release-year="selectedScheduleItem.releaseYear = $event"
+                        />
+                        <ipl-input
+                            v-model="selectedScheduleItem.releaseYear"
+                            name="releaseYear"
+                            label="Release year"
+                            class="m-l-8"
+                            style="width: 50%"
+                        />
+                    </div>
+                    <div class="layout horizontal m-t-4">
+                        <ipl-input
+                            v-model="selectedScheduleItem.category"
+                            name="category"
+                            label="Category"
+                            class="max-width"
+                        />
+                        <ipl-input
+                            v-model="selectedScheduleItem.system"
+                            name="system"
+                            label="System"
+                            class="m-l-8 max-width"
+                        />
+                    </div>
+                </template>
+                <template v-else>
                     <twitch-category-select
                         v-model="selectedScheduleItem.twitchCategory"
+                        :schedule-item-title="selectedScheduleItem.title"
                         color="primary"
-                        class="max-width"
-                        @update:release-year="selectedScheduleItem.releaseYear = $event"
+                        class="max-width m-t-4"
                     />
-                    <ipl-input
-                        v-model="selectedScheduleItem.releaseYear"
-                        name="releaseYear"
-                        label="Release year"
+                </template>
+                <div class="layout horizontal m-t-4 center-horizontal">
+                    <duration-input
+                        v-model="selectedScheduleItem.estimate"
+                        label="Estimate"
+                        style="width: 35%"
+                    />
+                    <duration-input
+                        v-model="selectedScheduleItem.setupTime"
+                        label="Setup time"
                         class="m-l-8"
-                        style="width: 50%"
+                        style="width: 35%"
                     />
-                </div>
-                <div class="layout horizontal m-t-4">
-                    <ipl-input
-                        v-model="selectedScheduleItem.category"
-                        name="category"
-                        label="Category"
-                        class="max-width"
-                    />
-                    <ipl-input
-                        v-model="selectedScheduleItem.system"
-                        name="system"
-                        label="System"
+                    <ipl-select
+                        v-if="selectedScheduleItem.type === 'SPEEDRUN'"
+                        v-model="selectedScheduleItem.layout as string | null"
+                        :options="layoutOptions as Option[]"
                         class="m-l-8 max-width"
+                        label="Layout"
                     />
                 </div>
-                <ipl-space color="primary" class="m-t-8">
+                <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                    <div class="layout horizontal center-horizontal m-t-8">
+                        <ipl-checkbox
+                            v-model="isRelay"
+                            label="Relay"
+                        />
+                        <ipl-checkbox
+                            v-model="isEmulated"
+                            label="Emulated"
+                            class="m-l-8"
+                        />
+                    </div>
+                </template>
+            </ipl-space>
+            <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                <ipl-space
+                    color="secondary"
+                    class="m-t-8"
+                >
                     <video-file-select
                         :model-value="selectedScheduleItem.videoFile"
-                        color="secondary"
+                        color="primary"
                         class="max-width"
                         @update:model-value="onVideoFileSelect"
                     />
@@ -90,48 +137,11 @@
                         />
                     </div>
                 </ipl-space>
-            </template>
-            <template v-else>
-                <twitch-category-select
-                    v-model="selectedScheduleItem.twitchCategory"
-                    color="primary"
-                    class="max-width m-t-4"
-                />
-            </template>
-            <div class="layout horizontal m-t-4 center-horizontal">
-                <duration-input
-                    v-model="selectedScheduleItem.estimate"
-                    label="Estimate"
-                    style="width: 35%"
-                />
-                <duration-input
-                    v-model="selectedScheduleItem.setupTime"
-                    label="Setup time"
-                    class="m-l-8"
-                    style="width: 35%"
-                />
-                <ipl-select
-                    v-if="selectedScheduleItem.type === 'SPEEDRUN'"
-                    v-model="selectedScheduleItem.layout as string | null"
-                    :options="layoutOptions as Option[]"
-                    class="m-l-8 max-width"
-                    label="Layout"
-                />
-            </div>
-            <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
-                <div class="layout horizontal center-horizontal m-t-8">
-                    <ipl-checkbox
-                        v-model="isRelay"
-                        label="Relay"
-                    />
-                    <ipl-checkbox
-                        v-model="isEmulated"
-                        label="Emulated"
-                        class="m-l-8"
-                    />
-                </div>
-                <div class="m-t-4">
-                    <div class="layout horizontal center-vertical">
+                <div class="m-t-8">
+                    <ipl-space
+                        color="secondary"
+                        class="layout horizontal center-vertical m-b-8"
+                    >
                         <div class="max-width">Teams</div>
                         <ipl-button
                             icon="plus"
@@ -139,16 +149,19 @@
                             color="green"
                             @click="addTeam"
                         />
-                    </div>
-                    <hr>
-                    <ipl-space
+                    </ipl-space>
+                    <div
                         v-for="(team, index) in selectedScheduleItem.teams"
                         :key="team.id"
-                        class="m-t-8"
+                        class="m-b-8"
                     >
-                        <div class="layout horizontal center-vertical">
+                        <ipl-space
+                            color="secondary"
+                            class="layout horizontal center-vertical m-b-8 m-l-16"
+                        >
                             <ipl-input
                                 v-model="team.name"
+                                :placeholder="team.playerIds.length === 0 ? 'Empty team' : 'Team ' + talentStore.formatTalentIdList(team.playerIds, 4)"
                                 name="team-name"
                                 label="Name"
                                 class="max-width"
@@ -158,7 +171,7 @@
                                 small
                                 color="green"
                                 class="m-l-8"
-                                @click="addTalentForTeam(team.id)"
+                                @click="addTalentForTeam(team.id, $event)"
                             />
                             <ipl-button
                                 icon="xmark"
@@ -168,66 +181,74 @@
                                 :disabled="selectedScheduleItem.teams.length <= 1"
                                 @click="removeTeam(index)"
                             />
-                        </div>
+                        </ipl-space>
                         <talent-list-editor
                             v-model:talent-list="team.playerIds"
                             :talent-item-map="talentItemMap"
                             color="secondary"
+                            class="m-l-32"
                             :team-active-relay-players="activeRelayPlayerIndexMap?.[team.id]"
                         />
-                    </ipl-space>
+                    </div>
                 </div>
-                <div class="m-t-8">
-                    <div class="layout horizontal center-vertical">
+                <div class="m-t-32">
+                    <ipl-space
+                        class="layout horizontal center-vertical"
+                        color="secondary"
+                    >
                         <div class="max-width">Commentators</div>
                         <ipl-button
                             icon="user-plus"
                             small
                             color="green"
-                            @click="addTalent('commentators')"
+                            @click="addTalent('commentators', $event)"
                         />
-                    </div>
-                    <hr>
+                    </ipl-space>
                     <talent-list-editor
                         v-model:talent-list="selectedScheduleItem.commentatorIds"
                         :talent-item-map="talentItemMap"
-                        color="primary"
+                        color="secondary"
+                        class="m-l-16 m-t-8"
                     />
                 </div>
             </template>
             <div
-                v-if="selectedScheduleItem.type !== 'SPEEDRUN'"
+                v-else
                 class="m-t-8"
             >
-                <div class="layout horizontal center-vertical">
+                <ipl-space
+                    color="secondary"
+                    class="layout horizontal center-vertical"
+                >
                     <div class="max-width">Talent</div>
                     <ipl-button
                         icon="user-plus"
                         small
                         color="green"
-                        @click="addTalent('talent')"
+                        @click="addTalent('talent', $event)"
                     />
-                </div>
-                <hr>
+                </ipl-space>
                 <talent-list-editor
                     v-model:talent-list="selectedScheduleItem.talentIds"
                     :talent-item-map="talentItemMap"
-                    color="primary"
+                    color="secondary"
+                    class="m-l-16 m-t-8"
                 />
             </div>
-            <div style="max-width: 200px; margin: 16px auto 0 auto">
+        </template>
+        <template #footer>
+            <div style="max-width: 200px; margin: 0 auto">
                 <ipl-button
                     label="Save"
                     color="green"
                     @click="onSave"
                 />
             </div>
-        </ipl-space>
+        </template>
     </ipl-dialog>
     <talent-select-dialog
-        :is-open="addingTalentFor != null"
-        @update:is-open="onTalentSearchDialogOpenChange"
-        @select="onTalentSelect"
+        ref="talentSelectPopup"
+        :style="floatingStyles"
     />
 </template>
 
@@ -242,7 +263,7 @@ import {
     IplSelect,
     IplSpace
 } from '@iplsplatoon/vue-components';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ScheduleItem } from 'types/ScheduleHelpers';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import cloneDeep from 'lodash/cloneDeep';
@@ -251,7 +272,6 @@ import TalentListEditor from './TalentListEditor.vue';
 import { ActiveRelayPlayers, OtherScheduleItem, Speedrun, Talent, VideoFile } from 'types/schemas';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
-import TalentSelectDialog from './TalentSelectDialog.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons/faUserPlus';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
@@ -262,6 +282,8 @@ import { v4 as uuidV4 } from 'uuid';
 import VideoFileSelect from './VideoFileSelect.vue';
 import { Duration } from 'luxon';
 import { Option } from '@iplsplatoon/vue-components/dist/types/select';
+import TalentSelectDialog from './TalentSelectDialog.vue';
+import { offset, shift, useFloating } from '@floating-ui/vue';
 
 library.add(faUserPlus, faPlus, faXmark);
 
@@ -271,6 +293,28 @@ const talentStore = useTalentStore();
 const isOpen = ref(false);
 const selectedScheduleItem = ref<ScheduleItem | null>(null);
 const talentItemMap = ref<Record<string, Talent[number]>>({});
+
+const addingTalentFor = ref<['team' | 'commentators' | 'talent', string | null] | null>(null);
+const talentSelectPopup = ref<InstanceType<typeof TalentSelectDialog>>();
+const talentSelectTargetElem = ref<HTMLElement | null>(null);
+const { floatingStyles } = useFloating(talentSelectTargetElem, talentSelectPopup, {
+    placement: 'right-end',
+    middleware: [
+        offset(8),
+        shift({
+            crossAxis: true,
+            mainAxis: true,
+            padding: 8
+        })
+    ]
+});
+
+watch(isOpen, newValue => {
+    if (!newValue) {
+        addingTalentFor.value = null;
+        talentSelectTargetElem.value = null;
+    }
+});
 
 const editingActiveSpeedrun = computed(() => selectedScheduleItem.value?.type === 'SPEEDRUN' && selectedScheduleItem.value?.id === scheduleStore.activeSpeedrun?.id);
 
@@ -324,44 +368,29 @@ async function onSave() {
     }
 }
 
-const addingTalentFor = ref<['team' | 'commentators' | 'talent', string | null] | null>(null);
-function addTalentForTeam(teamId: string) {
-    addingTalentFor.value = ['team', teamId];
+function addTalentForTeam(teamId: string, event: MouseEvent) {
+    talentSelectPopup.value?.open(talentItem => {
+        if (talentItemMap.value[talentItem.id] == null) {
+            talentItemMap.value[talentItem.id] = talentItem;
+        }
+        (selectedScheduleItem.value as Speedrun).teams.find(team => team.id === teamId)?.playerIds.push({ id: talentItem.id, externalId: talentItem.externalId });
+    });
+    talentSelectTargetElem.value = event.target as HTMLElement;
 }
-function addTalent(destination: 'commentators' | 'talent') {
-    addingTalentFor.value = [destination, null];
-}
-function onTalentSearchDialogOpenChange(isOpen: boolean) {
-    if (!isOpen) {
-        addingTalentFor.value = null;
-    }
-}
-function onTalentSelect(talentItem: Talent[number]) {
-    if (
-        selectedScheduleItem.value == null
-        || addingTalentFor.value == null
-        || addingTalentFor.value[0] === 'talent' && selectedScheduleItem.value.type === 'SPEEDRUN'
-        || addingTalentFor.value[0] !== 'talent' && selectedScheduleItem.value.type !== 'SPEEDRUN'
-        || addingTalentFor.value[0] === 'team' && addingTalentFor.value[1] == null
-    ) return;
-
-    if (talentItemMap.value[talentItem.id] == null) {
-        talentItemMap.value[talentItem.id] = talentItem;
-    }
-    switch (addingTalentFor.value[0]) {
-        case 'commentators':
+function addTalent(destination: 'commentators' | 'talent', event: MouseEvent) {
+    talentSelectPopup.value?.open(talentItem => {
+        if (talentItemMap.value[talentItem.id] == null) {
+            talentItemMap.value[talentItem.id] = talentItem;
+        }
+        if (destination === 'commentators') {
             (selectedScheduleItem.value as Speedrun).commentatorIds.push({ id: talentItem.id, externalId: talentItem.externalId });
-            break;
-        case 'team':
-            (selectedScheduleItem.value as Speedrun).teams.find(team => team.id === addingTalentFor.value![1])?.playerIds.push({ id: talentItem.id, externalId: talentItem.externalId });
-            break;
-        case 'talent':
+        } else {
             (selectedScheduleItem.value as OtherScheduleItem).talentIds.push({ id: talentItem.id, externalId: talentItem.externalId });
-            break;
-    }
-    addingTalentFor.value = null;
+        }
+    });
+    console.log('?', event.target);
+    talentSelectTargetElem.value = event.target as HTMLElement;
 }
-
 function addTeam() {
     if (selectedScheduleItem.value?.type !== 'SPEEDRUN') return;
 

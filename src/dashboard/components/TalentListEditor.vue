@@ -5,12 +5,13 @@
             item-key="teamPlayerId"
             handle=".talent-item-grip"
             group="talent-items"
+            class="talent-list-editor"
             @change="onChange"
         >
             <template #item="{ element, index }">
                 <ipl-expanding-space
                     class="talent-item-editor m-t-8"
-                    :color="props.color"
+                    color="secondary"
                 >
                     <template #title>
                         {{ props.talentItemMap[element.talentId]?.name }}
@@ -37,7 +38,6 @@
                     <talent-item-editor-form
                         v-if="props.talentItemMap[element.talentId] != null"
                         :model-value="props.talentItemMap[element.talentId]"
-                        :color="props.color"
                     />
                 </ipl-expanding-space>
             </template>
@@ -62,7 +62,6 @@ library.add(faGripVertical, faUserXmark);
 const props = defineProps<{
     talentList: { id: string }[]
     talentItemMap: Record<string, Talent[number]>
-    color: 'primary' | 'secondary'
     teamActiveRelayPlayers?: { talentId: string, index: number }[]
 }>();
 
@@ -88,6 +87,18 @@ function onChange() {
 </script>
 
 <style lang="scss" scoped>
+.talent-list-editor {
+    &:empty:before {
+        content: 'No items';
+        color: var(--ipl-input-color);
+        border-radius: 8px;
+        display: block;
+        text-align: center;
+        line-height: 45px;
+        background-color: var(--ipl-bg-secondary);
+    }
+}
+
 .talent-item-grip {
     color: var(--ipl-input-color);
     cursor: grab;

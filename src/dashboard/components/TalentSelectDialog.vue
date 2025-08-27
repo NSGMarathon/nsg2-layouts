@@ -1,48 +1,50 @@
 <template>
     <ipl-dialog
-        :is-open="props.isOpen"
-        @update:is-open="emit('update:isOpen', $event)"
+        v-model:is-open="isOpen"
         style="width: 400px"
+        anchor-y="start"
     >
-        <ipl-space color="secondary">
+        <template #header>
             <ipl-input
                 v-model="query"
                 name="query"
                 theme="large"
                 placeholder="Search for talent..."
                 type="search"
+                ref="queryInput"
             />
-        </ipl-space>
-        <ipl-space
-            color="secondary"
-            class="m-t-8"
-        >
             <ipl-button
                 label="Create new Talent"
                 color="green"
+                class="m-t-8"
                 @click="onNewTalent"
             />
-        </ipl-space>
-        <ipl-space
-            color="secondary"
-            class="m-t-8 results-display"
-        >
+        </template>
+        <div class="results-display">
             <ipl-space
                 v-for="result in searchResults"
                 :key="result.id"
                 clickable
-                @click="emit('select', result)"
+                color="secondary"
+                @click="onTalentSelect(result)"
             >
                 {{ result.name }}
                 <ipl-badge v-if="!isBlank(result.pronouns)">{{ result.pronouns }}</ipl-badge>
             </ipl-space>
-        </ipl-space>
+            <div
+                v-if="searchResults.length === 0"
+                class="text-low-emphasis text-center"
+                style="padding: 8px 0"
+            >
+                No results found
+            </div>
+        </div>
     </ipl-dialog>
 </template>
 
 <script setup lang="ts">
 import { IplBadge, IplButton, IplDialog, IplInput, IplSpace } from '@iplsplatoon/vue-components';
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, nextTick, ref, watch } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { isBlank } from 'shared/StringHelper';
 import { Talent } from 'types/schemas';
@@ -51,20 +53,14 @@ import { TalentItemEditDialogInjectionKey } from '../helpers/Injections';
 const talentStore = useTalentStore();
 
 const talentItemEditDialog = inject(TalentItemEditDialogInjectionKey);
-
-const props = defineProps<{
-    isOpen: boolean
-}>();
-
-const emit = defineEmits<{
-    'update:isOpen': [newValue: boolean],
-    'select': [talentItem: Talent[number]]
-}>();
-
+const queryInput = ref<InstanceType<typeof IplInput>>();
 const query = ref('');
+const isOpen = ref(false);
+let selectCallback: ((talentItem: Talent[number]) => void) | null = null;
 
-watch(() => props.isOpen, newValue => {
+watch(isOpen, newValue => {
     if (!newValue) {
+        selectCallback = null;
         query.value = '';
     }
 });
@@ -80,18 +76,30 @@ const searchResults = computed(() => {
 
 function onNewTalent() {
     talentItemEditDialog?.value?.openForNew(talentItem => {
-        emit('select', talentItem);
+        selectCallback?.(talentItem);
     }, query.value);
 }
+
+function onTalentSelect(talentItem: Talent[number]) {
+    selectCallback?.(talentItem);
+    isOpen.value = false;
+}
+
+function open(onSelect: (talentItem: Talent[number]) => void) {
+    selectCallback = onSelect;
+    isOpen.value = true;
+    nextTick(() => {
+        queryInput.value?.focus();
+    });
+}
+
+defineExpose({
+    open
+});
 </script>
 
 <style scoped lang="scss">
-.results-display {
-    height: 75vh;
-    overflow-y: auto;
-
-    > *:not(:last-child) {
-        margin-bottom: 8px;
-    }
+.results-display *:not(:last-child) {
+    margin-bottom: 8px;
 }
 </style>

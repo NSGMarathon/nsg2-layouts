@@ -3,14 +3,15 @@
         v-model:is-open="isOpen"
         style="width: 700px"
     >
-        <ipl-dialog-title
-            title="Edit nameplate assignments"
-            color="secondary"
-            @close="isOpen = false"
-        />
+        <template #header>
+            <ipl-dialog-title
+                title="Edit nameplate assignments"
+                @close="isOpen = false"
+            />
+        </template>
         <ipl-space
             color="secondary"
-            class="m-t-8 layout vertical center-horizontal"
+            class="layout vertical center-horizontal"
         >
             <ipl-radio
                 :model-value="String(selectedFeedIndex)"
@@ -70,18 +71,16 @@
                 </div>
             </div>
         </ipl-space>
-        <ipl-space
-            color="secondary"
-            class="m-t-8 layout horizontal center-horizontal"
-        >
-            <ipl-button
-                color="green"
-                label="Save"
-                style="max-width: 300px"
-                async
-                @click="save"
-            />
-        </ipl-space>
+        <template #footer>
+            <div style="max-width: 200px; margin: 0 auto">
+                <ipl-button
+                    color="green"
+                    label="Save"
+                    async
+                    @click="save"
+                />
+            </div>
+        </template>
     </ipl-dialog>
 </template>
 
