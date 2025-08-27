@@ -111,7 +111,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faVideo } from '@fortawesome/free-solid-svg-icons/faVideo';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import cloneDeep from 'lodash/cloneDeep';
 import { updateRefOnValueChange } from 'client-shared/helpers/StoreHelper';

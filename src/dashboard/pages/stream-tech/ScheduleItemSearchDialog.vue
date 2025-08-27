@@ -116,8 +116,7 @@ import {
     IplCheckbox,
     IplDialog,
     IplExpandingSpace,
-    IplInput,
-    IplSpace
+    IplInput
 } from '@iplsplatoon/vue-components';
 import { computed, inject, ref, watch } from 'vue';
 import { formatScheduleItemEstimate } from 'client-shared/helpers/StringHelper';
