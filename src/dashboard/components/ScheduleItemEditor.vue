@@ -1,251 +1,254 @@
 <template>
-    <ipl-dialog
-        v-model:is-open="isOpen"
-        style="width: 600px"
-    >
-        <template #header>
-            <ipl-message
-                v-if="saveError"
-                type="error"
-                class="m-b-8"
-                closeable
-                @close="saveError = null"
-            >
-                {{ saveError }}
-            </ipl-message>
-            <ipl-dialog-title
-                title="Edit schedule item"
-                color="secondary"
-                @close="isOpen = false"
-            />
-        </template>
-        <ipl-message
-            v-if="selectedScheduleItem == null"
-            type="warning"
+    <form @submit.prevent>
+        <ipl-dialog
+            v-model:is-open="isOpen"
+            style="width: 600px"
         >
-            The selected item could not be found in the schedule.
-        </ipl-message>
-        <template v-else>
-            <ipl-space color="secondary">
-                <ipl-input
-                    v-model="selectedScheduleItem.title"
-                    name="title"
-                    label="Title"
-                />
-                <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
-                    <div
-                        class="layout horizontal m-t-4"
-                        style="align-items: flex-end"
-                    >
-                        <twitch-category-select
-                            v-model="selectedScheduleItem.twitchCategory"
-                            color="primary"
-                            :schedule-item-title="selectedScheduleItem.title"
-                            class="max-width"
-                            @update:release-year="selectedScheduleItem.releaseYear = $event"
-                        />
-                        <ipl-input
-                            v-model="selectedScheduleItem.releaseYear"
-                            name="releaseYear"
-                            label="Release year"
-                            class="m-l-8"
-                            style="width: 50%"
-                        />
-                    </div>
-                    <div class="layout horizontal m-t-4">
-                        <ipl-input
-                            v-model="selectedScheduleItem.category"
-                            name="category"
-                            label="Category"
-                            class="max-width"
-                        />
-                        <ipl-input
-                            v-model="selectedScheduleItem.system"
-                            name="system"
-                            label="System"
-                            class="m-l-8 max-width"
-                        />
-                    </div>
-                </template>
-                <template v-else>
-                    <twitch-category-select
-                        v-model="selectedScheduleItem.twitchCategory"
-                        :schedule-item-title="selectedScheduleItem.title"
-                        color="primary"
-                        class="max-width m-t-4"
-                    />
-                </template>
-                <div class="layout horizontal m-t-4 center-horizontal">
-                    <duration-input
-                        v-model="selectedScheduleItem.estimate"
-                        label="Estimate"
-                        style="width: 35%"
-                    />
-                    <duration-input
-                        v-model="selectedScheduleItem.setupTime"
-                        label="Setup time"
-                        class="m-l-8"
-                        style="width: 35%"
-                    />
-                    <ipl-select
-                        v-if="selectedScheduleItem.type === 'SPEEDRUN'"
-                        v-model="selectedScheduleItem.layout as string | null"
-                        :options="layoutOptions as Option[]"
-                        class="m-l-8 max-width"
-                        label="Layout"
-                    />
-                </div>
-                <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
-                    <div class="layout horizontal center-horizontal m-t-8">
-                        <ipl-checkbox
-                            v-model="isRelay"
-                            label="Relay"
-                        />
-                        <ipl-checkbox
-                            v-model="isEmulated"
-                            label="Emulated"
-                            class="m-l-8"
-                        />
-                    </div>
-                </template>
-            </ipl-space>
-            <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
-                <ipl-space
-                    color="secondary"
-                    class="m-t-8"
+            <template #header>
+                <ipl-message
+                    v-if="saveError"
+                    type="error"
+                    class="m-b-8"
+                    closeable
+                    @close="saveError = null"
                 >
-                    <video-file-select
-                        :model-value="selectedScheduleItem.videoFile"
-                        color="primary"
-                        class="max-width"
-                        @update:model-value="onVideoFileSelect"
+                    {{ saveError }}
+                </ipl-message>
+                <ipl-dialog-title
+                    title="Edit schedule item"
+                    color="secondary"
+                    @close="isOpen = false"
+                />
+            </template>
+            <ipl-message
+                v-if="selectedScheduleItem == null"
+                type="warning"
+            >
+                The selected item could not be found in the schedule.
+            </ipl-message>
+            <template v-else>
+                <ipl-space color="secondary">
+                    <ipl-input
+                        v-model="selectedScheduleItem.title"
+                        name="title"
+                        label="Title"
                     />
-                    <div
-                        v-if="selectedScheduleItem.videoFile != null"
-                        class="layout horizontal center-horizontal m-t-4"
-                    >
-                        <duration-input
-                            v-model="selectedScheduleItem.videoFile.timerStartTime"
-                            label="Timer starts at"
-                            style="max-width: 150px"
-                        />
-                        <duration-input
-                            v-model="selectedScheduleItem.videoFile.timerStopTime"
-                            class="m-l-8"
-                            label="Timer stops at"
-                            style="max-width: 150px"
-                        />
-                    </div>
-                </ipl-space>
-                <div class="m-t-8">
-                    <ipl-space
-                        color="secondary"
-                        class="layout horizontal center-vertical m-b-8"
-                    >
-                        <div class="max-width">Teams</div>
-                        <ipl-button
-                            icon="plus"
-                            small
-                            color="green"
-                            @click="addTeam"
-                        />
-                    </ipl-space>
-                    <div
-                        v-for="(team, index) in selectedScheduleItem.teams"
-                        :key="team.id"
-                        class="m-b-8"
-                    >
-                        <ipl-space
-                            color="secondary"
-                            class="layout horizontal center-vertical m-b-8 m-l-16"
+                    <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                        <div
+                            class="layout horizontal m-t-4"
+                            style="align-items: flex-end"
                         >
+                            <twitch-category-select
+                                v-model="selectedScheduleItem.twitchCategory"
+                                color="primary"
+                                :schedule-item-title="selectedScheduleItem.title"
+                                class="max-width"
+                                @update:release-year="selectedScheduleItem.releaseYear = $event"
+                            />
                             <ipl-input
-                                v-model="team.name"
-                                :placeholder="team.playerIds.length === 0 ? 'Empty team' : 'Team ' + talentStore.formatTalentIdList(team.playerIds, 4)"
-                                name="team-name"
-                                label="Name"
+                                v-model="selectedScheduleItem.releaseYear"
+                                name="releaseYear"
+                                label="Release year"
+                                class="m-l-8"
+                                style="width: 50%"
+                            />
+                        </div>
+                        <div class="layout horizontal m-t-4">
+                            <ipl-input
+                                v-model="selectedScheduleItem.category"
+                                name="category"
+                                label="Category"
                                 class="max-width"
                             />
+                            <ipl-input
+                                v-model="selectedScheduleItem.system"
+                                name="system"
+                                label="System"
+                                class="m-l-8 max-width"
+                            />
+                        </div>
+                    </template>
+                    <template v-else>
+                        <twitch-category-select
+                            v-model="selectedScheduleItem.twitchCategory"
+                            :schedule-item-title="selectedScheduleItem.title"
+                            color="primary"
+                            class="max-width m-t-4"
+                        />
+                    </template>
+                    <div class="layout horizontal m-t-4 center-horizontal">
+                        <duration-input
+                            v-model="selectedScheduleItem.estimate"
+                            label="Estimate"
+                            style="width: 35%"
+                        />
+                        <duration-input
+                            v-model="selectedScheduleItem.setupTime"
+                            label="Setup time"
+                            class="m-l-8"
+                            style="width: 35%"
+                        />
+                        <ipl-select
+                            v-if="selectedScheduleItem.type === 'SPEEDRUN'"
+                            v-model="selectedScheduleItem.layout as string | null"
+                            :options="layoutOptions as Option[]"
+                            class="m-l-8 max-width"
+                            label="Layout"
+                        />
+                    </div>
+                    <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                        <div class="layout horizontal center-horizontal m-t-8">
+                            <ipl-checkbox
+                                v-model="isRelay"
+                                label="Relay"
+                            />
+                            <ipl-checkbox
+                                v-model="isEmulated"
+                                label="Emulated"
+                                class="m-l-8"
+                            />
+                        </div>
+                    </template>
+                </ipl-space>
+                <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                    <ipl-space
+                        color="secondary"
+                        class="m-t-8"
+                    >
+                        <video-file-select
+                            :model-value="selectedScheduleItem.videoFile"
+                            color="primary"
+                            class="max-width"
+                            @update:model-value="onVideoFileSelect"
+                        />
+                        <div
+                            v-if="selectedScheduleItem.videoFile != null"
+                            class="layout horizontal center-horizontal m-t-4"
+                        >
+                            <duration-input
+                                v-model="selectedScheduleItem.videoFile.timerStartTime"
+                                label="Timer starts at"
+                                style="max-width: 150px"
+                            />
+                            <duration-input
+                                v-model="selectedScheduleItem.videoFile.timerStopTime"
+                                class="m-l-8"
+                                label="Timer stops at"
+                                style="max-width: 150px"
+                            />
+                        </div>
+                    </ipl-space>
+                    <div class="m-t-8">
+                        <ipl-space
+                            color="secondary"
+                            class="layout horizontal center-vertical m-b-8"
+                        >
+                            <div class="max-width">Teams</div>
+                            <ipl-button
+                                icon="plus"
+                                small
+                                color="green"
+                                @click="addTeam"
+                            />
+                        </ipl-space>
+                        <div
+                            v-for="(team, index) in selectedScheduleItem.teams"
+                            :key="team.id"
+                            class="m-b-8"
+                        >
+                            <ipl-space
+                                color="secondary"
+                                class="layout horizontal center-vertical m-b-8 m-l-16"
+                            >
+                                <ipl-input
+                                    v-model="team.name"
+                                    :placeholder="team.playerIds.length === 0 ? 'Empty team' : 'Team ' + talentStore.formatTalentIdList(team.playerIds, 4)"
+                                    name="team-name"
+                                    label="Name"
+                                    class="max-width"
+                                />
+                                <ipl-button
+                                    icon="user-plus"
+                                    small
+                                    color="green"
+                                    class="m-l-8"
+                                    @click="addTalentForTeam(team.id, $event)"
+                                />
+                                <ipl-button
+                                    icon="xmark"
+                                    small
+                                    color="red"
+                                    class="m-l-8"
+                                    :disabled="selectedScheduleItem.teams.length <= 1"
+                                    @click="removeTeam(index)"
+                                />
+                            </ipl-space>
+                            <talent-list-editor
+                                v-model:talent-list="team.playerIds"
+                                :talent-item-map="talentItemMap"
+                                color="secondary"
+                                class="m-l-32"
+                                :team-active-relay-players="activeRelayPlayerIndexMap?.[team.id]"
+                            />
+                        </div>
+                    </div>
+                    <div class="m-t-32">
+                        <ipl-space
+                            class="layout horizontal center-vertical"
+                            color="secondary"
+                        >
+                            <div class="max-width">Commentators</div>
                             <ipl-button
                                 icon="user-plus"
                                 small
                                 color="green"
-                                class="m-l-8"
-                                @click="addTalentForTeam(team.id, $event)"
-                            />
-                            <ipl-button
-                                icon="xmark"
-                                small
-                                color="red"
-                                class="m-l-8"
-                                :disabled="selectedScheduleItem.teams.length <= 1"
-                                @click="removeTeam(index)"
+                                @click="addTalent('commentators', $event)"
                             />
                         </ipl-space>
                         <talent-list-editor
-                            v-model:talent-list="team.playerIds"
+                            v-model:talent-list="selectedScheduleItem.commentatorIds"
                             :talent-item-map="talentItemMap"
                             color="secondary"
-                            class="m-l-32"
-                            :team-active-relay-players="activeRelayPlayerIndexMap?.[team.id]"
+                            class="m-l-16 m-t-8"
                         />
                     </div>
-                </div>
-                <div class="m-t-32">
+                </template>
+                <div
+                    v-else
+                    class="m-t-8"
+                >
                     <ipl-space
-                        class="layout horizontal center-vertical"
                         color="secondary"
+                        class="layout horizontal center-vertical"
                     >
-                        <div class="max-width">Commentators</div>
+                        <div class="max-width">Talent</div>
                         <ipl-button
                             icon="user-plus"
                             small
                             color="green"
-                            @click="addTalent('commentators', $event)"
+                            @click="addTalent('talent', $event)"
                         />
                     </ipl-space>
                     <talent-list-editor
-                        v-model:talent-list="selectedScheduleItem.commentatorIds"
+                        v-model:talent-list="selectedScheduleItem.talentIds"
                         :talent-item-map="talentItemMap"
                         color="secondary"
                         class="m-l-16 m-t-8"
                     />
                 </div>
             </template>
-            <div
-                v-else
-                class="m-t-8"
-            >
-                <ipl-space
-                    color="secondary"
-                    class="layout horizontal center-vertical"
-                >
-                    <div class="max-width">Talent</div>
+            <template #footer>
+                <div style="max-width: 200px; margin: 0 auto">
                     <ipl-button
-                        icon="user-plus"
-                        small
+                        label="Save"
                         color="green"
-                        @click="addTalent('talent', $event)"
+                        type="submit"
+                        @click="onSave"
                     />
-                </ipl-space>
-                <talent-list-editor
-                    v-model:talent-list="selectedScheduleItem.talentIds"
-                    :talent-item-map="talentItemMap"
-                    color="secondary"
-                    class="m-l-16 m-t-8"
-                />
-            </div>
-        </template>
-        <template #footer>
-            <div style="max-width: 200px; margin: 0 auto">
-                <ipl-button
-                    label="Save"
-                    color="green"
-                    @click="onSave"
-                />
-            </div>
-        </template>
-    </ipl-dialog>
+                </div>
+            </template>
+        </ipl-dialog>
+    </form>
     <talent-select-dialog
         ref="talentSelectPopup"
         :style="floatingStyles"

@@ -1,39 +1,43 @@
 <template>
-    <ipl-dialog
-        :is-open="isOpen"
-        style="width: 500px"
-        @update:is-open="isOpen = $event"
-    >
-        <template #header>
-            <ipl-dialog-title
-                title="Edit talent"
-                @close="isOpen = $event"
-            />
-        </template>
-        <ipl-space color="secondary">
-            <ipl-message
-                v-if="talentItem == null"
-                type="warning"
-            >
-                The specified talent item couldn't be found.
-            </ipl-message>
-            <template v-else>
-                <talent-item-editor-form
-                    v-model="talentItem"
-                    ref="editorForm"
+    <form @submit.prevent>
+        <ipl-dialog
+            :is-open="isOpen"
+            style="width: 500px"
+            @update:is-open="isOpen = $event"
+        >
+            <template #header>
+                <ipl-dialog-title
+                    title="Edit talent"
+                    @close="isOpen = false"
                 />
             </template>
-        </ipl-space>
-        <template #footer>
-            <div style="max-width: 200px; margin: 0 auto">
-                <ipl-button
-                    color="green"
-                    label="Save"
-                    @click="onSave"
-                />
-            </div>
-        </template>
-    </ipl-dialog>
+                <ipl-space color="secondary">
+                    <ipl-message
+                        v-if="talentItem == null"
+                        type="warning"
+                    >
+                        The specified talent item couldn't be found.
+                    </ipl-message>
+                    <template v-else>
+                        <talent-item-editor-form
+                            v-model="talentItem"
+                            ref="editorForm"
+                        />
+                    </template>
+                </ipl-space>
+
+            <template #footer>
+                <div style="max-width: 200px; margin: 0 auto">
+                    <ipl-button
+                        color="green"
+                        type="submit"
+                        label="Save"
+                        @click="onSave"
+                    />
+                </div>
+            </template>
+        </ipl-dialog>
+    </form>
 </template>
 
 <script setup lang="ts">
@@ -51,6 +55,10 @@ const isOpen = ref(false);
 const talentItem = ref<TalentItem | null>(null);
 const editorForm = ref<InstanceType<typeof TalentItemEditorForm>>();
 let selectCallback: ((talentItem: TalentItem) => void) | null = null;
+
+function onTest(event: Event) {
+    console.log('!', event);
+}
 
 watch(isOpen, newValue => {
     if (!newValue) {
