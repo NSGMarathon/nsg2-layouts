@@ -77,6 +77,7 @@ const searchResults = computed(() => {
 function onNewTalent() {
     talentItemEditDialog?.value?.openForNew(talentItem => {
         selectCallback?.(talentItem);
+        isOpen.value = false;
     }, query.value);
 }
 

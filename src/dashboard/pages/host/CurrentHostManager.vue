@@ -20,7 +20,7 @@
             <ipl-button
                 label="Set new host"
                 color="green"
-                @click="talentSelectOpen = true"
+                @click="setNewHost"
             />
         </div>
         <div class="text-center m-t-8">
@@ -32,10 +32,7 @@
             />
         </div>
     </ipl-space>
-    <talent-select-dialog
-        v-model:is-open="talentSelectOpen"
-        @select="onTalentSelect"
-    />
+    <talent-select-dialog ref="talentSelectDialog" />
 </template>
 
 <script setup lang="ts">
@@ -53,10 +50,14 @@ const talentStore = useTalentStore();
 
 const currentHost = computed(() => talentStore.findTalentItemById(talentStore.currentHostId));
 
-const talentSelectOpen = ref(false);
+const talentSelectDialog = ref<InstanceType<typeof TalentSelectDialog>>();
+
+function setNewHost() {
+    talentSelectDialog.value?.open(onTalentSelect);
+}
+
 async function onTalentSelect(talentItem: TalentItem) {
     await sendMessage('talent:setCurrentHost', talentItem);
-    talentSelectOpen.value = false;
 }
 
 function editCurrentHost() {
