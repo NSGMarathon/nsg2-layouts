@@ -14,6 +14,8 @@ import { initCurrentTrackerDataStore } from 'client-shared/stores/CurrentTracker
 import { initTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 
+document.title = 'Host Layout Controls';
+
 (async () => {
     const app = createApp(HostPanel);
     app.use(createPinia());
