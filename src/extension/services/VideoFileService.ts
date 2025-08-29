@@ -1,9 +1,10 @@
 import type NodeCG from '@nodecg/types';
 import { readdir } from 'fs/promises';
 import path from 'node:path';
-import type { Configschema, Schedule, VideoFile, VideoFiles } from 'types/schemas';
+import type { Configschema, VideoFile, VideoFiles } from 'types/schemas';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import { ScheduleService } from './ScheduleService';
+import { DateTime } from 'luxon';
 
 export class VideoFileService extends HasNodecgLogger {
     private readonly videoFiles: NodeCG.ServerReplicantWithSchemaDefault<VideoFiles>;
@@ -22,11 +23,27 @@ export class VideoFileService extends HasNodecgLogger {
         this.loadVideoFilesOfType('interstitials');
     }
 
+    setInterstitialLastPlayed(file: VideoFile) {
+        const videoFileIndex = this.videoFiles.value.interstitials.findIndex(otherFile => file.path === otherFile.path);
+        if (videoFileIndex !== -1) {
+            this.videoFiles.value.interstitials[videoFileIndex] = {
+                ...this.videoFiles.value.interstitials[videoFileIndex],
+                lastPlayed: DateTime.utc().toISO()
+            };
+        }
+    }
+
     async loadVideoFilesOfType(type: keyof VideoFiles) {
         try {
-            this.videoFiles.value[type] = await this.loadVideoFiles(type === 'speedruns' ? this.preRecordedSpeedrunDirectory : this.interstitialVideoDirectory);
             if (type === 'speedruns') {
+                this.videoFiles.value.speedruns = await this.loadVideoFiles(this.preRecordedSpeedrunDirectory);
                 this.checkScheduleVideoFiles();
+            } else {
+                const interstitialVideos = await this.loadVideoFiles(this.interstitialVideoDirectory);
+                this.videoFiles.value.interstitials = interstitialVideos.map(video => ({
+                    ...video,
+                    lastPlayed: this.videoFiles.value.interstitials.find(otherVideo => video.path === otherVideo.path)?.lastPlayed
+                }));
             }
         } catch (e) {
             this.logError('Failed to load interstitial videos', e);

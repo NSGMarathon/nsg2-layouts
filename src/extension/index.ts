@@ -60,7 +60,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new CountdownService(nodecg);
     const videoFileService = new VideoFileService(nodecg, scheduleService);
     const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
-    const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService);
+    const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService, videoFileService);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);

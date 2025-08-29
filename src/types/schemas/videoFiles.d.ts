@@ -8,7 +8,10 @@
 
 export interface VideoFiles {
 	speedruns: VideoFile[];
-	interstitials: VideoFile1[];
+	interstitials: (VideoFile1 & {
+		lastPlayed?: string | null;
+		[k: string]: unknown;
+	})[];
 }
 export interface VideoFile {
 	name: string;
@@ -19,4 +22,5 @@ export interface VideoFile1 {
 	name: string;
 	path: string;
 	type: 'LOCAL_FILE';
+	[k: string]: unknown;
 }

@@ -13,9 +13,19 @@
         "interstitials": {
             "type": "array",
             "items": {
-                "$ref": "defs/VideoFile.json",
-                "additionalProperties": false
+                "allOf": [
+                    {
+                        "$ref": "./defs/VideoFile.json"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "lastPlayed": { "type": ["string", "null"] }
+                        }
+                    }
+                ]
             }
+
         }
     },
     "required": ["speedruns", "interstitials"],

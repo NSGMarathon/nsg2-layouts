@@ -33,13 +33,22 @@
             :class="{ loading: isLoading }"
         >
             <ipl-space
-                v-for="(file, i) in videoFileStore.videoFiles.interstitials"
-                :key="i"
+                v-for="file in videoFiles"
+                :key="file.path"
                 clickable
                 color="secondary"
                 @click="onSelect(file)"
             >
-                {{ file.name }}
+                <b>{{ file.name }}</b><br>
+                <small v-if="file.parsedLastPlayed == null">
+                    Never played before
+                </small>
+                <small
+                    v-else
+                    :title="file.parsedLastPlayed.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)"
+                >
+                    Last played {{ file.parsedLastPlayed.toRelative() }}
+                </small>
             </ipl-space>
         </div>
     </ipl-dialog>
@@ -56,6 +65,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import { InterstitialVideoState } from 'types/schemas/interstitialVideoState';
+import { DateTime } from 'luxon';
 
 library.add(faRotate);
 
@@ -67,6 +77,11 @@ const returnToSceneOptions = computed(() => [
     { name: 'Intermission', value: 'INTERMISSION' },
     { name: 'Preview Scene', value: 'PREVIEW', enabled: obsStore.obsState.previewScene != null }
 ]);
+
+const videoFiles = computed(() => videoFileStore.videoFiles.interstitials.map(video => ({
+    ...video,
+    parsedLastPlayed: video.lastPlayed == null ? null : DateTime.fromISO(video.lastPlayed)
+})));
 
 const isOpen = ref(false);
 const isLoading = ref(false);

@@ -4,24 +4,28 @@ import { ObsConnectorService } from './ObsConnectorService';
 import { JsonObject } from 'type-fest';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import { InterstitialVideoState } from 'types/schemas/interstitialVideoState';
+import { VideoFileService } from './VideoFileService';
 
 const TIME_REMAINING_BEFORE_INTERSTITIAL_VIDEO_STOP_MILLIS = 1500;
 
 export class InterstitialVideoPlayerService extends HasNodecgLogger {
     private readonly interstitialVideoState: NodeCG.ServerReplicantWithSchemaDefault<InterstitialVideoState>;
     private readonly obsConnectorService: ObsConnectorService;
+    private readonly videoFileService: VideoFileService;
     private readonly mediaSourceName: string;
     private mediaSourceUpdateInterval: NodeJS.Timeout | undefined;
     private playlistPlayTimeout: NodeJS.Timeout | undefined;
 
     constructor(
         nodecg: NodeCG.ServerAPI<Configschema>,
-        obsConnectorService: ObsConnectorService
+        obsConnectorService: ObsConnectorService,
+        videoFileService: VideoFileService
     ) {
         super(nodecg);
 
         this.interstitialVideoState = nodecg.Replicant('interstitialVideoState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<InterstitialVideoState>;
         this.obsConnectorService = obsConnectorService;
+        this.videoFileService = videoFileService;
         this.mediaSourceName = `${nodecg.bundleName} - Interstitial Video`;
         this.mediaSourceUpdateInterval = undefined;
         this.playlistPlayTimeout = undefined;
@@ -42,6 +46,7 @@ export class InterstitialVideoPlayerService extends HasNodecgLogger {
             throw new Error('OBS must be set to Studio Mode to continue');
         }
 
+        this.videoFileService.setInterstitialLastPlayed(file);
         this.interstitialVideoState.value = {
             isRunning: true,
             returnToScene
