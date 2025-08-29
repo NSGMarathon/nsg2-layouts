@@ -57,10 +57,12 @@ export class VideoFileService extends HasNodecgLogger {
 
         const dirContents = await readdir(dir);
 
-        return dirContents.map(fileName => ({
-            type: 'LOCAL_FILE',
-            name: fileName,
-            path: path.join(dir, fileName)
-        }));
+        return dirContents
+            .filter(fileName => !fileName.startsWith('.'))
+            .map(fileName => ({
+                type: 'LOCAL_FILE',
+                name: fileName,
+                path: path.join(dir, fileName)
+            }));
     }
 }
