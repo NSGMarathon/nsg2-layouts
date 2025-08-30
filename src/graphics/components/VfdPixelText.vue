@@ -141,12 +141,13 @@ const scrollText = () => {
 };
 watch(() => [props.textContent, characterCount.value] as [string | undefined | null, number], ([newText, newCharacterCount]) => {
     currentTextPosition = 0;
-    scrollingTextRef.value!.style.transform = 'translate3D(0, 0, 0)';
+    if (scrollingTextRef.value) {
+        scrollingTextRef.value.style.transform = 'translate3D(0, 0, 0)';
+    }
     textScrollEventBus.off('scroll', scrollText);
     clearTimeout(textScrollUnpauseTimeout);
 
     if (newText == null || useFittedContent.value) {
-        textScrollEventBus.off('scroll', scrollText);
         return;
     }
 
