@@ -5,7 +5,7 @@ export function useTweenedNumber(number: MaybeRefOrGetter<number>): Ref<number> 
     const tweenedNumber = ref(toValue(number));
 
     watch(() => toValue(number), newValue => {
-        gsap.to(tweenedNumber, { duration: 0.5, value: newValue, roundProps: { value: 1 }, ease: 'power2.inOut' });
+        gsap.to(tweenedNumber, { duration: 0.5, value: newValue, roundProps: { value: 1 }, ease: 'expo.out' });
     });
 
     return tweenedNumber;
