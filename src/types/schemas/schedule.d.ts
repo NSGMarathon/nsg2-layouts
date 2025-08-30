@@ -70,6 +70,7 @@ export interface OtherScheduleItem {
 	id: string;
 	externalId?: string | null;
 	title: string;
+	description?: string | null;
 	type: 'SETUP' | 'OTHER';
 	twitchCategory?: null | {
 		name: string;

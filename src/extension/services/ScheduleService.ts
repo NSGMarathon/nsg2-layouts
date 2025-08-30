@@ -11,6 +11,7 @@ import { SpeedrunService } from './SpeedrunService';
 import { findActiveScheduleItem } from '../helpers/ScheduleHelpers';
 import { IgdbService } from './IgdbService';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
+import { isBlank } from 'shared/StringHelper';
 
 // todo: calculate scheduled start times for schedule items manually
 
@@ -152,6 +153,7 @@ export class ScheduleService extends HasNodecgLogger {
             }
         } else {
             normalizedItem.talentIds = normalizedItem.talentIds.filter(talentId => this.talentService.talentItemExists(talentId.id));
+            normalizedItem.description = isBlank(normalizedItem.description) ? null : normalizedItem.description;
         }
 
         this.schedule.value.items[scheduleItemIndex] = normalizedItem;

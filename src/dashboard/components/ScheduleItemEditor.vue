@@ -69,14 +69,20 @@
                         </div>
                     </template>
                     <template v-else>
+                        <ipl-input
+                            v-model="selectedScheduleItem.description"
+                            name="description"
+                            label="Description"
+                            class="m-t-4"
+                        />
                         <twitch-category-select
                             v-model="selectedScheduleItem.twitchCategory"
                             :schedule-item-title="selectedScheduleItem.title"
                             color="primary"
-                            class="max-width m-t-4"
+                            class="max-width m-t-2"
                         />
                     </template>
-                    <div class="layout horizontal m-t-4 center-horizontal">
+                    <div class="layout horizontal center-horizontal">
                         <duration-input
                             v-model="selectedScheduleItem.estimate"
                             label="Estimate"

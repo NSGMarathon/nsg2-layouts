@@ -5,6 +5,7 @@
         "id": { "type": "string" },
         "externalId": { "type": ["string", "null"] },
         "title": { "type": "string" },
+        "description": { "type": ["string", "null"] },
         "type": {
             "type": "string",
             "enum": ["SETUP", "OTHER"]
