@@ -3,60 +3,46 @@
         <div class="title">
             <span>Next Up</span>
         </div>
-        <template
-            v-for="(item, i) in nextScheduleItems"
-        >
+        <template v-for="(item, i) in nextScheduleItems">
             <div class="schedule-item layout horizontal center-vertical">
-                <template v-if="item != null">
-                    <div
-                        v-if="i > 0"
-                        class="schedule-item-time-delta layout horizontal"
-                    >
-                        <div class="in">IN</div>
-                        <seven-segment-digits
-                            :digit-count="2"
-                            :value="scheduleItemTimeDeltas[i - 1] >= 60 ? Math.round(scheduleItemTimeDeltas[i - 1] / 60) : scheduleItemTimeDeltas[i - 1]"
-                            class="delta-digits"
-                        />
-                        <div class="m-l-2">
-                            <div class="unit" :class="{ lit: scheduleItemTimeDeltas[i - 1] < 60 }">MIN</div>
-                            <div class="unit" :class="{ lit: scheduleItemTimeDeltas[i - 1] >= 60 }">HR<span :class="{ unlit: Math.round(scheduleItemTimeDeltas[i - 1] / 60) === 1 }">S</span></div>
-                        </div>
+                <div
+                    v-if="i > 0"
+                    class="schedule-item-time-delta layout horizontal"
+                >
+                    <div class="in" :class="{ lit: item != null }">IN</div>
+                    <seven-segment-digits
+                        :digit-count="2"
+                        :value="item == null ? null : scheduleItemTimeDeltas[i] >= 60 ? Math.round(scheduleItemTimeDeltas[i] / 60) : scheduleItemTimeDeltas[i]"
+                        class="delta-digits"
+                    />
+                    <div class="m-l-2">
+                        <div class="unit" :class="{ lit: item != null && scheduleItemTimeDeltas[i] < 60 }">MIN</div>
+                        <div class="unit" :class="{ lit: item != null && scheduleItemTimeDeltas[i] >= 60 }">HR<span :class="{ unlit: Math.round(scheduleItemTimeDeltas[i] / 60) === 1 }">S</span></div>
                     </div>
-                    <div class="layout vertical center-vertical grow">
-                        <vfd-pixel-text
-                            :font-size="27"
-                            :text-content="item.title"
-                        />
-                        <div
-                            v-if="item.type === 'SPEEDRUN' || item.talentIds.length > 0"
-                            class="layout horizontal"
-                        >
-                            <template v-if="item.type === 'SPEEDRUN'">
-                                <div class="max-width m-t-4">
-                                    <vfd-pixel-text
-                                        :font-size="22"
-                                        :text-content="talentStore.formatSpeedrunTeamList(item)"
-                                    />
-                                    <vfd-pixel-text
-                                        :font-size="22"
-                                        :text-content="item.category"
-                                    />
-                                </div>
-                                <speedrun-estimate-display
-                                    :estimate="item.estimate"
-                                    class="estimate-display"
-                                />
-                            </template>
+                </div>
+                <div class="layout vertical center-vertical grow">
+                    <vfd-pixel-text
+                        :font-size="27"
+                        :text-content="item?.title"
+                    />
+                    <div class="layout horizontal">
+                        <div class="max-width m-t-4">
                             <vfd-pixel-text
-                                v-else
                                 :font-size="22"
-                                :text-content="talentStore.formatTalentIdList(item.talentIds, 4)"
-                                class="max-width m-t-4"
+                                :text-content="formatTalentList(item)"
+                            />
+                            <vfd-pixel-text
+                                :font-size="22"
+                                :text-content="item?.type === 'SPEEDRUN' ? item.category : item?.description"
                             />
                         </div>
+                        <speedrun-estimate-display
+                            :estimate="item?.estimate"
+                            :setup-time="item?.setupTime"
+                            class="estimate-display"
+                        />
                     </div>
-                </template>
+                </div>
             </div>
             <div class="separator" />
         </template>
@@ -82,6 +68,7 @@ import SpeedrunEstimateDisplay from 'components/SpeedrunEstimateDisplay.vue';
 import { Duration } from 'luxon';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { Configschema } from 'types/schemas';
+import { isBlank } from 'shared/StringHelper';
 
 const scheduleUrl = (nodecg.bundleConfig as Configschema).event?.scheduleUrl ?? 'schedule.nsgmarathon.com';
 const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
@@ -91,29 +78,40 @@ const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();
 const talentStore = useTalentStore();
 
+const timerFinished = computed(() => timerStore.timer.state === 'FINISHED');
+
+function isIgnorableScheduleItem(scheduleItem: ScheduleItem | null) {
+    return scheduleItem != null
+        && scheduleItem.type !== 'SPEEDRUN'
+        && isBlank(scheduleItem.description)
+        && scheduleItem.talentIds.length === 0;
+}
+
 // When seeking to the next speedrun, the timer state may be reset before or after the active speedrun is changed.
 // If the timer state is reset before the active speedrun is switched, the schedule may briefly flash an incorrect state before switching to the correct one.
 // Due to this, we wait 50ms before fully committing to a schedule update to ensure no other state updates come in within that timeframe.
 let scheduleUpdateTimeout: number | undefined = undefined;
 const nextScheduleItems = ref<(ScheduleItem | null)[]>([null, null, null, null]);
 watchEffect(() => {
-    if (scheduleStore.activeSpeedrunIndex === -1) return [];
+    if (scheduleStore.activeSpeedrunIndex === -1) return;
 
-    let newNextScheduleItems: ScheduleItem[] = [];
-    const interstitials: ScheduleItem[] = scheduleStore.interstitialsBeforeActiveRun.filter(interstitial => !interstitial.completed);
-    if (interstitials.length >= maxScheduleItemCount) {
-        newNextScheduleItems = interstitials.slice(0, maxScheduleItemCount);
+    let newNextScheduleItems: (ScheduleItem | null)[] = scheduleStore.interstitialsBeforeActiveRun
+        .filter(interstitial => !interstitial.completed && !isIgnorableScheduleItem(interstitial))
+        .slice(0, maxScheduleItemCount);
+
+    if (newNextScheduleItems.length < maxScheduleItemCount && !timerFinished.value) {
+        newNextScheduleItems.push(scheduleStore.activeSpeedrun);
     }
-    if (timerStore.timer.state === 'FINISHED') {
-        newNextScheduleItems = interstitials
-            .concat(scheduleStore.schedule.items.slice(scheduleStore.activeSpeedrunIndex + 1, scheduleStore.activeSpeedrunIndex + 1 + maxScheduleItemCount - interstitials.length));
-    } else {
-        newNextScheduleItems = interstitials
-            .concat(scheduleStore.activeSpeedrun!)
-            .concat(scheduleStore.schedule.items.slice(scheduleStore.activeSpeedrunIndex + 1, scheduleStore.activeSpeedrunIndex + maxScheduleItemCount - interstitials.length));
-    }
-    if (newNextScheduleItems.length !== maxScheduleItemCount) {
-        newNextScheduleItems = Array.from({ length: maxScheduleItemCount }, (_, i) => newNextScheduleItems[i] ?? null);
+
+    let scheduleItemIndex = scheduleStore.activeSpeedrunIndex + 1;
+    while (newNextScheduleItems.length < maxScheduleItemCount) {
+        const scheduleItem = scheduleStore.schedule.items[scheduleItemIndex];
+        if (scheduleItem == null) {
+            newNextScheduleItems.push(null);
+        } else if (!isIgnorableScheduleItem(scheduleItem)) {
+            newNextScheduleItems.push(scheduleItem);
+        }
+        scheduleItemIndex++;
     }
 
     clearTimeout(scheduleUpdateTimeout);
@@ -121,20 +119,58 @@ watchEffect(() => {
 });
 
 const scheduleItemTimeDeltas = computed(() => {
-     let minutes = 0;
-     const result: number[] = [];
-     nextScheduleItems.value.forEach(scheduleItem => {
-         if (scheduleItem == null) {
-             result.push(minutes);
-             return;
-         }
-         const parsedEstimate = Duration.fromISO(scheduleItem.estimate).shiftTo('minutes');
-         const parsedSetupTime = Duration.fromISO(scheduleItem.setupTime ?? 'PT0M').shiftTo('minutes');
-         minutes += Math.round(parsedEstimate.minutes + parsedSetupTime.minutes);
-         result.push(minutes);
-     });
-     return result;
+    let scheduleItemIndex = nextScheduleItems.value[0] == null
+        ? -1
+        : scheduleStore.schedule.items.findIndex(scheduleItem => scheduleItem.id === nextScheduleItems.value[0]?.id);
+
+    if (scheduleItemIndex === -1) {
+         return Array.from({ length: maxScheduleItemCount }, () => 0);
+    }
+
+    const priorInterstitials = scheduleStore.interstitialsBefore(scheduleItemIndex)
+        .filter(interstitial => !interstitial.completed);
+
+    const getScheduleItemLength = (scheduleItem: ScheduleItem): number => {
+        const parsedEstimate = Duration.fromISO(scheduleItem.estimate).shiftTo('minutes').minutes;
+        const parsedSetupTime = Duration.fromISO(scheduleItem.setupTime ?? 'PT0M').shiftTo('minutes').minutes;
+
+        return Math.round(parsedEstimate + parsedSetupTime);
+    }
+
+    let minutes = priorInterstitials.reduce((result, interstitial) => {
+        return result + getScheduleItemLength(interstitial);
+    }, 0);
+    const result: number[] = [];
+    while (result.length < maxScheduleItemCount) {
+        const scheduleItem = scheduleStore.schedule.items[scheduleItemIndex];
+        if (scheduleItem == null) {
+            result.push(minutes);
+            continue;
+        }
+
+        if (!isIgnorableScheduleItem(scheduleItem)) {
+            result.push(minutes);
+        }
+
+        minutes += getScheduleItemLength(scheduleItem);
+
+        scheduleItemIndex++;
+    }
+
+    return result;
 });
+
+function formatTalentList(scheduleItem: ScheduleItem | null) {
+    if (scheduleItem == null) {
+        return '';
+    } else if (scheduleItem.type === 'SPEEDRUN') {
+        return talentStore.formatSpeedrunTeamList(scheduleItem);
+    } else if (scheduleItem.talentIds.length === 0) {
+        return '';
+    } else {
+        return talentStore.formatTalentIdList(scheduleItem.talentIds);
+    }
+}
 </script>
 
 <style scoped lang="scss">
@@ -208,9 +244,13 @@ const scheduleItemTimeDeltas = computed(() => {
     }
 
     .in {
-        color: colors.$vfd-teal;
+        color: colors.$vfd-teal-unlit;
         margin-bottom: -2px;
         margin-right: 2px;
+
+        &.lit {
+            color: colors.$vfd-teal;
+        }
     }
 
     .unit {

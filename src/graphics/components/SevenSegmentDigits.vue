@@ -4,7 +4,7 @@
         :class="{ flash: props.flash, [`color-${props.color}`]: true }"
     >
         <span class="unlit">{{ unlitSegment ?? '8'.repeat(props.digitCount ?? 1) }}</span>
-        <span class="digits">{{ props.padDigits ? String(props.value ?? '').padStart(props.digitCount ?? 1, '0') : props.value }}</span>
+        <span class="digits">{{ props.padDigits && props.value != null ? String(props.value ?? '').padStart(props.digitCount ?? 1, '0') : props.value }}</span>
         <span v-if="props.alwaysLitSegment != null" class="always-lit-segment">{{ alwaysLitSegment }}</span>
     </div>
 </template>

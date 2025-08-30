@@ -67,6 +67,19 @@ export const useScheduleStore = defineStore('schedule', {
             }
             return result.reverse();
         },
+        interstitialsBefore(state) {
+            return (scheduleItemIndex: number) => {
+                if (scheduleItemIndex <= 0) return [];
+
+                const result: OtherScheduleItem[] = [];
+                for (let i = scheduleItemIndex - 1; i >= 0; i--) {
+                    const scheduleItem = state.schedule.items[i];
+                    if (scheduleItem.type === 'SPEEDRUN') break;
+                    result.push(scheduleItem);
+                }
+                return result.reverse();
+            }
+        },
         activeSpeedrunTalentIds(state): string[] {
             const talentIds = new Set<string>();
             if (state.activeSpeedrun != null) {

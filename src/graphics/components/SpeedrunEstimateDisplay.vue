@@ -3,22 +3,27 @@
         <div class="estimate-label">EST.</div>
         <seven-segment-digits
             :digit-count="2"
-            :value="parsedEstimate?.hours === 0 ? null : parsedEstimate?.hours"
+            :value="parsedEstimate.hours === 0 ? null : parsedEstimate.hours"
             class="estimate-digits m-l-4"
         />
         <div
             class="estimate-digit-label"
-            :class="{ unlit: parsedEstimate?.hours === 0 }"
+            :class="{ unlit: parsedEstimate.hours === 0 }"
         >
             H
         </div>
         <seven-segment-digits
             :digit-count="2"
-            :value="Math.round(parsedEstimate?.minutes ?? 0)"
+            :value="parsedEstimate.hours === 0 && parsedEstimate.minutes === 0 ? null : Math.round(parsedEstimate.minutes ?? 0)"
             pad-digits
             class="estimate-digits"
         />
-        <div class="estimate-digit-label">M</div>
+        <div
+            class="estimate-digit-label"
+            :class="{ unlit: parsedEstimate.hours === 0 && parsedEstimate.minutes === 0 }"
+        >
+            M
+        </div>
     </div>
 </template>
 
@@ -29,12 +34,28 @@ import { Duration } from 'luxon';
 
 const props = defineProps<{
     estimate?: string
+    setupTime?: string | null
 }>();
 
-const parsedEstimate = computed(() =>
-    props.estimate == null
-        ? { minutes: 0, hours: 0 }
-        : Duration.fromISO(props.estimate).shiftTo('minutes', 'hours').toObject());
+const asDurationWithLength = (value: string | null | undefined) => {
+    if (value == null) {
+        return null;
+    }
+
+    const parsedDuration = Duration.fromISO(value);
+
+    if (parsedDuration.as('seconds') > 0) {
+        return parsedDuration.shiftTo('minutes', 'hours').toObject();
+    } else {
+        return null;
+    }
+};
+
+const parsedEstimate = computed(() => {
+    return asDurationWithLength(props.estimate)
+        ?? asDurationWithLength(props.setupTime)
+        ?? { minutes: 0, hours: 0 };
+});
 </script>
 
 <style scoped lang="scss">
