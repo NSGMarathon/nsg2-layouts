@@ -15,6 +15,7 @@
                 {{ formatCurrencyAmount(donationStore.donationTotal, true) }}
             </ipl-space>
             <host-active-run-display class="m-t-8" />
+            <todo-list-status-display class="m-t-8" />
         </div>
         <rundown-display readonly />
     </div>
@@ -44,6 +45,7 @@ import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
 import HostActiveRunDisplay from './HostActiveRunDisplay.vue';
 import TwitchCommercialPlayer from '../../components/TwitchCommercialPlayer.vue';
 import InterstitialVideoPlayerDialog from '../../components/InterstitialVideoPlayerDialog.vue';
+import TodoListStatusDisplay from './TodoListStatusDisplay.vue';
 
 const donationStore = useDonationStore();
 
