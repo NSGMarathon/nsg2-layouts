@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["techSetup"],
+    "properties": {
+        "techSetup": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "items"],
+                "properties": {
+                    "name": { "type": "string" },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["name", "completed"],
+                            "properties": {
+                                "name": { "type": "string" },
+                                "completed": { "type": "boolean" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "default": {
+        "techSetup": []
+    }
+}

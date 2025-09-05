@@ -54,6 +54,8 @@ export interface MessageInputMap {
 
     'speedrunPlaylist:play': never
     'speedrunPlaylist:stop': never
+
+    'todo:setCompleted': { categoryName: string, listItemName: string, completed: boolean }
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;

@@ -13,6 +13,7 @@ import { TimerService } from './TimerService';
 import { Layout, layouts } from 'types/Layouts';
 import { ObsConnectorService } from './ObsConnectorService';
 import { DateTime } from 'luxon';
+import { TodoListService } from './TodoListService';
 
 export class SpeedrunService {
     private readonly schedule: NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
@@ -20,15 +21,23 @@ export class SpeedrunService {
     private readonly activeGameLayouts: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
     private readonly scheduleService: ScheduleService;
     private readonly timerService: TimerService;
+    private readonly todoListService: TodoListService;
     readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
 
-    constructor(nodecg: NodeCG.ServerAPI<Configschema>, scheduleService: ScheduleService, timerService: TimerService, obsConnectorService: ObsConnectorService) {
+    constructor(
+        nodecg: NodeCG.ServerAPI<Configschema>,
+        scheduleService: ScheduleService,
+        timerService: TimerService,
+        obsConnectorService: ObsConnectorService,
+        todoListService: TodoListService
+    ) {
         this.schedule = nodecg.Replicant('schedule') as unknown as NodeCG.ServerReplicantWithSchemaDefault<Schedule>;
         this.activeSpeedrun = nodecg.Replicant('activeSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
         this.nextSpeedrun = nodecg.Replicant('nextSpeedrun') as unknown as NodeCG.ServerReplicantWithSchemaDefault<NextSpeedrun>;
         this.activeGameLayouts = nodecg.Replicant('activeGameLayouts') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
         this.scheduleService = scheduleService;
         this.timerService = timerService;
+        this.todoListService = todoListService;
 
         this.schedule.on('change', newValue => {
             if (newValue.items.length === 0) return;
@@ -118,6 +127,7 @@ export class SpeedrunService {
         this.activeSpeedrun.value = cloneDeep(scheduleItem);
         if (activeRunChanging) {
             this.timerService.reset();
+            this.todoListService.reset();
         }
     }
 

@@ -99,6 +99,24 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
       "webhookUrl": "https://discord.com/api/webhooks/{...}",
       "mentions": ["87494390724964352", "&152019430073827328"]
     }
+  },
+  "todoList": {
+    "techSetup": [
+      {
+        "name": "Audio",
+        "items": [
+          { "name": "Runner Mix" },
+          { "name": "Stream Mix" }
+        ]
+      },
+      {
+        "name": "Video",
+        "items": [
+          { "name": "Runner Camera" },
+          { "name": "Layouts Ready" }
+        ]
+      }
+    ]
   }
 }
 ```

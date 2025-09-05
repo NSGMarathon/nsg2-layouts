@@ -152,6 +152,35 @@
                     }
                 }
             }
+        },
+        "todoList": {
+            "type": "object",
+            "properties": {
+                "techSetup": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["name", "items"],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": ["name"],
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

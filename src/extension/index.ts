@@ -34,6 +34,8 @@ import { SpeedrunPlaylistController } from './controllers/SpeedrunPlaylistContro
 import { DiscordWebhookClient } from './clients/DiscordWebhookClient';
 import { InterstitialVideoPlayerService } from './services/InterstitialVideoPlayerService';
 import { InterstitialVideoPlayerController } from './controllers/InterstitialVideoPlayerController';
+import { TodoListService } from './services/TodoListService';
+import { TodoListController } from './controllers/TodoListController';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -49,7 +51,8 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const scheduleService = new ScheduleService(nodecg, oengusClient, talentService, igdbService);
     const obsConnectorService = new ObsConnectorService(nodecg);
     const timerService = new TimerService(nodecg, obsConnectorService, scheduleService);
-    const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService, obsConnectorService);
+    const todoListService = new TodoListService(nodecg);
+    const speedrunService = new SpeedrunService(nodecg, scheduleService, timerService, obsConnectorService, todoListService);
     scheduleService.init(speedrunService);
     const nameplateAssignmentService = new NameplateAssignmentService(nodecg);
     new TrackerService(nodecg);
@@ -75,4 +78,5 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new VideoFileController(nodecg, videoFileService);
     new SpeedrunPlaylistController(nodecg, speedrunPlaylistService);
     new InterstitialVideoPlayerController(nodecg, interstitialVideoPlayerService);
+    new TodoListController(nodecg, todoListService);
 };

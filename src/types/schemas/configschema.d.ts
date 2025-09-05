@@ -92,6 +92,17 @@ export interface Configschema {
 		};
 		[k: string]: unknown;
 	};
+	todoList?: {
+		techSetup?: {
+			name: string;
+			items: {
+				name: string;
+				[k: string]: unknown;
+			}[];
+			[k: string]: unknown;
+		}[];
+		[k: string]: unknown;
+	};
 	[k: string]: unknown;
 }
 export interface ChannelItem {
