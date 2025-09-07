@@ -2,6 +2,7 @@
     <ipl-expanding-space
         v-if="todoListStore.todoList.techSetup.length > 0"
         v-model:expanded="isExpanded"
+        v-bind="$attrs"
     >
         <template #title>
             <!-- Kind of ridiculous, but without this the header grows by 1px when any badge is added -->
