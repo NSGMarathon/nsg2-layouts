@@ -26,3 +26,11 @@ body {
 .bg-panel {
     background: linear-gradient(to bottom, #151515 0%, #111111 100%);
 }
+
+.bg-panel-success {
+    background: linear-gradient(to bottom, #00A651 0%, #00BF5D 100%);
+}
+
+.bg-panel-warning {
+    background: linear-gradient(to bottom, #ffc700 0%, #FFE034 100%);
+}

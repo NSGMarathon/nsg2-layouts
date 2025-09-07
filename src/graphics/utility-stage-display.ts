@@ -6,6 +6,8 @@ import { createPinia } from 'pinia';
 import StageDisplayGraphic from './pages/utility-stage-display/StageDisplayGraphic.vue';
 import { initTodoListStore } from 'client-shared/stores/TodoListStore';
 import { initStageDisplayStore } from 'client-shared/stores/StageDisplayStore';
+import { initScheduleStore } from 'client-shared/stores/ScheduleStore';
+import { initTalentStore } from 'client-shared/stores/TalentStore';
 
 (async () => {
     const app = createApp(StageDisplayGraphic);
@@ -13,7 +15,9 @@ import { initStageDisplayStore } from 'client-shared/stores/StageDisplayStore';
     app.use(createPinia());
     await Promise.all([
         initTodoListStore(),
-        initStageDisplayStore()
+        initStageDisplayStore(),
+        initScheduleStore(),
+        initTalentStore()
     ]);
     app.mount('#app');
 })();

@@ -43,19 +43,73 @@
         </div>
         <div class="secondary-column">
             <div class="bg-panel flavor-text">
-                <div class="event-name">{{ eventName }}</div>
-                <div>
-                    May the odds be in your favor.
+                <div class="event-name layout horizontal center-vertical center-horizontal">{{ eventName }}</div>
+                <div class="scene-name-display-wrapper layout horizontal center-vertical center-horizontal">
+                    <opacity-swap-transition>
+                        <div v-if="!previewModeEnabled">
+                            May the odds be in your favor.
+                        </div>
+                        <div v-else>
+                            <fitted-content
+                                :max-width="useWideLayout ? 320 : bodySize.width - 200"
+                                :align="useWideLayout ? 'center' : 'right'"
+                            >
+                                <b>Program:</b> {{ stageDisplayStore.obsState.currentScene ?? 'Unknown!' }}
+                            </fitted-content>
+                            <fitted-content
+                                :max-width="useWideLayout ? 320 : bodySize.width - 200"
+                                :align="useWideLayout ? 'center' : 'right'"
+                            >
+                                <font-awesome-icon :icon="useWideLayout ? 'caret-left' : 'caret-down'" class="m-r-8" /><b>Preview:</b> {{ stageDisplayStore.obsState.previewScene ?? 'Unknown!' }}
+                            </fitted-content>
+                        </div>
+                    </opacity-swap-transition>
                 </div>
             </div>
-            <size-displaying-block
-                class="chat-placeholder"
-                :style="{ opacity: placeholderOpacity }"
-            >
-                <template #label>
-                    Chat Window
-                </template>
-            </size-displaying-block>
+            <div class="chat-placeholder">
+                <opacity-swap-transition>
+                    <div
+                        v-if="previewModeEnabled"
+                        class="chat-overlays"
+                    >
+                        <div
+                            v-if="scheduleStore.interstitialsBeforeActiveRun.length > 0"
+                            class="chat-overlay"
+                        >
+                            <div class="chat-overlay-title bg-panel">
+                                Coming up before this run...
+                            </div>
+                            <div
+                                v-for="interstitial of scheduleStore.interstitialsBeforeActiveRun"
+                                class="interstitial bg-panel"
+                                :class="{ completed: interstitial.completed }"
+                            >
+                                <div class="title">{{ interstitial.title }}</div>
+                                <div>{{ interstitial.description }}</div>
+                                <div v-if="interstitial.talentIds.length > 0">Featuring {{ talentStore.formatTalentIdList(interstitial.talentIds, 4) }}</div>
+                            </div>
+                        </div>
+                        <div class="chat-overlay">
+                            <div class="chat-overlay-title bg-panel">
+                                The team is setting up...
+                            </div>
+                            <div
+                                v-for="category in todoListStore.techSetupTodoWithCompletionInfo.categories"
+                                class="todo-category bg-panel"
+                                :class="{ 'bg-panel-success': category.allCompleted }"
+                            >
+                                <div class="title">{{ category.name }}</div>
+                                <div class="count"><span class="completed-count">{{ category.completedCount }}</span> / {{ category.items.length }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </opacity-swap-transition>
+                <size-displaying-block :style="{ opacity: placeholderOpacity }">
+                    <template #label>
+                        Chat Window
+                    </template>
+                </size-displaying-block>
+            </div>
         </div>
     </div>
 </template>
@@ -67,10 +121,25 @@ import SizeDisplayingBlock from 'components/utility/SizeDisplayingBlock.vue';
 import { useElementSize } from '../../helpers/useElementSize';
 import { computed, ref } from 'vue';
 import OpacitySwapTransition from 'components/OpacitySwapTransition.vue';
+import FittedContent from 'components/FittedContent.vue';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons/faCaretDown';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
+import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
+import { useTalentStore } from 'client-shared/stores/TalentStore';
+import { useTodoListStore } from 'client-shared/stores/TodoListStore';
+
+library.add(faCaretDown, faCaretLeft);
 
 const eventName = (nodecg.bundleConfig as Configschema).event?.name ?? 'Unnamed Event!';
 
 const stageDisplayStore = useStageDisplayStore();
+const scheduleStore = useScheduleStore();
+const talentStore = useTalentStore();
+const todoListStore = useTodoListStore();
+
+const previewModeEnabled = computed(() => stageDisplayStore.stageDisplayState.mode === 'PREVIEW');
 
 // We increment this counter to make this alert flash without actually changing its contents
 // It's a little dinky, but it works
@@ -79,11 +148,13 @@ nodecg.listenFor('stage-display:flash', () => {
     alertFlashCounter.value++;
 });
 
+// todo: vary message font size based on character count
 const bodySize = useElementSize(() => document.body);
+const useWideLayout = computed(() => bodySize.value.width / bodySize.value.height > 1);
 const videoSize = computed(() => {
     const aspect = 16 / 9;
 
-    if (bodySize.value.width / bodySize.value.height > 1) {
+    if (useWideLayout.value) {
         const maxWidth = bodySize.value.width - 354;
         const maxHeight = bodySize.value.height - 154;
 
@@ -144,6 +215,10 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
         margin-top: 4px;
         flex-grow: 1;
     }
+
+    .flavor-text {
+        padding: 8px;
+    }
 }
 
 @media (max-aspect-ratio: 1 / 1) {
@@ -161,6 +236,11 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
         order: -3;
         display: flex;
         justify-content: space-between;
+        padding: 8px 16px;
+
+        .scene-name-display-wrapper {
+            text-align: right;
+        }
     }
 
     .video-placeholder {
@@ -204,10 +284,15 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
 
 .flavor-text {
     text-align: center;
-    padding: 8px;
+    font-size: 1.25em;
+    line-height: 1.1em;
 
     .event-name {
         font-weight: 700;
+    }
+
+    .scene-name-display-wrapper {
+        min-height: 3.3em;
     }
 }
 
@@ -287,5 +372,94 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
     text-align: center;
     overflow-wrap: anywhere;
     position: absolute;
+}
+
+.chat-placeholder {
+    position: relative;
+}
+
+.chat-placeholder .size-displaying-block {
+    width: 100%;
+    height: 100%;
+}
+
+.chat-overlays {
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 1.25em;
+}
+
+.chat-overlay-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25em;
+}
+
+.chat-overlay {
+    width: 400px;
+}
+
+.chat-overlay > * {
+    margin: 0 4px;
+    padding: 8px;
+
+    &:first-child {
+        margin: 4px 4px 0 4px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    &:last-child {
+        margin: 0 4px 4px 4px;
+        border-radius: 0 0 8px 8px;
+    }
+
+    &:first-child:last-child {
+        margin: 4px;
+        border-radius: 8px;
+    }
+}
+
+.interstitial {
+    padding: 8px;
+    font-size: 1.1em;
+    margin: 0 4px;
+
+    &.completed {
+        filter: contrast(0.5);
+        text-decoration: line-through;
+    }
+
+    .title {
+        font-weight: 700;
+        font-size: 1.1em;
+    }
+}
+
+.todo-category {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.1em;
+
+    .title {
+        font-weight: 700;
+    }
+
+    .completed-count {
+        font-size: 1.15em;
+        font-weight: 700;
+    }
+}
+
+.chat-overlay-leave-active {
+    transition: transform 350ms ease-in;
+}
+
+.chat-overlay-enter-active {
+    transition: transform 350ms ease-out;
 }
 </style>
