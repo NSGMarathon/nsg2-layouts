@@ -14,6 +14,7 @@
                     <div
                         v-if="!stageDisplayStore.stageDisplayState.message.visible"
                         class="alert bg-panel"
+                        style="font-size: 5em"
                         :class="[
                             `mode-${stageDisplayStore.stageDisplayState.message.mode.toLowerCase()}`
                         ]"
@@ -23,6 +24,7 @@
                     <div
                         v-else
                         class="alert text-visible"
+                        :style="{ fontSize: alertMessageSize }"
                         :key="alertFlashCounter + stageDisplayStore.stageDisplayState.message.color + (stageDisplayStore.stageDisplayState.message.mode === 'QUICK' ? stageDisplayStore.stageDisplayState.message.text : '')"
                         :class="[
                             `color-${stageDisplayStore.stageDisplayState.message.color.toLowerCase()}`,
@@ -148,7 +150,22 @@ nodecg.listenFor('stage-display:flash', () => {
     alertFlashCounter.value++;
 });
 
-// todo: vary message font size based on character count
+const alertMessageSize = computed(() => {
+    const alertMessageLength = stageDisplayStore.stageDisplayState.message.text.length;
+
+    if (alertMessageLength > 384) {
+        return '2em';
+    } else if (alertMessageLength > 128) {
+        return '3em';
+    } else if (alertMessageLength > 64) {
+        return '4em';
+    } else if (alertMessageLength > 32) {
+        return '6em';
+    } else {
+        return '8em';
+    }
+});
+
 const bodySize = useElementSize(() => document.body);
 const useWideLayout = computed(() => bodySize.value.width / bodySize.value.height > 1);
 const videoSize = computed(() => {
@@ -366,9 +383,8 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
 }
 
 .alert-content {
-    font-size: 5em;
     max-height: 100%;
-    max-width: 100%;
+    max-width: calc(100% - 32px);
     text-align: center;
     overflow-wrap: anywhere;
     position: absolute;
@@ -453,13 +469,5 @@ const placeholderOpacity = computed(() => stageDisplayStore.stageDisplayState.sh
         font-size: 1.15em;
         font-weight: 700;
     }
-}
-
-.chat-overlay-leave-active {
-    transition: transform 350ms ease-in;
-}
-
-.chat-overlay-enter-active {
-    transition: transform 350ms ease-out;
 }
 </style>
