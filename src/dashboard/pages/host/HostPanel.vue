@@ -16,6 +16,17 @@
             </ipl-space>
             <host-active-run-display class="m-t-8" />
             <todo-list-status-display class="m-t-8" />
+            <ipl-expanding-space
+                class="m-t-8"
+            >
+                <template #title>
+                    <span style="display: inline-block; margin-bottom: 1px; margin-right: 8px">
+                        Message to Runners
+                    </span>
+                    <stage-display-message-state-badge />
+                </template>
+                <stage-display-config-form />
+            </ipl-expanding-space>
         </div>
         <rundown-display readonly />
     </div>
@@ -28,7 +39,7 @@
 import RundownDisplay from '../../components/RundownDisplay.vue';
 import CurrentHostManager from './CurrentHostManager.vue';
 import CountrySelectDialog from '../../components/CountrySelectDialog.vue';
-import { provide, ref } from 'vue';
+import { computed, provide, ref } from 'vue';
 import {
     CountrySelectDialogInjectionKey,
     InterstitialVideoPlayerDialogInjectionKey,
@@ -38,7 +49,7 @@ import TalentItemEditDialog from '../../components/TalentItemEditDialog.vue';
 import SceneSwitcher from '../../components/SceneSwitcher.vue';
 import BidList from './BidList.vue';
 import MilestoneList from './MilestoneList.vue';
-import { IplSpace } from '@iplsplatoon/vue-components';
+import { IplBadge, IplExpandingSpace, IplSpace } from '@iplsplatoon/vue-components';
 import { useDonationStore } from 'client-shared/stores/DonationStore';
 import PrizeList from './PrizeList.vue';
 import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
@@ -46,6 +57,8 @@ import HostActiveRunDisplay from './HostActiveRunDisplay.vue';
 import TwitchCommercialPlayer from '../../components/TwitchCommercialPlayer.vue';
 import InterstitialVideoPlayerDialog from '../../components/InterstitialVideoPlayerDialog.vue';
 import TodoListStatusDisplay from './TodoListStatusDisplay.vue';
+import StageDisplayConfigForm from '../../components/StageDisplayConfigForm.vue';
+import StageDisplayMessageStateBadge from '../../components/StageDisplayMessageStateBadge.vue';
 
 const donationStore = useDonationStore();
 

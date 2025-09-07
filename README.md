@@ -186,6 +186,16 @@ Logging in to Oengus is possible using the Data Import dashboard panel. All Oeng
 so, but schedules will be imported without any cache on Oengus' side if the logged-in user is a moderator of the marathon 
 being imported. This means that updates to the schedule will appear without any delay.
 
+### Stage display utility
+
+The `utility-stage-display` graphic is placed on a monitor visible to the runners on stage. It provides a template for 
+items that may be useful to techs during setup and runners during their run.
+
+At this time, the stream preview and chat windows are composited under the graphic using OBS. Toggling between the 
+program and preview feeds is managed by a trigger within Bitfocus Companion (find our Companion module
+[here.](https://github.com/NSGMarathon/companion-module-nsg-layouts))  
+The guides for sizing and placing those elements may be hidden from the Stream Tech Dashboard.
+
 ## npm commands
 
 - `build`: Create a production-ready build.

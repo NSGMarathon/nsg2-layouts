@@ -16,6 +16,7 @@ import { initCountdownStore } from 'client-shared/stores/CountdownStore';
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 import { initTodoListStore } from 'client-shared/stores/TodoListStore';
+import { initStageDisplayStore } from 'client-shared/stores/StageDisplayStore';
 
 (async () => {
     const app = createApp(StreamTechPanel);
@@ -34,7 +35,8 @@ import { initTodoListStore } from 'client-shared/stores/TodoListStore';
         initCountdownStore(),
         initVideoFileStore(),
         initSpeedrunPlaylistStore(),
-        initTodoListStore()
+        initTodoListStore(),
+        initStageDisplayStore()
     ]);
     useMixerStore().listenForMixerLevels();
     app.mount('#app');

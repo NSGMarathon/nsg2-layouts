@@ -14,6 +14,7 @@ import { initCurrentTrackerDataStore } from 'client-shared/stores/CurrentTracker
 import { initTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 import { initVideoFileStore } from 'client-shared/stores/VideoFileStore';
 import { initTodoListStore } from 'client-shared/stores/TodoListStore';
+import { initStageDisplayStore } from 'client-shared/stores/StageDisplayStore';
 
 document.title = 'Host Layout Controls';
 
@@ -32,7 +33,8 @@ document.title = 'Host Layout Controls';
         initCurrentTrackerDataStore(),
         initTwitchDataStore(),
         initVideoFileStore(),
-        initTodoListStore()
+        initTodoListStore(),
+        initStageDisplayStore()
     ]);
     app.mount('#app');
 })();

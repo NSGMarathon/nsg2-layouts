@@ -1,0 +1,28 @@
+@import '../../client-shared/styles/layout';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    height: 100dvh;
+    overflow: hidden;
+    margin: 0;
+    image-rendering: -webkit-optimize-contrast;
+    position: relative;
+    background-color: #222;
+    font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    font-optical-sizing: auto;
+    color: #FFF;
+
+    > #app {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.bg-panel {
+    background: linear-gradient(to bottom, #151515 0%, #111111 100%);
+}

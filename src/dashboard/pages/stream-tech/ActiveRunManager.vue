@@ -83,7 +83,7 @@
                 </div>
             </ipl-space>
             <timer-manager class="m-t-8" />
-            <todo-list-manager class="m-t-8" />
+            <tech-setup-space class="m-t-8" />
         </template>
         <schedule-item-search-dialog
             ref="scheduleItemSearchDialog"
@@ -119,7 +119,7 @@ import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTrian
 import TwitchCategoryDataRow from './TwitchCategoryDataRow.vue';
 import NameplateAssignmentDialog from './NameplateAssignmentDialog.vue';
 import { faAddressCard } from '@fortawesome/free-solid-svg-icons/faAddressCard';
-import TodoListManager from './TodoListManager.vue';
+import TechSetupSpace from './TechSetupSpace.vue';
 
 library.add(faChevronRight, faChevronLeft, faSearch, faPenToSquare, faHeadset, faTriangleExclamation, faAddressCard);
 
