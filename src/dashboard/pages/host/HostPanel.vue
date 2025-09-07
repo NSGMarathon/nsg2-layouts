@@ -39,7 +39,7 @@
 import RundownDisplay from '../../components/RundownDisplay.vue';
 import CurrentHostManager from './CurrentHostManager.vue';
 import CountrySelectDialog from '../../components/CountrySelectDialog.vue';
-import { computed, provide, ref } from 'vue';
+import { provide, ref } from 'vue';
 import {
     CountrySelectDialogInjectionKey,
     InterstitialVideoPlayerDialogInjectionKey,
@@ -49,7 +49,7 @@ import TalentItemEditDialog from '../../components/TalentItemEditDialog.vue';
 import SceneSwitcher from '../../components/SceneSwitcher.vue';
 import BidList from './BidList.vue';
 import MilestoneList from './MilestoneList.vue';
-import { IplBadge, IplExpandingSpace, IplSpace } from '@iplsplatoon/vue-components';
+import { IplExpandingSpace, IplSpace } from '@iplsplatoon/vue-components';
 import { useDonationStore } from 'client-shared/stores/DonationStore';
 import PrizeList from './PrizeList.vue';
 import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
