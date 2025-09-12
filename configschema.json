@@ -95,6 +95,7 @@
                 "address": { "type": "string" },
                 "transitionFps": { "type": "number" },
                 "defaultSpeakingDBThreshold": { "type": "number" },
+                "meterUpdateRate": { "type": "number" },
                 "disableNameplateVolumeMeters": { "type": "boolean" },
                 "transitionDurations": {
                     "type": "object",

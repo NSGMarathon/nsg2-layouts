@@ -71,6 +71,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "address": "192.168.1.102",
     "transitionFps": 30,
     "defaultSpeakingDBThreshold": -75,
+    "meterUpdateRate": 1,
     "disableNameplateVolumeMeters": false,
     "transitionDurations": {
         "mute": 500,
@@ -133,6 +134,14 @@ Music information is gathered through foobar2000 with the [beefweb](https://gith
 
 When configuring mixer channel mappings (`x32.channelMappings` and `x32.visibleChannels`), the following channel types are accepted:
 `CHANNEL`, `AUX_IN`, `FX_RETURN`, `BUS`, `MATRIX` & `DCA`
+
+To tweak the rate at which nameplate volume meters update (`x32.meterUpdateRate`), refer to the following excerpt from
+Patrick-Gilles Maillot's guide to the X32's OSC protocol:
+
+> `time_factor` is a value between 1 and 99 setting the interval between two successive meters messages to 
+> `50ms * time_factor`. Any value of `time_factor` outside of [1, 99] is equivalent to 1.
+
+In brief, a value of `1` updates the most frequently, and increasing the value makes updates less frequent.
 
 #### OBS Websocket
 

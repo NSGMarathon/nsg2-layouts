@@ -39,6 +39,7 @@ export class MixerService extends HasNodecgLogger {
     private readonly unmuteTransitionDuration: number;
     private readonly requiredFaders: string[];
     private readonly channelIdToAddressPrefix: string[];
+    private readonly meterUpdateRate: number;
     private assignedChannels: number[] = [];
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
@@ -49,6 +50,7 @@ export class MixerService extends HasNodecgLogger {
         this.mixerChannelAssignments = nodecg.Replicant('mixerChannelAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
         this.unmuteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.unmute ?? 500;
         this.muteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.mute ?? 500;
+        this.meterUpdateRate = nodecg.bundleConfig.x32?.meterUpdateRate ?? 1;
         this.debouncedUpdateStateReplicant = debounce(
             this.updateStateReplicant, 100, { maxWait: 500, trailing: true, leading: false });
         this.debouncedUpdateMixerLevelsReplicant = debounce(
@@ -300,7 +302,9 @@ export class MixerService extends HasNodecgLogger {
             address: '/meters',
             args: [
                 { type: 's', value: '/meters/0' },
-                { type: 'i', value: 50 }
+                { type: 'i', value: 0 },
+                { type: 'i', value: 0 },
+                { type: 'i', value: this.meterUpdateRate }
             ]
         });
     }
