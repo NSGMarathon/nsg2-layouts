@@ -49,8 +49,8 @@ provide(GameLayoutFeedIndexInjectionKey, feedIndex);
 
 onMounted(() => {
     if (params.has('is-layout-leader')) {
-        watch(() => obsStore.activeGameLayouts, async (newValue) => {
-            await calculateCapturePositions(newValue[feedIndex], feedIndex);
+        watch(() => obsStore.activeGameLayouts[feedIndex], async (newValue) => {
+            await calculateCapturePositions(newValue, feedIndex);
         }, { immediate: true });
     }
 });
