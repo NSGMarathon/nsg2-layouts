@@ -21,7 +21,7 @@ export class MixerService extends HasNodecgLogger {
     private readonly mixerState: NodeCG.ServerReplicantWithSchemaDefault<MixerState>;
     private readonly mixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
-    private readonly localMixerChannelLevels: Map<string, number> = new Map();
+    private readonly localMixerChannelLevels: Map<number, number> = new Map();
     private readonly mixerAddress?: string;
     private osc: UDPPort | null;
     private subscriptionRenewalInterval: NodeJS.Timeout | undefined = undefined;
@@ -225,7 +225,7 @@ export class MixerService extends HasNodecgLogger {
                         const dataView = new DataView(withoutLength.buffer);
                         const meterValues = range(0, floatCount).map(i => dataView.getFloat32(i * 4, true));
                         meterValues.forEach((value, i) => {
-                            this.localMixerChannelLevels.set(String(i), floatToDB(value));
+                            this.localMixerChannelLevels.set(i, floatToDB(value));
                         });
                     }
                 }
@@ -270,7 +270,7 @@ export class MixerService extends HasNodecgLogger {
             if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) {
                 return [channelId, -90];
             } else {
-                return [channelId, this.localMixerChannelLevels.get(String(channelId)) ?? -90];
+                return [channelId, this.localMixerChannelLevels.get(channelId) ?? -90];
             }
         }));
     }
