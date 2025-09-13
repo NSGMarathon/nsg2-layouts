@@ -52,6 +52,7 @@
             />
             <ipl-button
                 label="Open Settings"
+                style="width: 85%"
                 @click="stageDisplayDialogOpen = true"
             />
         </ipl-space>
