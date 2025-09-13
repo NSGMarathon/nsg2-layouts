@@ -65,6 +65,7 @@ export interface Configschema {
 		transitionFps?: number;
 		defaultSpeakingDBThreshold?: number;
 		meterUpdateRate?: number;
+		useExperimentalAccurateChannelMeters?: boolean;
 		disableNameplateVolumeMeters?: boolean;
 		transitionDurations?: {
 			mute?: number;

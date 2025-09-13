@@ -18,7 +18,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { colors } from '../../styles/colors';
 import { useMixerStore } from 'client-shared/stores/MixerStore';
 import Badge from 'components/Badge.vue';
-import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
+import { CHANNEL_LEVEL_EXPONENT, useExperimentalAccurateChannelMeters } from 'client-shared/helpers/MixerHelper';
 import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
 
 const mixerStore = useMixerStore();
@@ -85,7 +85,11 @@ onMounted(() => {
             ];
         }
     }, ([channelLevel, speakingThreshold]) => {
-        targetLevel = channelLevel > speakingThreshold ? ((channelLevel + 90) / 100) ** (1 / CHANNEL_LEVEL_EXPONENT) : 0;
+        if (useExperimentalAccurateChannelMeters) {
+            targetLevel = channelLevel > speakingThreshold ? (channelLevel + 90) / 100 : 0;
+        } else {
+            targetLevel = channelLevel > speakingThreshold ? ((channelLevel + 90) / 100) ** (1 / CHANNEL_LEVEL_EXPONENT) : 0;
+        }
     }, { immediate: true });
 
     const redraw = (time: number) => {

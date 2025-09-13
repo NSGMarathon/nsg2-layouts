@@ -37,13 +37,17 @@
 import { IplInput, IplSelect, IplSpace } from '@iplsplatoon/vue-components';
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import { computed, ref, watch } from 'vue';
-import { CHANNEL_LEVEL_EXPONENT } from 'shared/MixerHelper';
+import { CHANNEL_LEVEL_EXPONENT, useExperimentalAccurateChannelMeters } from 'client-shared/helpers/MixerHelper';
 
 const mixerStore = useMixerStore();
 
 const volumeDisplayScale = computed(() => {
     if (props.visible) {
-        return ((((props.assignedChannel != null ? mixerStore.mixerChannelLevels[props.assignedChannel] : undefined) ?? -90) + 90) / 100) ** (1 / CHANNEL_LEVEL_EXPONENT);
+        if (useExperimentalAccurateChannelMeters) {
+            return (((props.assignedChannel != null ? mixerStore.mixerChannelLevels[props.assignedChannel] : undefined) ?? -90) + 90) / 100;
+        } else {
+            return ((((props.assignedChannel != null ? mixerStore.mixerChannelLevels[props.assignedChannel] : undefined) ?? -90) + 90) / 100) ** (1 / CHANNEL_LEVEL_EXPONENT);
+        }
     }
 
     return '0';

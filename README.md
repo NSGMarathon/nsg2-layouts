@@ -73,6 +73,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "defaultSpeakingDBThreshold": -75,
     "meterUpdateRate": 1,
     "disableNameplateVolumeMeters": false,
+    "useExperimentalAccurateChannelMeters": true,
     "transitionDurations": {
         "mute": 500,
         "unmute": 750

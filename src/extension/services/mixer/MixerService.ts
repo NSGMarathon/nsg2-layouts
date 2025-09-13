@@ -1,11 +1,5 @@
 import type NodeCG from '@nodecg/types';
-import {
-    ActiveSpeedrun,
-    ChannelItem,
-    Configschema,
-    MixerState,
-    MixerChannelAssignments
-} from 'types/schemas';
+import { ActiveSpeedrun, ChannelItem, Configschema, MixerChannelAssignments, MixerState } from 'types/schemas';
 import { MetaArgument, UDPPort } from 'osc';
 import PQueue from 'p-queue';
 import range from 'lodash/range';
@@ -22,6 +16,9 @@ export class MixerService extends HasNodecgLogger {
     private readonly mixerChannelAssignments: NodeCG.ServerReplicantWithSchemaDefault<MixerChannelAssignments>;
     private readonly activeSpeedrun: NodeCG.ServerReplicantWithSchemaDefault<ActiveSpeedrun>;
     private readonly localMixerChannelLevels: Map<number, number> = new Map();
+    private readonly localMixerGateGains: Map<number, number> = new Map();
+    private readonly localMixerDynGains: Map<number, number> = new Map();
+    private readonly localMixerAutomixGains: Map<number, number> = new Map();
     private readonly mixerAddress?: string;
     private osc: UDPPort | null;
     private subscriptionRenewalInterval: NodeJS.Timeout | undefined = undefined;
@@ -33,13 +30,13 @@ export class MixerService extends HasNodecgLogger {
     private inFlightRequests: Record<string, () => void> = { };
     private readonly oscState: Map<string, MetaArgument[]> = new Map();
     private readonly debouncedUpdateStateReplicant: () => void;
-    private readonly debouncedUpdateMixerLevelsReplicant: () => void;
     private readonly transitions: X32Transitions;
     private readonly muteTransitionDuration: number;
     private readonly unmuteTransitionDuration: number;
     private readonly requiredFaders: string[];
     private readonly channelIdToAddressPrefix: string[];
     private readonly meterUpdateRate: number;
+    private readonly useExperimentalAccurateChannelMeters: boolean;
     private assignedChannels: number[] = [];
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService) {
@@ -51,10 +48,9 @@ export class MixerService extends HasNodecgLogger {
         this.unmuteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.unmute ?? 500;
         this.muteTransitionDuration = nodecg.bundleConfig.x32?.transitionDurations?.mute ?? 500;
         this.meterUpdateRate = nodecg.bundleConfig.x32?.meterUpdateRate ?? 1;
+        this.useExperimentalAccurateChannelMeters = nodecg.bundleConfig.x32?.useExperimentalAccurateChannelMeters ?? false;
         this.debouncedUpdateStateReplicant = debounce(
             this.updateStateReplicant, 100, { maxWait: 500, trailing: true, leading: false });
-        this.debouncedUpdateMixerLevelsReplicant = debounce(
-            this.updateMixerLevelsReplicant, 50, { maxWait: 50, trailing: false, leading: true });
         this.channelIdToAddressPrefix = [
             ...MixerService.getChannelAddresses(''),
             ...MixerService.getAuxInAddresses(''),
@@ -188,7 +184,7 @@ export class MixerService extends HasNodecgLogger {
                 this.registerForUpdates();
             }, 8000);
 
-            const requiredState = [
+            const requiredState = new Set([
                 ...MixerService.getChannelAddresses('/config/name'),
                 ...MixerService.getChannelAddresses('/mix/on'),
                 ...MixerService.getAuxInAddresses('/config/name'),
@@ -205,8 +201,13 @@ export class MixerService extends HasNodecgLogger {
                 '/main/m/config/name',
                 '/main/st/mix/on',
                 '/main/m/mix/on',
-                ...this.requiredFaders
-            ];
+                ...this.requiredFaders,
+                ...(this.useExperimentalAccurateChannelMeters ? [
+                    ...MixerService.getChannelAddresses('/mix/fader'),
+                    ...MixerService.getChannelAddresses('/dyn/mgain'),
+                    ...MixerService.getChannelAddresses('/dyn/on')
+                ] : [])
+            ]);
             requiredState.forEach(address => {
                 this.queueEnsureLoaded(address);
             });
@@ -216,20 +217,37 @@ export class MixerService extends HasNodecgLogger {
                 const arg = (message.args as MetaArgument[])[0];
                 if (arg != null && arg.type === 'b') {
                     const metersData = arg.value;
+                    const valueCount = metersData[0];
                     const withoutLength = metersData.slice(4);
-                    const floatCount = withoutLength.byteLength / 4;
-                    if (floatCount !== 70) {
-                        this.logger.warn(`Received meters message with ${floatCount} floats? (Expected 70)`);
+                    const actualValueCount = withoutLength.byteLength / 4;
+                    if (valueCount !== actualValueCount) {
+                        this.logger.warn(`Received meters message with ${actualValueCount} floats? (Expected ${valueCount})`);
                         return;
-                    } else {
-                        const dataView = new DataView(withoutLength.buffer);
-                        const meterValues = range(0, floatCount).map(i => dataView.getFloat32(i * 4, true));
-                        meterValues.forEach((value, i) => {
-                            this.localMixerChannelLevels.set(i, floatToDB(value));
-                        });
+                    }
+
+                    const dataView = new DataView(withoutLength.buffer);
+
+                    if (valueCount === 70) {
+                        for (let i = 0; i < valueCount; i++) {
+                            this.localMixerChannelLevels.set(i, dataView.getFloat32(i * 4, true));
+                        }
+
+                        if (!this.useExperimentalAccurateChannelMeters) {
+                            this.updateMixerLevels();
+                        }
+                    } else if (valueCount === 48) {
+                        for (let i = 0; i < 32; i++) {
+                            this.localMixerGateGains.set(i, dataView.getInt16(i * 2, true) / 32767.0);
+                            this.localMixerDynGains.set(i, dataView.getInt16((i + 32) * 2, true) / 32767.0);
+                        }
+                        for (let i = 0; i < 8; i++) {
+                            // Automix GRs are weird and distinct from all the rest
+                            this.localMixerAutomixGains.set(i, dataView.getInt16(176 + (i * 2), true) / 256);
+                        }
+
+                        this.updateMixerLevels();
                     }
                 }
-                this.debouncedUpdateMixerLevelsReplicant();
             } else {
                 this.oscState.set(message.address, message.args as MetaArgument[]);
                 if (this.inFlightRequests[message.address]) {
@@ -264,15 +282,65 @@ export class MixerService extends HasNodecgLogger {
         };
     }
 
-    private updateMixerLevelsReplicant() {
-        this.nodecg.sendMessage('level:mixer', this.assignedChannels.map(channelId => {
-            const muteState = this.oscState.get(`${this.channelIdToAddressPrefix[channelId]}/mix/on`);
-            if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) {
-                return [channelId, -90];
-            } else {
-                return [channelId, this.localMixerChannelLevels.get(channelId) ?? -90];
+    private updateMixerLevels() {
+        if (this.useExperimentalAccurateChannelMeters) {
+            // Since the X32 won't hand us post-fader levels for more than one channel at a time,
+            // we can kind of reassemble them ourselves, using what information the mixer _does_ give.
+            // This can be done for more than just the regular input channels, but I didn't
+            // think it was needed, based on the way we've been using these meters.
+            // I really hope this was worth all the trouble it took...
+            const getStateValue = (address: string, fallback: number): number => {
+                const rawValue = this.oscState.get(address);
+                if (rawValue == null) {
+                    return fallback;
+                }
+                return rawValue[0].value as number;
             }
-        }));
+
+            const getDbDelta = (db: number): number => {
+                return Math.pow(10, db / 20);
+            }
+
+            const getAutomixGainDelta = (channelId: number): number => {
+                if (channelId >= 8) {
+                    return 1;
+                }
+                const gain = this.localMixerAutomixGains.get(channelId);
+                if (gain == null || gain === 0) return 1;
+                return getDbDelta(Math.max(gain, -90));
+            }
+
+            this.nodecg.sendMessage('level:mixer', this.assignedChannels.map(channelId => {
+                const addressPrefix = this.channelIdToAddressPrefix[channelId];
+                const muteState = this.oscState.get(`${addressPrefix}/mix/on`);
+                if (muteState != null && muteState[0].value === 0) {
+                    return [channelId, -90];
+                } else {
+                    if (channelId >= 32) {
+                        return [channelId, floatToDB(this.localMixerChannelLevels.get(channelId))];
+                    } else {
+                        const inputLevel = this.localMixerChannelLevels.get(channelId) ?? 0;
+                        const gateGain = this.localMixerGateGains.get(channelId) ?? 1;
+                        const dynGain = this.localMixerDynGains.get(channelId) ?? 1;
+                        const dynOn = getStateValue(`${addressPrefix}/dyn/on`, 0);
+                        const dynMakeupGain = dynOn === 1 ? getDbDelta(getStateValue(`${addressPrefix}/dyn/mgain`, 0) * 24) : 1;
+                        const fader = getDbDelta(floatToDB(getStateValue(`${addressPrefix}/mix/fader`, 0.75)));
+                        const automixGain = getAutomixGainDelta(channelId);
+
+                        return [channelId, floatToDB(Math.min(1, inputLevel * gateGain * dynGain * dynMakeupGain * fader * automixGain))];
+                    }
+                }
+            }));
+        } else {
+            this.nodecg.sendMessage('level:mixer', this.assignedChannels.map(channelId => {
+                const muteState = this.oscState.get(`${this.channelIdToAddressPrefix[channelId]}/mix/on`);
+                if (muteState != null && muteState[0].type === 'i' && muteState[0].value === 0) {
+                    return [channelId, -90];
+                } else {
+                    return [channelId, this.localMixerChannelLevels.get(channelId) ?? -90];
+                }
+            }));
+        }
     }
 
     private static getChannelAddresses(suffix: string): string[] {
@@ -307,6 +375,19 @@ export class MixerService extends HasNodecgLogger {
                 { type: 'i', value: this.meterUpdateRate }
             ]
         });
+
+        if (this.useExperimentalAccurateChannelMeters) {
+            // Gate/Dyn gains; Automix gains
+            this.osc!.send({
+                address: '/meters',
+                args: [
+                    { type: 's', value: '/meters/16' },
+                    { type: 'i', value: 0 },
+                    { type: 'i', value: 0 },
+                    { type: 'i', value: this.meterUpdateRate }
+                ]
+            });
+        }
     }
 
     private queueEnsureLoaded(path: string) {

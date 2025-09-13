@@ -96,6 +96,7 @@
                 "transitionFps": { "type": "number" },
                 "defaultSpeakingDBThreshold": { "type": "number" },
                 "meterUpdateRate": { "type": "number" },
+                "useExperimentalAccurateChannelMeters": { "type": "boolean" },
                 "disableNameplateVolumeMeters": { "type": "boolean" },
                 "transitionDurations": {
                     "type": "object",

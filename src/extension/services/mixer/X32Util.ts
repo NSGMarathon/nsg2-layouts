@@ -15,8 +15,10 @@ export function dbToFloat(d: number): number {
     return f // Math.round((f * 1023.5) / 1023.0)
 }
 
-export function floatToDB(f: number): number {
-    if (f >= 0.5) {
+export function floatToDB(f?: number): number {
+    if (f == null) {
+        return -90;
+    } else if (f >= 0.5) {
         return f * 40 - 30 // max dB value: +10.
     } else if (f >= 0.25) {
         return f * 80 - 50
