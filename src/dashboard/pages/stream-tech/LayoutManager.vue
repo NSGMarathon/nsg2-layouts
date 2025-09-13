@@ -87,7 +87,7 @@
                 </div>
             </div>
         </ipl-space>
-        <ipl-space class="layout vertical center-horizontal">
+        <ipl-space class="layout horizontal center-horizontal">
             <ipl-radio
                 :model-value="String(selectedFeedIndex)"
                 label="Feed"
@@ -95,42 +95,94 @@
                 name="feed"
                 @update:model-value="selectedFeedIndex = Number($event)"
             />
+            <ipl-button
+                small
+                icon="copy"
+                style="margin-top: 22.5px"
+                @click="copyFeedDialogOpen = true"
+            />
         </ipl-space>
         <scene-switcher />
         <source-cropping-dialog
             ref="sourceCroppingDialog"
             :selected-feed-index="selectedFeedIndex"
         />
+        <ipl-dialog
+            v-model:is-open="copyFeedDialogOpen"
+            style="width: 400px"
+        >
+            <template #header>
+                <ipl-dialog-title @close="copyFeedDialogOpen = false">
+                    Copy layout & inputs
+                </ipl-dialog-title>
+            </template>
+            <div class="layout vertical center-horizontal">
+                <ipl-radio
+                    :model-value="String(copyFromFeedIndex)"
+                    label="From"
+                    :options="feedOptions"
+                    name="copyFromFeedIndex"
+                    @update:model-value="copyFromFeedIndex = Number($event)"
+                />
+                <div class="m-t-4" />
+                <ipl-radio
+                    :model-value="String(selectedFeedIndex)"
+                    label="To"
+                    :options="feedOptions"
+                    name="copyToFeedIndex"
+                    @update:model-value="selectedFeedIndex = Number($event)"
+                />
+                <div class="m-t-8" />
+            </div>
+            <template #footer>
+                <ipl-button
+                    color="green"
+                    label="Copy"
+                    async
+                    @click="copyFeed"
+                />
+            </template>
+        </ipl-dialog>
     </div>
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
+import { IplButton, IplDialog, IplDialogTitle, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
 import { layouts } from 'types/Layouts';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faVideo } from '@fortawesome/free-solid-svg-icons/faVideo';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons/faGamepad';
+import { faCrop } from '@fortawesome/free-solid-svg-icons/faCrop';
+import { faCopy } from '@fortawesome/free-solid-svg-icons/faCopy';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { computed, ref } from 'vue';
 import { useObsStore } from 'client-shared/stores/ObsStore';
 import cloneDeep from 'lodash/cloneDeep';
 import { updateRefOnValueChange } from 'client-shared/helpers/StoreHelper';
 import SceneSwitcher from '../../components/SceneSwitcher.vue';
-import { faCrop } from '@fortawesome/free-solid-svg-icons/faCrop';
 import SourceCroppingDialog from './SourceCroppingDialog.vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { VideoInputAssignment } from 'types/schemas';
 import { onClickOutside } from '../../helpers/onClickOutside';
 
-library.add(faVideo, faGamepad, faCrop);
+library.add(faVideo, faGamepad, faCrop, faCopy);
 
 const wrapper = ref<HTMLElement>();
 
 const obsStore = useObsStore();
 
+const copyFeedDialogOpen = ref(false);
+const copyFromFeedIndex = ref(1);
+async function copyFeed() {
+    if (copyFromFeedIndex.value === selectedFeedIndex.value) return;
+
+    await sendMessage('obs:copyFeedVideoInputs', { fromFeedIndex: copyFromFeedIndex.value, toFeedIndex: selectedFeedIndex.value });
+    copyFeedDialogOpen.value = false;
+}
+
 const selectedFeedIndex = ref(0);
 const feedOptions = [
-    { name: 'Main Feed', value: '0' },
+    { name: 'Main', value: '0' },
     { name: 'Feed 2', value: '1' },
     { name: 'Feed 3', value: '2' }
 ];

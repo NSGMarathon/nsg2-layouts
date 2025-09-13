@@ -79,5 +79,9 @@ export class ObsConnectorController extends BaseController {
             obsVideoInputPositions.value[data.feedIndex] = data.positions;
             await obsConnectorService.setGameLayoutVideoFeedPositions(obsVideoInputAssignments.value[data.feedIndex], data.feedIndex);
         });
+
+        this.listen('obs:copyFeedVideoInputs', async (data) => {
+            await obsConnectorService.copyFeedVideoInputs(data.fromFeedIndex, data.toFeedIndex);
+        });
     }
 }

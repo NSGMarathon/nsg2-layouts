@@ -1,5 +1,6 @@
 import type NodeCG from '@nodecg/types';
 import {
+    type ActiveGameLayouts,
     Configschema,
     ObsConfig,
     ObsConnectionInfo,
@@ -14,6 +15,8 @@ import cloneDeep from 'lodash/cloneDeep';
 import { ObsSceneItem, ObsSceneItemTransform } from 'types/obs';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import { JsonObject } from 'type-fest';
+import { layouts } from 'types/Layouts';
+import range from 'lodash/range';
 
 // Authentication failed, Unsupported protocol version, Session invalidated
 const SOCKET_CLOSURE_CODES_FORBIDDING_RECONNECTION = [4009, 4010, 4011];
@@ -41,6 +44,7 @@ export class ObsConnectorService extends HasNodecgLogger {
     private obsConnectionInfo: NodeCG.ServerReplicantWithSchemaDefault<ObsConnectionInfo>;
     private obsVideoInputAssignments: NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputAssignments>;
     private obsVideoInputPositions: NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputPositions>;
+    private activeGameLayouts: NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
     private reconnectionInterval: NodeJS.Timeout | null = null;
     private reconnectionCount: number;
     private programSceneChangeListeners: ((sceneName: string) => void)[]
@@ -55,6 +59,7 @@ export class ObsConnectorService extends HasNodecgLogger {
         this.obsConfig = nodecg.Replicant('obsConfig') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsConfig>;
         this.obsVideoInputAssignments = nodecg.Replicant('obsVideoInputAssignments') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputAssignments>;
         this.obsVideoInputPositions = nodecg.Replicant('obsVideoInputPositions') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ObsVideoInputPositions>;
+        this.activeGameLayouts = nodecg.Replicant('activeGameLayouts') as unknown as NodeCG.ServerReplicantWithSchemaDefault<ActiveGameLayouts>;
         this.socket = new OBSWebSocket();
         this.reconnectionCount = 0;
         this.sceneDataInTransitionEvents = nodecg.bundleConfig.obs?.sceneDataInTransitionEvents ?? false;
@@ -583,6 +588,62 @@ export class ObsConnectorService extends HasNodecgLogger {
 
     async stopRecording() {
         return this.socket.call('StopRecord');
+    }
+
+    async copyFeedVideoInputs(fromFeedIndex: number, toFeedIndex: number) {
+        if (fromFeedIndex === toFeedIndex) {
+            throw new Error('Cannot copy inputs from a feed to itself');
+        }
+
+        const fromFeedScene = this.obsConfig.value.gameLayoutVideoFeedScenes[fromFeedIndex];
+        const toFeedScene = this.obsConfig.value.gameLayoutVideoFeedScenes[toFeedIndex];
+        if (fromFeedScene == null || toFeedScene == null) {
+            throw new Error('One or both of the provided feeds has no configured scene');
+        }
+        const toLayoutMeta = layouts[this.activeGameLayouts.value[toFeedIndex] as keyof typeof layouts];
+        if (toLayoutMeta == null) {
+            throw new Error(`Unknown layout "${this.activeGameLayouts.value[toFeedIndex]}"`);
+        }
+
+        const toCopy = cloneDeep(this.obsVideoInputAssignments.value[fromFeedIndex]);
+        const loadTransforms = (captureCount: number, assignments: (VideoInputAssignment | null)[]) =>
+            Promise.all(range(0, captureCount).map(i => {
+                const assignment = assignments[i];
+                if (assignment == null || assignment.sceneItemId == null) {
+                    return null;
+                }
+
+                return this.getSceneItemTransform(assignment.sceneItemId, fromFeedScene);
+            }));
+        const copyTransforms = (transforms: (ObsSceneItemTransform | null)[], assignments: (VideoInputAssignment | null)[]) =>
+            Promise.all(transforms.map((transform, i) => {
+                if (transform == null || assignments[i]?.sceneItemId == null) {
+                    return null;
+                }
+
+                return this.setSceneItemTransform(toFeedScene, assignments[i].sceneItemId, transform);
+            }));
+        const removeSceneItemIds = (assignments: (VideoInputAssignment | null)[]) =>
+            assignments.map(assignment => assignment == null ? null : ({ ...assignment, sceneItemId: undefined }));
+
+        const [cameraCaptureTransforms, gameCaptureTransforms] = await Promise.all([
+            loadTransforms(toLayoutMeta.cameraCaptureCount, toCopy.cameraCaptures),
+            loadTransforms(toLayoutMeta.gameCaptureCount, toCopy.gameCaptures)
+        ]);
+
+        this.obsVideoInputPositions.value[toFeedIndex] = this.obsVideoInputPositions.value[fromFeedIndex];
+        await this.setGameLayoutVideoFeedPositions({
+            cameraCaptures: removeSceneItemIds(toCopy.cameraCaptures),
+            gameCaptures: removeSceneItemIds(toCopy.gameCaptures)
+        }, toFeedIndex);
+
+        const copiedAssignments = this.obsVideoInputAssignments.value[toFeedIndex];
+        await Promise.all([
+            copyTransforms(cameraCaptureTransforms, copiedAssignments.cameraCaptures),
+            copyTransforms(gameCaptureTransforms, copiedAssignments.gameCaptures)
+        ]);
+
+        this.activeGameLayouts.value[toFeedIndex] = this.activeGameLayouts.value[fromFeedIndex];
     }
 
     static sceneNameTagPresent(tag: string, sceneName: string): boolean {
