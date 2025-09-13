@@ -9,4 +9,4 @@ Share Alike license (http://creativecommons.org/licenses/by-sa/3.0/).
 
 ---
 The font included in this repository has been further modified by
-inkfarer <inkfarer@inkfarer.com> to add the "▓", "▏", "▎", "▍", "▌" and "█" characters.
+inkfarer <inkfarer@inkfarer.com> to add the "▓", "▏", "▎", "▍", "▌", "█", "ø" and "Ø" characters.
