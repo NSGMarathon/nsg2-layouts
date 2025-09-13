@@ -310,7 +310,7 @@ export class ObsConnectorService extends HasNodecgLogger {
         });
         this.obsVideoInputAssignments.value[feedIndex] = newInputAssignments;
 
-        this.logger.debug(`Removing ${unusedSceneItems.length} unused scene items`);
+        this.logger.debug(`Feed ${feedIndex + 1}: Removing ${unusedSceneItems.length} unused scene items`);
         for (const unusedSceneItem of unusedSceneItems) {
             await this.socket.call('RemoveSceneItem', {
                 sceneName: videoInputsScene,
@@ -333,12 +333,12 @@ export class ObsConnectorService extends HasNodecgLogger {
         const boundsType = type === 'camera' ? 'OBS_BOUNDS_SCALE_OUTER' : 'OBS_BOUNDS_STRETCH';
         const sceneItemIds: (number | undefined)[] = [];
 
-        this.logger.debug(`Assigning ${capturePositions.length} ${type} capture(s)`);
+        this.logger.debug(`Feed ${feedIndex + 1}: Assigning ${capturePositions.length} ${type} capture(s)`);
         for (let i = 0; i < capturePositions.length; i++) {
             const capture = capturePositions[i];
             const assignedFeed = typeAssignments[i] ?? null;
             if (assignedFeed == null || !this.obsState.value.videoInputs?.some(input => input.sourceName === assignedFeed?.sourceName)) {
-                this.logger.debug(`${type} ${i + 1} - Assigned input is missing`);
+                this.logger.debug(`Feed ${feedIndex + 1}: ${type} ${i + 1} - Assigned input is missing`);
                 sceneItemIds.push(undefined);
                 continue;
             }
@@ -357,7 +357,7 @@ export class ObsConnectorService extends HasNodecgLogger {
 
             if (sceneItemIndex !== -1) {
                 const existingSceneItem = unusedSceneItems[sceneItemIndex];
-                this.logger.debug(`${type} ${i + 1} - Found existing scene item`);
+                this.logger.debug(`Feed ${feedIndex + 1}: ${type} ${i + 1} - Found existing scene item`);
                 if (
                     existingSceneItem.sceneItemTransform.boundsType !== boundsType
                     || existingSceneItem.sceneItemTransform.boundsHeight !== capture.height
@@ -366,7 +366,7 @@ export class ObsConnectorService extends HasNodecgLogger {
                     || existingSceneItem.sceneItemTransform.positionX !== capture.x
                     || existingSceneItem.sceneItemTransform.positionY !== capture.y
                 ) {
-                    this.logger.debug(`${type} ${i + 1} - Correcting transform settings`);
+                    this.logger.debug(`Feed ${feedIndex + 1}: ${type} ${i + 1} - Correcting transform settings`);
                     await this.socket.call('SetSceneItemTransform', {
                         sceneName: videoInputsScene,
                         sceneItemId: existingSceneItem.sceneItemId,
@@ -383,7 +383,7 @@ export class ObsConnectorService extends HasNodecgLogger {
                 unusedSceneItems.splice(sceneItemIndex, 1);
                 sceneItemIds.push(existingSceneItem.sceneItemId);
             } else {
-                this.logger.debug(`${type} ${i + 1} - Creating scene item for assigned input`);
+                this.logger.debug(`Feed ${feedIndex + 1}: ${type} ${i + 1} - Creating scene item for assigned input`);
                 const newSceneItem = await this.socket.call('CreateSceneItem', {
                     sceneName: videoInputsScene,
                     sourceName: assignedFeed.sourceName,
