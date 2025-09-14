@@ -19,6 +19,14 @@
             <font-awesome-icon icon="thumbtack" size="xs" />
             Pinned
         </ipl-badge>
+        <ipl-badge
+            v-if="props.bid.state === 'CLOSED'"
+            :color="colors.stateRed"
+            class="pinned-bid-badge m-b-2"
+        >
+            <font-awesome-icon icon="xmark" size="sm" />
+            Closed
+        </ipl-badge>
         <div class="bid-name">{{ props.bid.name }}</div>
         <div class="m-t-2">{{ props.bid.description }}</div>
         <div v-if="!$helpers.isBlank(props.bid.speedrunName)" class="m-t-4 m-b-2"><span class="text-bold">Game: </span>{{ props.bid.speedrunName }}</div>
@@ -59,8 +67,9 @@ import { faThumbtack } from '@fortawesome/free-solid-svg-icons/faThumbtack';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { formatCurrencyAmount } from 'client-shared/helpers/StringHelper';
 import { colors } from '../../styles/colors';
+import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
 
-library.add(faCircleInfo, faThumbtack);
+library.add(faCircleInfo, faThumbtack, faXmark);
 
 const props = defineProps<{
     bid: AllBids[number]
