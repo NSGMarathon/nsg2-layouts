@@ -1,7 +1,11 @@
 <template>
     <ipl-space color="secondary">
         <div class="prize-name">{{ props.prize.name }}</div>
-        <div>{{ availability }}</div>
+        <div
+            :class="{ waiting: availability.waiting, closed: !availability.waiting && availability.closed }"
+        >
+            {{ availability.message }}
+        </div>
         <div>{{ formatCurrencyAmount(props.prize.minimumBid) }} {{ props.prize.sumDonations ? 'total donations' : 'minimum donation' }}</div>
     </ipl-space>
 </template>
@@ -17,7 +21,7 @@ const props = defineProps<{
     prize: AllPrizes[number]
 }>();
 
-const availability = ref('');
+const availability = ref({ closed: false, waiting: false, message: '' });
 function refreshAvailability() {
     availability.value = getPrizeRelativeAvailability(props.prize);
 }
@@ -36,8 +40,18 @@ watch(() => props.prize, refreshAvailability);
 </script>
 
 <style scoped lang="scss">
+@use '../../styles/dashboard-colors';
+
 .prize-name {
     font-size: 1.25em;
     font-weight: 700;
+}
+
+.waiting {
+    color: dashboard-colors.$state-yellow;
+}
+
+.closed {
+    color: dashboard-colors.$state-red;
 }
 </style>

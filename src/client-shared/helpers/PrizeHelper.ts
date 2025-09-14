@@ -70,7 +70,7 @@ function getDisplayableExactTime(now: DateTime, targetTime: DateTime) {
 // - now before endTime and outside window = end run name
 // - now before endTime and inside window = nearest time to end and end run name
 // - now after endTime = "No longer available for bidding".
-export const getPrizeRelativeAvailability = (prize: AllPrizes[number]) => {
+export const getPrizeRelativeAvailability = (prize: AllPrizes[number]): { closed: boolean, waiting: boolean, message: string } => {
     const startTime = prize.startTime == null ? null : DateTime.fromISO(prize.startTime);
     const endTime = prize.endTime == null ? null : DateTime.fromISO(prize.endTime);
     const startDrawTime = prize.startDrawTime == null ? null : DateTime.fromISO(prize.startDrawTime);
@@ -79,21 +79,21 @@ export const getPrizeRelativeAvailability = (prize: AllPrizes[number]) => {
     // If no time bound is set, assume the prize is available for the entire
     // duration of the event.
     if (startDrawTime == null || endDrawTime == null) {
-        return 'Available all event long!';
+        return { closed: false, waiting: false, message: 'Available all event long!' };
     }
 
     // If the current time is past the end of the availability window, it is
     // considered closed.
     const now = DateTime.local();
     if (now > endDrawTime) {
-        return 'No longer available for bidding.';
+        return { closed: true, waiting: false, message: 'No longer available for bidding.' };
     }
 
     // If exact start and end times are given, we can render that time directly.
     if (startTime != null && now < startTime) {
-        return `Opens at ${getDisplayableExactTime(now, startTime)}`;
+        return { closed: true, waiting: true, message: `Opens at ${getDisplayableExactTime(now, startTime)}` };
     } else if (endTime != null && now < endTime) {
-        return `Open until ${getDisplayableExactTime(now, endTime)}`;
+        return { closed: false, waiting: false, message: `Open until ${getDisplayableExactTime(now, endTime)}` };
     }
 
     const isOpening = now < startDrawTime;
@@ -107,5 +107,7 @@ export const getPrizeRelativeAvailability = (prize: AllPrizes[number]) => {
     }
 
     const description = compact([runDescription, relativeTime]).join(', ');
-    return isOpening ? `Opens ${description}` : `Closes ${description}`;
+    return isOpening
+        ? { closed: true, waiting: true, message: `Opens ${description}` }
+        : { closed: false, waiting: false, message: `Closes ${description}` };
 };
