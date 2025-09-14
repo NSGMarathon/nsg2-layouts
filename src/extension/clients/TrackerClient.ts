@@ -7,7 +7,7 @@ import cookie from 'cookie';
 import { URLSearchParams } from 'url';
 import { isBlank } from 'shared/StringHelper';
 import { DateTime } from 'luxon';
-import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
+import { AbstractTrackerClient } from './AbstractTrackerClient';
 
 interface TrackerEventIndexResponse {
     count: {
@@ -151,7 +151,7 @@ interface TrackerAllBidsSearchResponseItem {
     }
 }
 
-export class TrackerClient extends HasNodecgLogger {
+export class TrackerClient extends AbstractTrackerClient {
     private readonly axios: AxiosInstance;
     private readonly username?: string;
     private readonly password?: string;
@@ -160,7 +160,7 @@ export class TrackerClient extends HasNodecgLogger {
     private sessionId?: string;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
-        if (!TrackerClient.hasRequiredTrackerConfig(nodecg)) {
+        if (!AbstractTrackerClient.hasRequiredTrackerConfig(nodecg)) {
             throw new Error('GDQ tracker config is missing');
         }
         super(nodecg);
@@ -328,6 +328,10 @@ export class TrackerClient extends HasNodecgLogger {
         return eventIndexResponse.data.agg.amount;
     }
 
+    canLogin(): boolean {
+        return true;
+    }
+
     async login() {
         const loginPageResponse = await this.axios.get('/admin/login/');
         const csrfToken = this.findCookie('csrftoken', loginPageResponse.headers['set-cookie']);
@@ -368,15 +372,6 @@ export class TrackerClient extends HasNodecgLogger {
             ?.map(cookieHeader => cookie.parse(cookieHeader))
             .find(parsedHeader => Object.keys(parsedHeader).includes(cookieName))
             ?.[cookieName];
-    }
-
-    static hasRequiredTrackerConfig(nodecg: NodeCG.ServerAPI<Configschema>): boolean {
-        const trackerConfig = nodecg.bundleConfig.tracker;
-        if (trackerConfig == null) return false;
-        return [
-            trackerConfig.address,
-            trackerConfig.eventId
-        ].every(configItem => configItem != null);
     }
 
     static hasTrackerLogin(nodecg: NodeCG.ServerAPI<Configschema>): boolean {

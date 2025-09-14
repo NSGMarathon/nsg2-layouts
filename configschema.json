@@ -59,7 +59,8 @@
                 "socketAddress": { "type": "string" },
                 "username": { "type": "string" },
                 "password": { "type": "string" },
-                "eventId": { "type": "number" }
+                "eventId": { "type": "number" },
+                "useOldTrackerApi": { "type": "boolean" }
             }
         },
         "twitch": {

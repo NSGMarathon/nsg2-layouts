@@ -38,6 +38,7 @@ export interface Configschema {
 		username?: string;
 		password?: string;
 		eventId?: number;
+		useOldTrackerApi?: boolean;
 		[k: string]: unknown;
 	};
 	twitch?: {

@@ -48,7 +48,8 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "socketAddress": "wss://tracker.example.org/tracker/ws/donations/",
     "username": "example-user",
     "password": "example-pwd",
-    "eventId": 2
+    "eventId": 2,
+    "useOldTrackerApi": false
   },
   "twitch": {
     "clientId": "twitch_client_id",
