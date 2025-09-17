@@ -28,7 +28,7 @@
             </div>
             <div class="layout-gap-right layout-gap-left middle-panel">
                 <div class="layout vertical">
-                    <div class="bg-timer timer-wrapper grow layout vertical center-vertical">
+                    <div class="bg-timer timer-wrapper grow layout vertical center-vertical layout-gap-bottom">
                         <speedrun-details class="bg-inset" />
                         <speedrun-timer class="bg-inset m-t-16" hide-run-number />
                     </div>
