@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["enabled", "roomSlug", "roomPassword"],
+    "properties": {
+        "enabled": { "type": "boolean" },
+        "roomSlug": { "type": "string" },
+        "roomPassword": { "type": "string" }
+    },
+    "default": {
+        "enabled": false,
+        "roomSlug": "",
+        "roomPassword": ""
+    }
+}

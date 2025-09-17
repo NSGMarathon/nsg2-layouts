@@ -36,6 +36,7 @@ import { InterstitialVideoPlayerService } from './services/InterstitialVideoPlay
 import { InterstitialVideoPlayerController } from './controllers/InterstitialVideoPlayerController';
 import { TodoListService } from './services/TodoListService';
 import { TodoListController } from './controllers/TodoListController';
+import { PlayBingoSocketService } from './services/PlayBingoSocketService';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -64,6 +65,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const videoFileService = new VideoFileService(nodecg, scheduleService);
     const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
     const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService, videoFileService);
+    new PlayBingoSocketService(nodecg);
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);

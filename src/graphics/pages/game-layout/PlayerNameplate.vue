@@ -30,6 +30,7 @@
                         :index="baseIndex + 1"
                         :channel-assignments="getGlobalTeamVolumeMeterAssignments(assignmentData.globalTeamId!)"
                         class="volume-meter"
+                        :color="assignmentData.globalColor"
                     />
                 </div>
                 <div
@@ -94,6 +95,7 @@
                         :index="baseIndex + i + 1 + activeTalentListChunk * props.maxConcurrentPlayers"
                         :channel-assignments="getPlayerVolumeMeterChannelAssignments(talent)"
                         class="volume-meter"
+                        :color="talent.color"
                     />
                 </div>
             </div>
@@ -121,10 +123,11 @@ import { GameLayoutFeedIndexInjectionKey, PlayerNameplateModeInjectionKey } from
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import { MixerChannelAssignment } from 'types/schemas';
 import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
+import { useBingoStore } from 'client-shared/stores/BingoStore';
 
 library.add(faTwitch, faYoutube);
 
-type NormalizedTalentItem = { id: string, teamName?: string, teamId: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null };
+type NormalizedTalentItem = { id: string, teamName?: string, teamId: string, name: string, social?: string, socialType?: string, pronouns?: string | null, countryCode?: string | null, color?: string };
 
 const props = withDefaults(defineProps<{
     index: number
@@ -138,6 +141,7 @@ const props = withDefaults(defineProps<{
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 const mixerStore = useMixerStore();
+const bingoStore = useBingoStore();
 
 const feedIndex = inject(GameLayoutFeedIndexInjectionKey, 0);
 
@@ -210,6 +214,12 @@ function normalizeTalentList(players: { talentId: string, teamId: string }[]): N
         const talentData = talentStore.findTalentItemById(playerItem.talentId);
         if (talentData == null) return null;
         const team = scheduleStore.activeSpeedrun?.teams.find(team => team.id === playerItem.teamId);
+        const bingoPlayerId = bingoStore.bingoConfig.enabled
+            ? bingoStore.bingoTalentMapping.find(mappingItem => mappingItem.talentId === playerItem.talentId)?.bingoPlayerId
+            : null;
+        const bingoPlayer = bingoPlayerId != null
+            ? bingoStore.bingoState.players.find(bingoPlayer => bingoPlayer.id === bingoPlayerId)
+            : null;
 
         let socialData: { social?: string, socialType?: string } = {};
         if (!isBlank(talentData.socials.twitch)) {
@@ -231,12 +241,13 @@ function normalizeTalentList(players: { talentId: string, teamId: string }[]): N
             ...socialData,
             pronouns: talentData.pronouns,
             countryCode: talentData.countryCode,
-            teamName: team?.name
+            teamName: team?.name,
+            color: bingoPlayer?.color
         };
     }).filter(talentItem => talentItem != null);
 }
 
-const assignmentData = computed<{ talentList: NormalizedTalentList, globalTeamName?: string, globalTeamId?: string }>(() => {
+const assignmentData = computed<{ talentList: NormalizedTalentList, globalTeamName?: string, globalTeamId?: string, globalColor?: string }>(() => {
     const assignment = scheduleStore.playerNameplateAssignments[feedIndex].assignments[props.index];
     if (assignment == null || assignment.players.length === 0) return { talentList: [] };
 
@@ -249,6 +260,7 @@ const assignmentData = computed<{ talentList: NormalizedTalentList, globalTeamNa
         return {
             globalTeamId,
             globalTeamName: scheduleStore.activeSpeedrun?.teams.find(team => team.id === globalTeamId)?.name,
+            globalColor: globalTeamId != null ? talentList[0].color : undefined,
             talentList: scheduleStore.activeSpeedrun?.relay ? talentList : []
         };
     }

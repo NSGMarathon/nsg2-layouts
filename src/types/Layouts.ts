@@ -14,6 +14,7 @@ export const layoutKeys = [
     '16x9-1g1c',
     '16x9-1g1c-tallcam',
     '16x9-2g1c',
+    '16x9-2g1c-bingo',
     '16x9-3g1c',
     '16x9-4g1c',
     '4x3-1g1c',
@@ -56,6 +57,17 @@ export const layouts: Record<typeof layoutKeys[number], Layout> = {
             gridTemplateColumns: '2fr 1fr 1fr 2fr',
             gridTemplateRows: '5fr 4fr',
             gridTemplateAreas: '"game-1 game-1 game-2 game-2" ". cam-1 cam-1 ."'
+        }
+    },
+    '16x9-2g1c-bingo': {
+        name: '16:9 2P (Bingo)',
+        gameCaptureCount: 2,
+        cameraCaptureCount: 1,
+        playerNameplateCount: 2,
+        preview: {
+            gridTemplateColumns: '1fr 0.5fr 1fr',
+            gridTemplateRows: '1fr 1fr',
+            gridTemplateAreas: '"game-1 . game-2" ". . cam-1"'
         }
     },
     '16x9-3g1c': {

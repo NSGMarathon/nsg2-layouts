@@ -36,6 +36,7 @@
                 "timezone": { "type": "string" },
                 "name": { "type": "string" },
                 "donationUrl": { "type": "string" },
+                "omnibarDonationReminderMessage": { "type": "string" },
                 "scheduleUrl": { "type": "string" },
                 "currency": {
                     "type": "object",

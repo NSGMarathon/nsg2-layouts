@@ -1,11 +1,21 @@
 <template>
-    <span class="badge">
+    <span
+        class="badge"
+        :style="{
+            backgroundColor: props.color,
+            color: props.color == null ? undefined : getContrastingTextColor(props.color, '#fff', '#000')
+        }"
+    >
         <slot />
     </span>
 </template>
 
 <script setup lang="ts">
+import { getContrastingTextColor } from '@iplsplatoon/vue-components';
 
+const props = defineProps<{
+    color?: string
+}>();
 </script>
 
 <style scoped lang="scss">

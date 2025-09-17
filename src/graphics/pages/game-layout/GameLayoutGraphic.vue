@@ -16,6 +16,7 @@ import { ObsVideoInputPositions } from 'types/schemas';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import Layout_16x9_1g1c from './layouts/Layout_16x9_1g1c.vue';
 import Layout_16x9_2g1c from './layouts/Layout_16x9_2g1c.vue';
+import Layout_16x9_2g1c_bingo from './layouts/Layout_16x9_2g1c_bingo.vue';
 import Layout_16x9_1g1c_tallcam from './layouts/Layout_16x9_1g1c_tallcam.vue';
 import Layout_4x3_1g1c from './layouts/Layout_4x3_1g1c.vue';
 import Layout_4x3_2g1c from './layouts/Layout_4x3_2g1c.vue';
@@ -33,6 +34,7 @@ const gameLayoutComponentMap: Record<typeof layoutKeys[number], Component> = {
     '16x9-1g1c': Layout_16x9_1g1c,
     '16x9-1g1c-tallcam': Layout_16x9_1g1c_tallcam,
     '16x9-2g1c': Layout_16x9_2g1c,
+    '16x9-2g1c-bingo': Layout_16x9_2g1c_bingo,
     '16x9-3g1c': Layout_16x9_3g1c,
     '16x9-4g1c': Layout_16x9_4g1c,
     '4x3-1g1c': Layout_4x3_1g1c,

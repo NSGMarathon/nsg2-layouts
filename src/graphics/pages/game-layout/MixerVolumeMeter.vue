@@ -3,6 +3,7 @@
         <badge
             v-if="index != null"
             class="volume-meter-talent-index"
+            :color="props.color"
         >
             {{ props.index }}
         </badge>
@@ -26,6 +27,7 @@ const mixerStore = useMixerStore();
 const props = defineProps<{
     channelAssignments: MixerVolumeMeterChannelAssignment
     index?: number
+    color?: string
 }>();
 
 const volumeMeterCanvas = ref<HTMLCanvasElement>();
@@ -68,7 +70,7 @@ onMounted(() => {
     const meterAlphaSpeed = 0.25;
     let lastTime = 0;
     let currentLevel = 0;
-    let targetLevel = 0;
+    let targetLevel = 0.5;
 
     watch(() => {
         if (props.channelAssignments.channelIds.length === 0) {
@@ -115,7 +117,10 @@ onMounted(() => {
                 ? i === dotCount - peakThreshold
                 : i > 12 ? (i - 4) % 8 === 0 : i % 4 === 0;
             if (drawSmallDot) {
-                ctx.fillStyle = color === 'peak' ? colors.vfdRed : colors.vfdTeal;
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = props.color == null ?
+                    color === 'peak' ? colors.vfdRed : colors.vfdTeal
+                    : props.color;
                 ctx.beginPath();
                 ctx.arc(
                     i * (dotDiameter + dotSpacing) + xOffset,
@@ -133,15 +138,12 @@ onMounted(() => {
                 dotDiameter / 2,
                 0,
                 Math.PI * 2);
-            ctx.fillStyle = color === 'peak' ? colors.vfdRedUnlit : colors.vfdTealUnlit;
-            ctx.fill();
 
             const existingAlphaValue = meterAlphaValues[i] ?? 0;
-            const litPortionAlpha = i < litDotCount
+            ctx.globalAlpha = i < litDotCount
                 ? meterAlphaValues[i] = Math.min(1, existingAlphaValue + meterAlphaSpeed)
-                : meterAlphaValues[i] = Math.max(0, existingAlphaValue - meterAlphaSpeed);
+                : meterAlphaValues[i] = Math.max(0.15, existingAlphaValue - meterAlphaSpeed);
 
-            ctx.fillStyle = color === 'peak' ? `rgba(239, 53, 50, ${litPortionAlpha})` : `rgba(153, 251, 249, ${litPortionAlpha})`;
             ctx.fill();
         }
 

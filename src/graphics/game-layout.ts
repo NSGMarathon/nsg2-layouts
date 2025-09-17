@@ -12,6 +12,7 @@ import { initAssetStore } from 'client-shared/stores/AssetStore';
 import { initMixerStore, useMixerStore } from 'client-shared/stores/MixerStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
 import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
+import { initBingoStore } from 'client-shared/stores/BingoStore';
 
 (async () => {
     const app = createApp(GameLayoutGraphic);
@@ -24,7 +25,8 @@ import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylist
         initTimerStore(),
         initAssetStore(),
         initMixerStore(),
-        initSpeedrunPlaylistStore()
+        initSpeedrunPlaylistStore(),
+        initBingoStore()
     ]);
     initTextScrollEventBus(app);
     useMixerStore().listenForMixerLevels();

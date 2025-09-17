@@ -20,6 +20,7 @@ export interface Configschema {
 		timezone: string;
 		name?: string;
 		donationUrl?: string;
+		omnibarDonationReminderMessage?: string;
 		scheduleUrl?: string;
 		currency?: {
 			code?: string;

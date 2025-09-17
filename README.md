@@ -207,6 +207,17 @@ program and preview feeds is managed by a trigger within Bitfocus Companion (fin
 [here.](https://github.com/NSGMarathon/companion-module-nsg-layouts))  
 The guides for sizing and placing those elements may be hidden from the Stream Tech Dashboard.
 
+### Bingo
+
+nsg2-layouts integrates with [playbingo.gg](https://playbingo.gg/) to facilitate bingo runs of games.  
+Set up the integration in the "3 - Setup" workspace of the NodeCG dashboard. The board is visible on any layouts marked 
+as being usable for bingo, or using the `standalone-bingo` graphic.
+
+Adjust the `standalone-bingo` graphic's scaling using the `scale` query parameter.  
+Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/standalone-bingo.html?scale=2`  
+The `standalone-bingo` graphic is currently only tested using a 16:9 viewport, and might not respond well to being used 
+in other setups.
+
 ## npm commands
 
 - `build`: Create a production-ready build.

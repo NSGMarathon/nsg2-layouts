@@ -62,6 +62,14 @@
                 "headerColor": "#262F40"
             },
             {
+                "name": "bingo",
+                "title": "Bingo",
+                "width": 2,
+                "file": "bingo.html",
+                "workspace": "3 - Setup",
+                "headerColor": "#262F40"
+            },
+            {
                 "name": "stream-tech",
                 "title": "1 - Stream Tech Dashboard",
                 "file": "stream-tech.html",
@@ -94,6 +102,11 @@
             },
             {
                 "file": "countdown.html",
+                "width": 1920,
+                "height": 1080
+            },
+            {
+                "file": "standalone-bingo.html",
                 "width": 1920,
                 "height": 1080
             },
