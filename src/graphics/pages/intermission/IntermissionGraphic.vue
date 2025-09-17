@@ -22,7 +22,7 @@
                     <div class="pointer-icon">»</div>
                     <img
                         class="charity-logo"
-                        src="../../assets/img/charity-logo-wide.png"
+                        src="../../assets/img/charity-logo-main.png"
                     >
                 </div>
             </div>
@@ -213,7 +213,7 @@ const hostSpeaking = computed(() => {
 
 .logos {
     justify-content: space-between;
-    margin: 25px 60px 0;
+    margin: 16px 60px 0;
 
     img {
         width: 250px;
@@ -227,7 +227,7 @@ const hostSpeaking = computed(() => {
 }
 
 .prize-display {
-    margin-top: 56px;
+    margin-top: 16px;
     height: 300px;
 }
 
@@ -238,12 +238,11 @@ const hostSpeaking = computed(() => {
 .pointer-icon {
     color: colors.$vfd-teal;
     font-size: 3em;
-    margin: 0 16px;
+    margin: 0 32px;
 }
 
 .charity-logo {
-    height: 129px;
-    margin: -8px 0;
+    height: 150px;
 }
 
 .host-name-display {

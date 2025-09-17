@@ -7,7 +7,7 @@
             >
                 <opacity-swap-transition mode="default">
                     <span v-if="slides.activeComponent.value === 'donationReminder1'">You are watching <span class="emphasis">{{ eventName }}</span></span>
-                    <span v-else>In support of the NABP - <span class="emphasis">{{ donationUrl }}</span></span>
+                    <span v-else>{{ donationReminderMessage }} - <span class="emphasis">{{ donationUrl }}</span></span>
                 </opacity-swap-transition>
             </div>
             <div
@@ -30,7 +30,7 @@
                             v-if="slides.activeComponent.value === 'fallback'"
                             class="no-slide-placeholder max-height"
                         >
-                            Benefiting Norges Blindeforbund
+                            {{donationReminderMessage }}
                         </div>
                         <omnibar-schedule-item-display
                             v-else-if="slides.activeComponent.value === 'nextUp'"
@@ -99,6 +99,7 @@ const props = withDefaults(defineProps<{
 const eventName = (nodecg.bundleConfig as Configschema).event?.name ?? 'the Norway Speedrunner Gathering';
 const fallbackSlideTitle = (nodecg.bundleConfig as Configschema).event?.name ?? 'NSG';
 const donationUrl = (nodecg.bundleConfig as Configschema).event?.donationUrl;
+const donationReminderMessage = (nodecg.bundleConfig as Configschema).event?.omnibarDonationReminderMessage ?? 'In support of the NABP'
 const showDonationReminder = computed(() => donationUrl != null && !props.withoutDonationReminder);
 
 const donationStore = useDonationStore();
