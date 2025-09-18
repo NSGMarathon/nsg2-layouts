@@ -31,11 +31,16 @@
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { computed } from 'vue';
 import { Duration } from 'luxon';
+import { Speedrun } from 'types/schemas';
+import { toMetricTime } from 'shared/TimeHelper';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     estimate?: string
     setupTime?: string | null
-}>();
+    timerMode?: Speedrun['timerMode']
+}>(), {
+    timerMode: 'TIMER_COUNTUP'
+});
 
 const asDurationWithLength = (value: string | null | undefined) => {
     if (value == null) {
@@ -52,9 +57,25 @@ const asDurationWithLength = (value: string | null | undefined) => {
 };
 
 const parsedEstimate = computed(() => {
-    return asDurationWithLength(props.estimate)
+    const durationObject = asDurationWithLength(props.estimate)
         ?? asDurationWithLength(props.setupTime)
         ?? { minutes: 0, hours: 0 };
+
+    if (props.timerMode.includes('METRIC')) {
+        const inMetricTime = toMetricTime({
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+            milliseconds: 0,
+            ...durationObject
+        });
+        return {
+            hours: inMetricTime.hours,
+            minutes: Math.round(inMetricTime.minutes + inMetricTime.seconds / 100)
+        };
+    }
+
+    return durationObject;
 });
 </script>
 

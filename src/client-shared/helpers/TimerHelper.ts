@@ -1,7 +1,10 @@
-import { Duration } from 'types/schemas';
 import { padNumber } from 'client-shared/helpers/StringHelper';
 
-export function formatTimer(timer: Duration, trimHours = false, isSevenSegmentGraphic = false): string {
+export function formatTimer(
+    timer: { hours: number, minutes: number, seconds: number, milliseconds: number },
+    trimHours = false,
+    isSevenSegmentGraphic = false
+): string {
     const beforeDecimalPoint = isSevenSegmentGraphic ? ' ' : '';
     const hours = timer.hours === 0 && trimHours
         ? null

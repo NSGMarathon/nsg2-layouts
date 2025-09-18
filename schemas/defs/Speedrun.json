@@ -35,6 +35,11 @@
         "relay": { "type": ["boolean", "null"] },
         "emulated": { "type": ["boolean", "null"] },
         "layout": { "type": ["string", "null"] },
+        "timerMode": {
+            "type": "string",
+            "enum": ["TIMER_COUNTUP", "METRIC_TIMER_COUNTUP"],
+            "default": "TIMER_COUNTUP"
+        },
         "videoFile": {
             "anyOf": [
                 {
@@ -94,5 +99,5 @@
             }
         }
     },
-    "required": ["id", "title", "type", "estimate", "scheduledStartTime", "teams", "commentatorIds"]
+    "required": ["id", "title", "type", "estimate", "scheduledStartTime", "teams", "commentatorIds", "timerMode"]
 }

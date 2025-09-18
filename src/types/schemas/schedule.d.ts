@@ -39,6 +39,7 @@ export interface Speedrun {
 	relay?: boolean | null;
 	emulated?: boolean | null;
 	layout?: string | null;
+	timerMode: 'TIMER_COUNTUP' | 'METRIC_TIMER_COUNTUP';
 	videoFile?:
 		| null
 		| (VideoFile & {

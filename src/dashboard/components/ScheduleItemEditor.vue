@@ -82,7 +82,24 @@
                             class="max-width m-t-2"
                         />
                     </template>
-                    <div class="layout horizontal center-horizontal">
+                    <div
+                        v-if="selectedScheduleItem.type === 'SPEEDRUN'"
+                        class="layout horizontal m-t-2"
+                    >
+                        <ipl-select
+                            v-model="selectedScheduleItem.layout as string | null"
+                            :options="layoutOptions as Option[]"
+                            class="max-width"
+                            label="Layout"
+                        />
+                        <ipl-select
+                            v-model="selectedScheduleItem.timerMode as string | null"
+                            :options="timerModeOptions"
+                            class="m-l-8 max-width"
+                            label="Timer mode"
+                        />
+                    </div>
+                    <div class="layout horizontal center-horizontal m-t-2">
                         <duration-input
                             v-model="selectedScheduleItem.estimate"
                             label="Estimate"
@@ -93,13 +110,6 @@
                             label="Setup time"
                             class="m-l-8"
                             style="width: 35%"
-                        />
-                        <ipl-select
-                            v-if="selectedScheduleItem.type === 'SPEEDRUN'"
-                            v-model="selectedScheduleItem.layout as string | null"
-                            :options="layoutOptions as Option[]"
-                            class="m-l-8 max-width"
-                            label="Layout"
                         />
                     </div>
                     <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
@@ -415,10 +425,15 @@ function removeTeam(index: number) {
     selectedScheduleItem.value.teams = selectedScheduleItem.value.teams.toSpliced(index, 1);
 }
 
-const layoutOptions = computed(() => [
+const layoutOptions = [
     { name: 'None', value: null },
     ...Object.entries(layouts).map(([key, layout]) => ({ name: layout.name, value: key }))
-]);
+];
+
+const timerModeOptions = [
+    { name: 'Count-up (Default)', value: 'TIMER_COUNTUP' },
+    { name: 'Count-up (Metric time)', value: 'METRIC_TIMER_COUNTUP' }
+];
 
 function open(scheduleItemId: string) {
     const scheduleItem = scheduleStore.schedule.items.find(scheduleItem => scheduleItem.id === scheduleItemId);

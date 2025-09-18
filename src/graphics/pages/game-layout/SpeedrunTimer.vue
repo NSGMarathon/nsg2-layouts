@@ -16,7 +16,10 @@
                         <span :class="{ lit: scheduleStore.activeSpeedrun?.relay }">RELAY</span>
                         <span :class="{ lit: isRace }" class="segment-red">RACE</span>
                     </div>
-                    <div>
+                    <div v-if="usingMetricTime">
+                        <span class="lit">METRIC TIME UNIT</span>
+                    </div>
+                    <div v-else>
                         <span>SLEEP</span>
                         <span class="lit">FAST</span>
                         <span class="segment-red"><span>FASTER</span><span>!!!</span></span>
@@ -66,6 +69,7 @@ import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
 import { Duration } from 'luxon';
 import { formatTimer } from 'client-shared/helpers/TimerHelper';
+import { toMetricTime } from 'shared/TimeHelper';
 
 const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();
@@ -77,15 +81,22 @@ const props = withDefaults(defineProps<{
 });
 
 const speedrunCount = computed(() => scheduleStore.speedrunCount(scheduleStore.activeSpeedrun?.id));
+
+const usingMetricTime = computed(() => scheduleStore.activeSpeedrun?.timerMode === 'METRIC_TIMER_COUNTUP');
+
 const formattedTimer = computed(() => {
-    if (timerStore.timer.time.hours > 0) {
+    const time = usingMetricTime.value
+        ? toMetricTime(timerStore.timer.time)
+        : timerStore.timer.time
+
+    if (time.hours > 0) {
         return {
-            timer: formatTimer(timerStore.timer.time, false, true),
+            timer: formatTimer(time, false, true),
             alwaysLitSegment: '!:!!:!! .!'
         };
     } else {
         return {
-            timer: formatTimer(timerStore.timer.time, true, true),
+            timer: formatTimer(time, true, true),
             alwaysLitSegment: '!!:!! .!'
         };
     }

@@ -21,7 +21,10 @@
                     align="left"
                 />
             </div>
-            <speedrun-estimate-display :estimate="scheduleStore.activeSpeedrun?.estimate" />
+            <speedrun-estimate-display
+                :estimate="scheduleStore.activeSpeedrun?.estimate"
+                :timer-mode="scheduleStore.activeSpeedrun?.timerMode"
+            />
         </div>
     </div>
 </template>

@@ -293,7 +293,8 @@ export class OengusClient extends HasNodecgLogger {
                     relay: line.type.includes('RELAY'),
                     teams: this.getTeamListV1(line),
                     commentatorIds: [],
-                    emulated: line.emulated
+                    emulated: line.emulated,
+                    timerMode: 'TIMER_COUNTUP'
                 } satisfies Speedrun;
             }
         });
@@ -402,7 +403,8 @@ export class OengusClient extends HasNodecgLogger {
                     relay: line.type.includes('RELAY'),
                     teams: this.getTeamListV2(line),
                     commentatorIds: [],
-                    emulated: line.emulated
+                    emulated: line.emulated,
+                    timerMode: 'TIMER_COUNTUP'
                 } satisfies Speedrun;
             }
         });
