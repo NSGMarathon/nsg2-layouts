@@ -26,7 +26,7 @@
                     >
                 </div>
             </div>
-            <div class="bg-inset m-t-16" style="overflow: hidden; height: 80px">
+            <div class="bg-inset m-t-16 slide-rotation">
                 <omnibar-slide-rotation
                     :slide-title-width="150"
                     without-donation-reminder
@@ -302,5 +302,11 @@ const hostSpeaking = computed(() => {
     font-size: 40px;
     color: colors.$vfd-teal;
     margin: -4px 12px 0;
+}
+
+.slide-rotation {
+    overflow: hidden;
+    height: 80px;
+    padding: 0;
 }
 </style>
