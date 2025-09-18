@@ -14,14 +14,17 @@
                 v-else
                 class="omnibar-slides"
             >
-                <transition name="slide-swap">
+                <transition name="slide-title">
                     <div
                         :key="slideTitle"
                         class="slide-title"
                         :style="{ minWidth: `${props.slideTitleWidth}px`, width: `${props.slideTitleWidth}px` }"
                     >
                         <fitted-content class="slide-title-text">{{ slideTitle }}</fitted-content>
-                        <div class="slide-title-icon">»</div>
+                        <svg class="slide-title-icon" viewBox="0 0 50 50">
+                            <path class="first-half" d="M10.872,1.773l16.279,22.675l0,1.104l-16.279,22.675l-10.872,-0l13.953,-23.198l-13.953,-23.256l10.872,0Z" />
+                            <path class="second-half" d="M33.721,1.773l16.279,22.675l0,1.104l-16.279,22.675l-10.872,-0l13.953,-23.198l-13.953,-23.256l10.872,0Z" />
+                        </svg>
                     </div>
                 </transition>
                 <div class="slide-content">
@@ -300,10 +303,19 @@ const slideTitle = computed(() => {
     }
 
     .slide-title-icon {
-        color: colors.$vfd-teal;
-        font-size: 40px;
-        margin-top: -4px;
-        margin-left: 8px;
+        fill: colors.$vfd-teal;
+        height: 20px;
+        margin-left: 10px;
+
+        .first-half {
+            transition: fill 50ms linear;
+            transition-delay: 500ms;
+        }
+
+        .second-half {
+            transition: fill 50ms linear;
+            transition-delay: 750ms;
+        }
     }
 }
 
@@ -368,6 +380,33 @@ const slideTitle = computed(() => {
 }
 .slide-swap-enter-from {
     transform: translateY(constants.$omnibarHeight);
+}
+
+.slide-title-enter-active {
+    transition: transform 350ms ease-in-out;
+}
+.slide-title-leave-active {
+    position: absolute;
+    transition: transform 350ms ease-in-out;
+}
+.slide-title-leave-from,
+.slide-title-enter-to {
+    transform: translateY(0px);
+    color: colors.$vfd-teal;
+
+    .slide-title-icon {
+        fill: colors.$vfd-teal;
+    }
+}
+.slide-title-leave-to {
+    transform: translateY(constants.$omnibarHeight * -1);
+}
+.slide-title-enter-from {
+    transform: translateY(constants.$omnibarHeight);
+
+    .slide-title-icon {
+        fill: colors.$vfd-teal-unlit;
+    }
 }
 
 .donation-reminder-leave-active {
