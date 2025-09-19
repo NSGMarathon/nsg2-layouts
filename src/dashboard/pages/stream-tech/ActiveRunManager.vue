@@ -1,8 +1,5 @@
 <template>
-    <div
-        class="layout vertical"
-        style="overflow: hidden;"
-    >
+    <div style="overflow-y: auto;">
         <ipl-space class="run-selector-space">
             <ipl-button
                 :disabled="!canSeekBackwards"
@@ -29,6 +26,7 @@
         <ipl-message
             v-if="scheduleStore.activeSpeedrun == null"
             type="warning"
+            class="m-t-8"
         >
             No speedrun is currently active
         </ipl-message>
