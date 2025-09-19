@@ -70,7 +70,7 @@ onMounted(() => {
     const meterAlphaSpeed = 0.25;
     let lastTime = 0;
     let currentLevel = 0;
-    let targetLevel = 0.5;
+    let targetLevel = 0.0;
 
     watch(() => {
         if (props.channelAssignments.channelIds.length === 0) {

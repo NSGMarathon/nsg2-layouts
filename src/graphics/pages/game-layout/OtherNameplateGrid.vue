@@ -31,36 +31,12 @@
                     v-for="(talentRow, i) in talent"
                     :key="i"
                 >
-                    <td
+                    <other-nameplate-grid-cell
                         v-for="(talent, j) in talentRow"
                         :key="talent?.id ?? j"
-                        :class="{ speaking: mixerStore.isSpeaking(talent?.id, null) }"
-                    >
-                        <template v-if="talent != null">
-                            <fitted-content
-                                class="commentator-name"
-                                align="center"
-                            >
-                                {{ talent.name }}
-                            </fitted-content>
-                            <div class="layout horizontal center-horizontal center-vertical m-t-2 m-x-4">
-                                <country-flag
-                                    v-if="talent.countryCode != null"
-                                    :country-code="talent.countryCode"
-                                    class="commentator-flag"
-                                />
-                                <fitted-content class="commentator-pronoun-wrapper">
-                                    <badge
-                                        v-if="!isBlank(talent.pronouns)"
-                                        class="commentator-pronouns"
-                                    >
-                                        {{ talent.pronouns }}
-                                    </badge>
-                                </fitted-content>
-                            </div>
-                        </template>
-                        <div class="cell-index">{{ talentStore.currentHostId != null && talent?.id === talentStore.currentHostId ? 'H' : i * rowCount + j + 1 + baseIndex }}</div>
-                    </td>
+                        :talent="talent"
+                        :cell-index="talentStore.currentHostId != null && talent?.id === talentStore.currentHostId ? 'H' : i * rowCount + j + 1 + baseIndex"
+                    />
                 </tr>
             </tbody>
         </table>
@@ -73,10 +49,6 @@ import { computed, inject } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import chunk from 'lodash/chunk';
 import { TalentItem } from 'types/ScheduleHelpers';
-import FittedContent from 'components/FittedContent.vue';
-import CountryFlag from 'components/CountryFlag.vue';
-import { isBlank } from 'shared/StringHelper';
-import Badge from 'components/Badge.vue';
 import { defaultSpeakingThreshold, useMixerStore } from 'client-shared/stores/MixerStore';
 import { GameLayoutFeedIndexInjectionKey } from '../../helpers/Injections';
 import { useSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
@@ -84,6 +56,7 @@ import MixerVolumeMeter from './MixerVolumeMeter.vue';
 import { MixerVolumeMeterChannelAssignment } from '../../helpers/MixerVolumeMeter';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { disableVolumeMeters } from 'client-shared/stores/MixerStore';
+import OtherNameplateGridCell from 'components/OtherNameplateGridCell.vue';
 
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
@@ -150,41 +123,6 @@ table {
     flex-grow: 1;
     border-collapse: collapse;
     table-layout: fixed;
-
-    td {
-        border: 2px solid colors.$vfd-teal;
-        height: 60px;
-        text-align: center;
-        position: relative;
-        padding: 0;
-        background-color: transparent;
-        transition: background-color 150ms;
-
-        &.speaking {
-            background-color: color.adjust(colors.$vfd-teal, $alpha: -0.8);
-        }
-    }
-}
-
-.cell-index {
-    position: absolute;
-    bottom: -2px;
-    left: -2px;
-    background-color: colors.$vfd-teal;
-    font-family: 'Roboto Condensed';
-    font-weight: 600;
-    font-size: 20px;
-    color: colors.$vfd-background;
-    min-width: 18px;
-    height: 20px;
-    line-height: 21px;
-    text-align: center;
-}
-
-.commentator-name {
-    margin: 2px 4px 0;
-    font-size: 22px;
-    font-weight: 700;
 }
 
 .speedrun-playlist-data-layout {
@@ -217,19 +155,6 @@ table {
     max-width: 450px;
     margin: -8px 0 6px;
     padding: 0 8px;
-}
-
-.commentator-flag {
-    height: 22px;
-}
-
-.commentator-flag + .commentator-pronoun-wrapper {
-    margin-left: 4px;
-}
-
-.commentator-pronouns {
-    font-size: 17.5px !important;
-    transform: translateY(-0.5px);
 }
 
 .pre-recorded-label {

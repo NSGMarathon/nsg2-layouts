@@ -35,41 +35,14 @@
             </div>
             <div class="bg-inset m-t-16 layout vertical">
                 <div class="layout horizontal center-vertical">
-                    <div
-                        class="host-name-display layout vertical center-vertical center-horizontal"
-                        :class="{ speaking: hostSpeaking }"
-                    >
-                        <template v-if="currentHost == null">
-                            No Host!
-                        </template>
-                        <template v-else>
-                            <fitted-content
-                                class="host-name"
-                                align="center"
-                            >
-                                {{ currentHost.name }}
-                            </fitted-content>
-                            <div
-                                class="layout horizontal center-horizontal center-vertical m-t-2 max-width"
-                                style="padding: 0 4px;"
-                            >
-                                <country-flag
-                                    v-if="currentHost.countryCode != null"
-                                    :country-code="currentHost.countryCode"
-                                    class="host-flag"
-                                />
-                                <fitted-content class="host-pronoun-wrapper">
-                                    <badge
-                                        v-if="!isBlank(currentHost.pronouns)"
-                                        class="host-pronouns"
-                                    >
-                                        {{ currentHost.pronouns }}
-                                    </badge>
-                                </fitted-content>
-                            </div>
-                        </template>
-                        <div class="host-name-label">H</div>
-                    </div>
+                    <table class="host-display-table">
+                        <tbody>
+                            <other-nameplate-grid-cell
+                                :talent="currentHost"
+                                cell-index="H"
+                            />
+                        </tbody>
+                    </table>
                     <div class="music-icon">♫</div>
                     <div class="grow" style="margin-top: -4px">
                         <vfd-pixel-text
@@ -115,16 +88,12 @@ import {
     MaxOmnibarBidWarItemsInjectionKey,
     MaxOmnibarBidWarTitleWidthInjectionKey
 } from '../../../dashboard/helpers/Injections';
-import FittedContent from 'components/FittedContent.vue';
 import VfdPixelText from 'components/VfdPixelText.vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
-import { isBlank } from 'shared/StringHelper';
-import Badge from 'components/Badge.vue';
-import CountryFlag from 'components/CountryFlag.vue';
 import { useMusicStore } from 'client-shared/stores/MusicStore';
-import { defaultSpeakingThreshold, disableVolumeMeters, useMixerStore } from 'client-shared/stores/MixerStore';
 import { Configschema } from 'types/schemas';
 import { useCurrentTrackerDataStore } from 'client-shared/stores/CurrentTrackerDataStore';
+import OtherNameplateGridCell from 'components/OtherNameplateGridCell.vue';
 
 const currentTrackerDataStore = useCurrentTrackerDataStore();
 
@@ -137,15 +106,7 @@ provide(MaxOmnibarBidWarTitleWidthInjectionKey, 200);
 
 const talentStore = useTalentStore();
 const musicStore = useMusicStore();
-const mixerStore = useMixerStore();
 const currentHost = computed(() => talentStore.findTalentItemById(talentStore.currentHostId));
-
-const hostSpeaking = computed(() => {
-    if (disableVolumeMeters || talentStore.currentHostId == null) return false;
-    const assignment = mixerStore.mixerChannelAssignments.host;
-    if (assignment == null) return false;
-    return (mixerStore.mixerChannelLevels[assignment.channelId] ?? -90) > (assignment.speakingThresholdDB ?? defaultSpeakingThreshold);
-});
 </script>
 
 <style scoped lang="scss">
@@ -245,57 +206,11 @@ const hostSpeaking = computed(() => {
     height: 150px;
 }
 
-.host-name-display {
-    border: 2px solid colors.$vfd-teal;
-    font-size: 30px;
-    color: colors.$vfd-teal;
-    font-weight: 700;
-    position: relative;
+.host-display-table {
+    border-collapse: collapse;
+    table-layout: fixed;
     width: 250px;
     height: 73px;
-    overflow: hidden;
-    background-color: transparent;
-    transition: background-color 150ms;
-
-    &.speaking {
-        background-color: color.adjust(colors.$vfd-teal, $alpha: -0.8);
-    }
-
-    > .host-name-label {
-        font-family: 'Roboto Condensed', sans-serif;
-        font-size: 20px;
-        background-color: colors.$vfd-teal;
-        color: colors.$vfd-background;
-        position: absolute;
-        bottom: 0;
-        left: -2px;
-        padding: 0 5px;
-        min-width: 18px;
-        height: 20px;
-    }
-
-    .host-name {
-        padding: 0 4px;
-        width: 100%;
-        font-weight: 700;
-    }
-
-    .host-flag {
-        height: 22px;
-    }
-
-    .host-flag + .host-pronoun-wrapper {
-        margin-left: 4px;
-    }
-
-    .host-pronoun-wrapper {
-        margin-top: -12px;
-    }
-
-    .host-pronouns {
-        font-size: 16.25px !important;
-        transform: translateY(1.5px);
-    }
 }
 
 .music-icon {
