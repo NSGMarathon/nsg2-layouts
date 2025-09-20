@@ -61,7 +61,10 @@ const secondLine = computed(() => {
             return talentStore.formatSpeedrunTeamList(props.scheduleItem);
         }
     } else {
-        return props.scheduleItem.talentIds.length === 0 ? '' : talentStore.formatTalentIdList(props.scheduleItem.talentIds, 4);
+        return [
+            props.scheduleItem.talentIds.length === 0 ? '' : talentStore.formatTalentIdList(props.scheduleItem.talentIds, 4),
+            props.scheduleItem.description
+        ].filter(item => !isBlank(item)).join('·');
     }
 });
 </script>
