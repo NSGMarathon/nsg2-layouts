@@ -89,6 +89,7 @@ import OmnibarBidWarDisplay from 'components/omnibar/OmnibarBidWarDisplay.vue';
 import OmnibarScheduleItemDisplay from 'components/omnibar/OmnibarScheduleItemDisplay.vue';
 import OmnibarIncentiveDisplay from 'components/omnibar/OmnibarIncentiveDisplay.vue';
 import OmnibarMilestoneDisplay from 'components/omnibar/OmnibarMilestoneDisplay.vue';
+import { isIgnorableScheduleItem } from 'shared/ScheduleHelper';
 
 const props = withDefaults(defineProps<{
     withoutDonationReminder?: boolean
@@ -110,7 +111,7 @@ const scheduleStore = useScheduleStore();
 const currentTrackerDataStore = useCurrentTrackerDataStore();
 
 // Grab the next items on the schedule. If the next two items are interstitials, also show the next speedrun.
-const interstitialsBeforeActiveRun = computed(() => props.withoutScheduleItems ? [] : scheduleStore.interstitialsBeforeActiveRun.filter(interstitial => !interstitial.completed));
+const interstitialsBeforeActiveRun = computed(() => props.withoutScheduleItems ? [] : scheduleStore.interstitialsBeforeActiveRun.filter(interstitial => !interstitial.completed && !isIgnorableScheduleItem(interstitial)));
 const nextScheduleItem = computed(() => {
     if (props.withoutScheduleItems) {
         return null;

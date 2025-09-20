@@ -22,6 +22,7 @@ import VfdPixelText from 'components/VfdPixelText.vue';
 import { ScheduleItem } from 'types/ScheduleHelpers';
 import { computed, onMounted } from 'vue';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
+import { isBlank } from 'shared/StringHelper';
 
 const talentStore = useTalentStore();
 
@@ -54,13 +55,13 @@ function onScrollEnd(lineIndex: number) {
 const secondLine = computed(() => {
     if (props.scheduleItem == null) return '';
     if (props.scheduleItem.type === 'SPEEDRUN') {
-        if (!!props.scheduleItem.category) {
+        if (!isBlank(props.scheduleItem.category)) {
             return `${props.scheduleItem.category}·${talentStore.formatSpeedrunTeamList(props.scheduleItem)}`;
         } else {
             return talentStore.formatSpeedrunTeamList(props.scheduleItem);
         }
     } else {
-        return talentStore.formatTalentIdList(props.scheduleItem.talentIds, 4);
+        return props.scheduleItem.talentIds.length === 0 ? '' : talentStore.formatTalentIdList(props.scheduleItem.talentIds, 4);
     }
 });
 </script>

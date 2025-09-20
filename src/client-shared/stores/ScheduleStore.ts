@@ -10,6 +10,7 @@ import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { ScheduleItem, ScheduleItemType } from 'types/ScheduleHelpers';
 import { isBlank } from 'shared/StringHelper';
+import { isIgnorableScheduleItem } from 'shared/ScheduleHelper';
 
 const schedule = nodecg.Replicant<Schedule>('schedule');
 const activeSpeedrun = nodecg.Replicant<ActiveSpeedrun>('activeSpeedrun');
@@ -52,6 +53,7 @@ export const useScheduleStore = defineStore('schedule', {
                 if (
                     (types == null || types.includes(scheduleItem.type))
                     && (completed == null || scheduleItem.type === 'SPEEDRUN' || (!completed && scheduleItem.completed == null) || scheduleItem.completed === completed)
+                    && (completed !== false || !isIgnorableScheduleItem(scheduleItem))
                 ) return scheduleItem;
             }
             return null;

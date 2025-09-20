@@ -68,7 +68,7 @@ import SpeedrunEstimateDisplay from 'components/SpeedrunEstimateDisplay.vue';
 import { Duration } from 'luxon';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { Configschema } from 'types/schemas';
-import { isBlank } from 'shared/StringHelper';
+import { isIgnorableScheduleItem } from 'shared/ScheduleHelper';
 
 const scheduleUrl = (nodecg.bundleConfig as Configschema).event?.scheduleUrl ?? 'schedule.nsgmarathon.com';
 const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
@@ -79,14 +79,6 @@ const timerStore = useTimerStore();
 const talentStore = useTalentStore();
 
 const timerFinished = computed(() => timerStore.timer.state === 'FINISHED');
-
-function isIgnorableScheduleItem(scheduleItem: ScheduleItem | null) {
-    return scheduleItem != null
-        && scheduleItem.type !== 'SPEEDRUN'
-        && isBlank(scheduleItem.description)
-        && scheduleItem.talentIds.length === 0;
-}
-
 // When seeking to the next speedrun, the timer state may be reset before or after the active speedrun is changed.
 // If the timer state is reset before the active speedrun is switched, the schedule may briefly flash an incorrect state before switching to the correct one.
 // Due to this, we wait 50ms before fully committing to a schedule update to ensure no other state updates come in within that timeframe.
