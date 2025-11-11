@@ -16,7 +16,7 @@ export interface IgdbGameDataResponse {
     }
     external_games?: {
         id: number
-        category: number
+        external_game_source: number
         uid: string
         name: string
         url: string
@@ -31,7 +31,7 @@ export interface IgdbGameDataResponse {
         first_release_date?: number
         external_games?: {
             id: number
-            category: number
+            external_game_source: number
             uid: string
             name: string
             url: string

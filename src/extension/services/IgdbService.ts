@@ -115,17 +115,17 @@ export class IgdbService extends HasNodecgLogger {
 
     private getGamesWithTwitchCategories(games: IgdbGameDataResponse[]): IgdbGameDataResponse[] {
         return games.filter(result =>
-            (result.external_games != null && result.external_games.some(game => game.category === 14))
-            || (result.parent_game?.external_games != null && result.parent_game.external_games.some(game => game.category === 14)));
+            (result.external_games != null && result.external_games.some(game => game.external_game_source === 14))
+            || (result.parent_game?.external_games != null && result.parent_game.external_games.some(game => game.external_game_source === 14)));
     }
 
     private mapIgdbResponse(data: IgdbGameDataResponse): IgdbGameData {
-        let twitchExternalGame = data.external_games?.find(externalGame => externalGame.category === 14);
+        let twitchExternalGame = data.external_games?.find(externalGame => externalGame.external_game_source === 14);
         let name = data.name;
         if (twitchExternalGame == null && data.parent_game != null) {
             // For our purposes, we want to show the parent game's name if we are using its twitch category
             name = data.parent_game.name;
-            twitchExternalGame = data.parent_game.external_games?.find(externalGame => externalGame.category === 14);
+            twitchExternalGame = data.parent_game.external_games?.find(externalGame => externalGame.external_game_source === 14);
         }
         if (twitchExternalGame == null) {
             throw new Error(`No Twitch game data found for game ${data.name}`);
