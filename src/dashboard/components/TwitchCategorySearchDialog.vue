@@ -54,6 +54,9 @@
                         >
                             ({{ result.releaseYear }})
                         </span>
+                        <div v-if="result.platforms != null && result.platforms.length !== 0">
+                            <small>{{ result.platforms.join(', ') }}</small>
+                        </div>
                         <div>
                             <a
                                 v-if="result.twitchCategoryUrl != null"
@@ -87,7 +90,13 @@ import debounce from 'lodash/debounce';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useTwitchDataStore } from 'client-shared/stores/TwitchDataStore';
 
-type SelectCallbackData = { category: { id: string, name: string, boxArtUrl?: string }, releaseYear?: string, twitchCategoryUrl?: string, igdbUrl?: string };
+type SelectCallbackData = {
+    category: { id: string, name: string, boxArtUrl?: string },
+    releaseYear?: string,
+    twitchCategoryUrl?: string,
+    igdbUrl?: string
+    platforms?: string[]
+};
 
 const twitchDataStore = useTwitchDataStore();
 
@@ -139,7 +148,8 @@ async function onQueryChange(newQuery: string, dataSource: string) {
                     },
                     releaseYear: result.releaseYear,
                     twitchCategoryUrl: result.twitchCategoryUrl,
-                    igdbUrl: result.url
+                    igdbUrl: result.url,
+                    platforms: result.platforms.map(platform => platform.abbreviation || platform.name)
                 }));
             }
         }
