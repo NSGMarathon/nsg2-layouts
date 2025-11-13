@@ -59,8 +59,8 @@ export class IgdbClient {
 
     async getGame(name: string): Promise<IgdbGameDataResponse[]> {
         const response = await this.requestQueue.add(() => this.axios.post<IgdbGameDataResponse[]>('/games', `
-            f name, external_games.category, external_games.url, external_games.uid, cover.url, first_release_date, platforms.abbreviation, platforms.name, url, parent_game.external_games.category, parent_game.external_games.url, parent_game.external_games.uid, parent_game.first_release_date, parent_game.name, parent_game.cover.url;
-            w name = "${this.escapeQuotes(name.trim())}" & (external_games.category = 14 | parent_game != null);
+            f name, external_games.external_game_source, external_games.url, external_games.uid, cover.url, first_release_date, platforms.abbreviation, platforms.name, url, parent_game.external_games.external_game_source, parent_game.external_games.url, parent_game.external_games.uid, parent_game.first_release_date, parent_game.name, parent_game.cover.url;
+            w name = "${this.escapeQuotes(name.trim())}" & (external_games.external_game_source = 14 | parent_game != null);
             l 500;
         `, {
             headers: {
@@ -81,8 +81,8 @@ export class IgdbClient {
     // have a Twitch category, ignoring the parent game. This reduces duplicate search results.
     async searchGames(query: string, findGamesWithParent: boolean): Promise<IgdbGameDataResponse[]> {
         const response = await this.requestQueue.add(() => this.axios.post<IgdbGameDataResponse[]>('/games', `
-            f name, external_games.category, external_games.url, external_games.uid, cover.url, first_release_date, platforms.abbreviation, platforms.name, url, parent_game.external_games.category, parent_game.external_games.url, parent_game.external_games.uid, parent_game.first_release_date, parent_game.name, parent_game.cover.url;
-            w external_games.category = 14${findGamesWithParent ? ' | parent_game != null' : ''};
+            f name, external_games.external_game_source, external_games.url, external_games.uid, cover.url, first_release_date, platforms.abbreviation, platforms.name, url, parent_game.external_games.external_game_source, parent_game.external_games.url, parent_game.external_games.uid, parent_game.first_release_date, parent_game.name, parent_game.cover.url;
+            w external_games.external_game_source = 14${findGamesWithParent ? ' | parent_game != null' : ''};
             search "${this.escapeQuotes(query.trim())}";
             l 500;
         `, {
