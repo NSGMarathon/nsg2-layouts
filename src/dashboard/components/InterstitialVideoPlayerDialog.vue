@@ -26,6 +26,14 @@
                     :options="returnToSceneOptions"
                     name="returnToScene"
                 />
+                <div class="m-l-32">
+                    <ipl-radio
+                        v-model="order"
+                        label="Order by..."
+                        :options="orderOptions"
+                        name="order"
+                    />
+                </div>
             </div>
         </template>
         <div
@@ -78,10 +86,30 @@ const returnToSceneOptions = computed(() => [
     { name: 'Preview Scene', value: 'PREVIEW', enabled: obsStore.obsState.previewScene != null }
 ]);
 
-const videoFiles = computed(() => videoFileStore.videoFiles.interstitials.map(video => ({
-    ...video,
-    parsedLastPlayed: video.lastPlayed == null ? null : DateTime.fromISO(video.lastPlayed)
-})));
+const order = ref<'TIME_PLAYED' | 'NAME'>('TIME_PLAYED');
+const orderOptions = [
+    { name: 'Time played', value: 'TIME_PLAYED' },
+    { name: 'Name', value: 'NAME' }
+];
+
+const videoFiles = computed(() => videoFileStore.videoFiles.interstitials
+    .toSorted((a, b) => {
+        if (order.value === 'NAME' || (a.lastPlayed == null && b.lastPlayed == null)) {
+            return a.name.localeCompare(b.name);
+        } else {
+            if (a.lastPlayed == null) {
+                return -1;
+            } else if (b.lastPlayed == null) {
+                return 1;
+            } else {
+                return DateTime.fromISO(a.lastPlayed) > DateTime.fromISO(b.lastPlayed) ? 1 : -1;
+            }
+        }
+    })
+    .map(video => ({
+        ...video,
+        parsedLastPlayed: video.lastPlayed == null ? null : DateTime.fromISO(video.lastPlayed)
+    })));
 
 const isOpen = ref(false);
 const isLoading = ref(false);
