@@ -238,7 +238,9 @@ export class TwitchService extends HasNodecgLogger {
                     .replace('{{talent}}',
                         firstTalentItem == null
                             ? `${talentCount} player${talentCount === 1 ? '' : 's'}`
-                            : `${firstTalentItem.name} & ${talentCount} other${talentCount === 1 ? '' : 's'}`)
+                            : talentCount === 0
+                                ? firstTalentItem.name
+                                : `${firstTalentItem.name} & ${talentCount} other${talentCount === 1 ? '' : 's'}`)
                     .replace('{{category}}', scheduleItem.category?.trim() ?? '???')
                     .replace('{{title}}', scheduleItem.title.trim());
             }
