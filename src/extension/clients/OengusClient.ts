@@ -344,8 +344,10 @@ export class OengusClient extends HasNodecgLogger {
                 this.logger.debug('Got Oengus schedule without cache');
                 return privateScheduleResponse.data.data;
             } catch (e) {
-                if (isAxiosError(e) && e.response?.status === 401) {
-                    this.logger.warn('Tried to fetch Oengus schedule without cache, but got a 401 error.');
+                // I'm not entirely positive why Oengus sends us a 404 error here, but retrying with the public endpoint
+                // has a chance of returning a positive result.
+                if (isAxiosError(e) && (e.response?.status === 401 || e.response?.status === 404)) {
+                    this.logger.warn(`Tried to fetch Oengus schedule without cache, but got a ${e.response?.status} error: ${this.formatError(e)}`);
                 } else {
                     throw e;
                 }
