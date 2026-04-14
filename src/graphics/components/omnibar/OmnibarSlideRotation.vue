@@ -31,7 +31,7 @@
                     <transition name="slide-swap">
                         <div
                             v-if="slides.activeComponent.value === 'fallback'"
-                            class="no-slide-placeholder max-height"
+                            class="no-slide-placeholder"
                         >
                             Benefiting Norges Blindeforbund
                         </div>
