@@ -22,7 +22,7 @@
                     <div class="pointer-icon">»</div>
                     <img
                         class="charity-logo"
-                        src="../../assets/img/charity-logo-main.png"
+                        src="../../assets/img/charity-logo-wide.png"
                     >
                 </div>
             </div>
@@ -174,7 +174,7 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 
 .logos {
     justify-content: space-between;
-    margin: 16px 60px 0;
+    margin: 25px 60px 0;
 
     img {
         width: 250px;
@@ -188,7 +188,7 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 }
 
 .prize-display {
-    margin-top: 16px;
+    margin-top: 56px;
     height: 300px;
 }
 
@@ -199,11 +199,12 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 .pointer-icon {
     color: colors.$vfd-teal;
     font-size: 3em;
-    margin: 0 32px;
+    margin: 0 16px;
 }
 
 .charity-logo {
-    height: 150px;
+    height: 129px;
+    margin: -8px 0;
 }
 
 .host-display-table {
