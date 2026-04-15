@@ -37,6 +37,8 @@ import { InterstitialVideoPlayerController } from './controllers/InterstitialVid
 import { TodoListService } from './services/TodoListService';
 import { TodoListController } from './controllers/TodoListController';
 import { PlayBingoSocketService } from './services/PlayBingoSocketService';
+import { FeudService } from './services/FeudService';
+import { FeudController } from './controllers/FeudController';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -66,6 +68,13 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const speedrunPlaylistService = new SpeedrunPlaylistService(nodecg, obsConnectorService, speedrunService, timerService, discordWebhookClient);
     const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService, videoFileService);
     new PlayBingoSocketService(nodecg);
+
+    if (FeudService.hasRequiredConfig(nodecg)) {
+        const feudService = new FeudService(nodecg);
+        new FeudController(nodecg, feudService);
+    } else {
+        nodecg.log.warn('Disabling Feud support since it was not configured');
+    }
 
     new ScheduleController(nodecg, scheduleService);
     new SpeedrunController(nodecg, speedrunService);

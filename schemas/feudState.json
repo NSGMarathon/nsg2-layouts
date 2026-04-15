@@ -1,0 +1,110 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "oneOf": [
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["WAITING_FOR_QUESTION", "WAITING_FOR_BUZZER"]
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "firstToBuzz", "teamInPlay", "anyGuessMadeBy"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["WAITING_FOR_FACEOFF_ANSWER"]
+                },
+                "firstToBuzz": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                },
+                "teamInPlay": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                },
+                "anyGuessMadeBy": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["teamA", "teamB"],
+                    "properties": {
+                        "teamA": { "type": "boolean" },
+                        "teamB": { "type": "boolean" }
+                    }
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "faceoffWinner"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["WAITING_FOR_PLAY_OR_PASS"]
+                },
+                "faceoffWinner": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "teamInPlay", "strikes"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["WAITING_FOR_ANSWER"]
+                },
+                "teamInPlay": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                },
+                "strikes": {
+                    "type": "number"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "winner"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["END_OF_ROUND"]
+                },
+                "winner": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "teamInPlay"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["WAITING_FOR_STEAL"]
+                },
+                "teamInPlay": {
+                    "type": "string",
+                    "enum": ["teamA", "teamB"]
+                }
+            }
+        }
+    ],
+    "default": {
+        "state": "WAITING_FOR_QUESTION"
+    }
+}

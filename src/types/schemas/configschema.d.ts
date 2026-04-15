@@ -107,6 +107,16 @@ export interface Configschema {
 		}[];
 		[k: string]: unknown;
 	};
+	feudQuestions?: {
+		question: string;
+		internalRoundName?: string;
+		board: {
+			answer: string;
+			value: number;
+			[k: string]: unknown;
+		}[];
+		[k: string]: unknown;
+	}[];
 	[k: string]: unknown;
 }
 export interface ChannelItem {

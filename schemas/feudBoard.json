@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["question", "answers"],
+    "properties": {
+        "question": {
+            "type": ["string", "null"]
+        },
+        "answers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["answer", "value", "guessed"],
+                "properties": {
+                    "answer": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "guessed": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    },
+    "default": {
+        "question": null,
+        "answers": []
+    }
+}

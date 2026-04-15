@@ -185,6 +185,28 @@
                     }
                 }
             }
+        },
+        "feudQuestions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["question", "board"],
+                "properties": {
+                    "question": { "type": "string" },
+                    "internalRoundName": { "type": "string" },
+                    "board": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["answer", "value"],
+                            "properties": {
+                                "answer": { "type": "string" },
+                                "value": { "type": "number" }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
 import { InterstitialVideoState } from '../schemas/interstitialVideoState';
+import { FeudTeam } from '../feud';
 
 export interface MessageInputMap {
     'log:warning': string
@@ -59,6 +60,16 @@ export interface MessageInputMap {
     'todo:setCompleted': { categoryName: string, listItemName: string, completed: boolean }
 
     'stage-display:flash': never
+
+    'feud:resetScores': never
+    'feud:chooseQuestion': { questionIndex: number, boardSize: number }
+    'feud:setBuzzerWinner': { team: FeudTeam }
+    'feud:undoBuzzer': never
+    'feud:completePlayOrPass': { teamToPlay: FeudTeam }
+    'feud:markAnswerGuessed': { answerIndex: number }
+    'feud:markNoAnswerGuessed': never
+    'feud:revealLowestAnswerNotGuessed': never
+    'feud:startNewRound': never
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;
