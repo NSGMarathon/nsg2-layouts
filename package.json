@@ -82,6 +82,13 @@
                 "file": "host.html",
                 "headerColor": "#262F40",
                 "fullbleed": true
+            },
+            {
+                "name": "feud",
+                "title": "4 - Game Show",
+                "file": "feud.html",
+                "headerColor": "#262F40",
+                "fullbleed": true
             }
         ],
         "graphics": [
@@ -135,7 +142,7 @@
         "@fortawesome/free-brands-svg-icons": "^6.4.0",
         "@fortawesome/free-solid-svg-icons": "^6.4.0",
         "@fortawesome/vue-fontawesome": "^3.0.0-4",
-        "@iplsplatoon/vue-components": "3.9.1",
+        "@iplsplatoon/vue-components": "3.10.0",
         "@jest/globals": "^29.7.0",
         "@nodecg/types": "^2.1.12",
         "@types/cookie": "^0.6.0",
