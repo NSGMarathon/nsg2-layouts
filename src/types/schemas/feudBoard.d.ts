@@ -7,6 +7,7 @@
  */
 
 export interface FeudBoard {
+	roundNumber: number;
 	question: string | null;
 	answers: {
 		answer: string;

@@ -2,8 +2,11 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "type": "object",
     "additionalProperties": false,
-    "required": ["question", "answers"],
+    "required": ["roundNumber", "question", "answers"],
     "properties": {
+        "roundNumber": {
+            "type": "number"
+        },
         "question": {
             "type": ["string", "null"]
         },
@@ -28,6 +31,7 @@
         }
     },
     "default": {
+        "roundNumber": 1,
         "question": null,
         "answers": []
     }

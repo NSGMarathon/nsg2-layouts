@@ -59,6 +59,7 @@ export class FeudService extends HasNodecgLogger {
     resetScores() {
         this.feudTeamInfo.value.teamA.score = 0;
         this.feudTeamInfo.value.teamB.score = 0;
+        this.feudBoard.value.roundNumber = 1;
     }
 
     chooseQuestion(index: number, boardSize: number) {
@@ -75,6 +76,7 @@ export class FeudService extends HasNodecgLogger {
         }
 
         this.feudBoard.value = {
+            roundNumber: this.feudBoard.value.roundNumber,
             question: question.question,
             answers: question.board.slice(0, boardSize).map((boardItem) => ({
                 answer: boardItem.answer,
@@ -272,10 +274,13 @@ export class FeudService extends HasNodecgLogger {
     }
 
     startNewRound() {
+        const incrementRoundNumber = this.feudState.value.state !== 'WAITING_FOR_BUZZER' && this.feudState.value.state !== 'WAITING_FOR_FACEOFF_ANSWER';
+
         this.feudState.value = {
             state: 'WAITING_FOR_QUESTION',
         };
         this.feudBoard.value = {
+            roundNumber: incrementRoundNumber ? this.feudBoard.value.roundNumber + 1 : this.feudBoard.value.roundNumber,
             question: null,
             answers: [],
         };
@@ -286,7 +291,13 @@ export class FeudService extends HasNodecgLogger {
             .filter((answer, i) => answer.guessed && (excludeIndexFromSum == null || excludeIndexFromSum !== i))
             .reduce((result, answer) => result + answer.value, 0);
 
-        this.feudTeamInfo.value[winner].score += summedAnswerValue;
+        if (this.feudBoard.value.roundNumber === 3) {
+            this.feudTeamInfo.value[winner].score += summedAnswerValue * 2;
+        } else if (this.feudBoard.value.roundNumber === 4) {
+            this.feudTeamInfo.value[winner].score += summedAnswerValue * 3;
+        } else {
+            this.feudTeamInfo.value[winner].score += summedAnswerValue;
+        }
         this.feudState.value = {
             state: 'END_OF_ROUND',
             winner: winner,
