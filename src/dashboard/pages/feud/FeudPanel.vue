@@ -237,6 +237,8 @@ library.add(faUndo, faCancel);
 
 const feudStore = useFeudStore();
 
+const params = new URLSearchParams(window.location.search);
+
 const hasConfig = feudConfig != null && feudConfig.length > 0;
 
 const selectedQuestion = ref('0');
@@ -270,7 +272,7 @@ const canClickAnyBoardSpace = computed(() => {
 
 const allAnswersGuessed = computed(() => feudStore.feudBoard.answers.every((answer) => answer.guessed));
 
-const showAnswers = ref(true);
+const showAnswers = ref(!params.has('hide-answers'));
 
 function getOpponent(team: FeudTeam): FeudTeam {
     return team === 'teamA' ? 'teamB' : 'teamA';
