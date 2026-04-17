@@ -288,11 +288,10 @@ export class FeudService extends HasNodecgLogger {
     }
 
     private endRound(winner: FeudTeam) {
-        const summedAnswerValue = this.feudBoard.value.answers
-            .filter((answer, i) => answer.guessed)
+        let pointsWon = this.feudBoard.value.answers
+            .filter((answer) => answer.guessed)
             .reduce((result, answer) => result + answer.value, 0);
 
-        let pointsWon = summedAnswerValue;
         if (this.feudBoard.value.roundNumber === 3) {
             pointsWon *= 2;
         } else if (this.feudBoard.value.roundNumber === 4) {
