@@ -27,6 +27,23 @@ export const useFeudStore = defineStore('feud', {
         setTeamNames(teamAName: string, teamBName: string) {
             feudTeamInfo.value!.teamA.name = teamAName;
             feudTeamInfo.value!.teamB.name = teamBName;
+        },
+    },
+    getters: {
+        guessedAnswerValue(state) {
+            if (state.feudState.state === 'END_OF_ROUND') {
+                return state.feudState.pointsWon;
+            }
+
+            const result = state.feudBoard.answers.filter((answer) => answer.guessed).reduce((result, answer) => result + answer.value, 0);
+
+            if (state.feudBoard.roundNumber === 3) {
+                return result * 2;
+            } else if (state.feudBoard.roundNumber === 4) {
+                return result * 3;
+            } else {
+                return result;
+            }
         }
     }
 });

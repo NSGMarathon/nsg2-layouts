@@ -118,6 +118,11 @@
                 "height": 1080
             },
             {
+                "file": "feud-board.html",
+                "width": 1920,
+                "height": 1080
+            },
+            {
                 "file": "utility-stage-display.html",
                 "width": 1920,
                 "height": 1080
@@ -133,6 +138,17 @@
                     "png",
                     "gif"
                 ]
+            }
+        ],
+        "soundCues": [
+            {
+                "name": "feud-correct-answer"
+            },
+            {
+                "name": "feud-incorrect-answer"
+            },
+            {
+                "name": "feud-buzzer"
             }
         ]
     },

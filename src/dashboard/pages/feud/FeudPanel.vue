@@ -67,10 +67,10 @@
                                 Face-off: <span :class="getTeamColor(feudStore.feudState.teamInPlay)">{{ getTeamName(feudStore.feudState.teamInPlay) }}</span> guesses
                             </template>
                             <template v-else-if="feudStore.feudState.state === 'WAITING_FOR_ANSWER'">
-                                <span :class="getTeamColor(feudStore.feudState.teamInPlay)">{{ getTeamName(feudStore.feudState.teamInPlay) }}</span> guesses - {{ pluralize('strike', feudStore.feudState.strikes) }} - {{ pluralize('point', guessedAnswerValue) }}
+                                <span :class="getTeamColor(feudStore.feudState.teamInPlay)">{{ getTeamName(feudStore.feudState.teamInPlay) }}</span> guesses - {{ pluralize('strike', feudStore.feudState.strikes) }} - {{ pluralize('point', feudStore.guessedAnswerValue) }}
                             </template>
                             <template v-else-if="feudStore.feudState.state === 'WAITING_FOR_STEAL'">
-                                <span :class="getTeamColor(feudStore.feudState.teamInPlay)">{{ getTeamName(feudStore.feudState.teamInPlay) }}</span> steals - {{ pluralize('point', guessedAnswerValue) }}
+                                <span :class="getTeamColor(feudStore.feudState.teamInPlay)">{{ getTeamName(feudStore.feudState.teamInPlay) }}</span> steals - {{ pluralize('point', feudStore.guessedAnswerValue) }}
                             </template>
                             <template v-else-if="feudStore.feudState.state === 'END_OF_ROUND'">
                                 End of round - <span :class="getTeamColor(feudStore.feudState.winner)">{{ getTeamName(feudStore.feudState.winner) }}</span> wins!
@@ -207,9 +207,7 @@
                         </ipl-button>
                     </div>
                 </ipl-space>
-                <div
-                    class="grow layout vertical center-vertical center-horizontal m-t-8"
-                >
+                <div class="grow layout vertical center-vertical center-horizontal m-t-8">
                     <ipl-space style="width: 10em;">
                         <div class="title">Answers</div>
                         <ipl-toggle v-model="showAnswers" style="height: 2.5em" />
@@ -228,7 +226,6 @@ import { computed, ref } from 'vue';
 import FeudTeamManagementDialog from './FeudTeamManagementDialog.vue';
 import ErrorDisplay from '../../components/ErrorDisplay.vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
-import { FeudBoard } from 'types/schemas/feudBoard';
 import { FeudTeam } from 'types/feud';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUndo } from '@fortawesome/free-solid-svg-icons/faUndo';
@@ -270,17 +267,6 @@ const canClickAnyBoardSpace = computed(() => {
     }
 });
 
-const guessedAnswerValue = computed(() => {
-    const result = feudStore.feudBoard.answers.filter((answer) => answer.guessed).reduce((result, answer) => result + answer.value, 0);
-
-    if (feudStore.feudBoard.roundNumber === 3) {
-        return result * 2;
-    } else if (feudStore.feudBoard.roundNumber === 4) {
-        return result * 3;
-    } else {
-        return result;
-    }
-});
 const allAnswersGuessed = computed(() => feudStore.feudBoard.answers.every((answer) => answer.guessed));
 
 const showAnswers = ref(true);

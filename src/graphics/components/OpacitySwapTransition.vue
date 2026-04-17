@@ -22,6 +22,10 @@ export default defineComponent({
         mode: {
             type: String as PropType<'in-out' | 'out-in' | 'default'>,
             default: 'out-in'
+        },
+        enterDelay: {
+            type: Number,
+            default: 0
         }
     },
 
@@ -31,7 +35,7 @@ export default defineComponent({
                 gsap.set(elem, { opacity: 0 });
             },
             enter: (elem: HTMLElement, done: gsap.Callback) => {
-                gsap.to(elem, { opacity: 1, onComplete: done, duration: 0.35, ease: 'none' });
+                gsap.to(elem, { opacity: 1, onComplete: done, duration: 0.35, ease: 'none', delay: props.enterDelay });
             },
             beforeLeave: (elem: HTMLElement) => {
                 if (props.mode === 'default') {
