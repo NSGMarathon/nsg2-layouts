@@ -192,6 +192,7 @@
                             style="max-width: 15em"
                             class="m-r-8"
                             requires-confirmation
+                            :disabled="feudStore.feudState.anyGuessMadeBy.teamA || feudStore.feudState.anyGuessMadeBy.teamB"
                             @click="undoBuzzer"
                         >
                             <font-awesome-icon icon="undo" /> {{ state === 'confirm' ? 'CONFIRM?' : 'BUZZ AGAIN' }}
