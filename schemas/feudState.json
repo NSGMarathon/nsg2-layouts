@@ -76,7 +76,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "winner", "pointsWon"],
+            "required": ["state", "winner", "pointsWon", "stealSuccessful"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -87,6 +87,12 @@
                     "enum": ["teamA", "teamB"]
                 },
                 "pointsWon": {
+                    "type": "number"
+                },
+                "stealSuccessful": {
+                    "type": ["boolean", "null"]
+                },
+                "strikes": {
                     "type": "number"
                 }
             }

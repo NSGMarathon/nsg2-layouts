@@ -9,6 +9,7 @@ import { FeudBoard } from 'types/schemas/feudBoard';
 
 // Welcome to the Family Feud State Machine
 export class FeudService extends HasNodecgLogger {
+    private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly feudQuestions: DeepReadonly<NonNullable<Configschema['feudQuestions']>>;
     private readonly feudState: NodeCG.ServerReplicantWithSchemaDefault<FeudState>;
     private readonly feudTeamInfo: NodeCG.ServerReplicantWithSchemaDefault<FeudTeamInfo>;
@@ -21,6 +22,7 @@ export class FeudService extends HasNodecgLogger {
             throw new Error('FeudService was loaded without required config! This should never happen.');
         }
 
+        this.nodecg = nodecg;
         this.feudQuestions = nodecg.bundleConfig.feudQuestions!.map((question) => ({
             ...question,
             board: question.board.toSorted((a, b) => b.value - a.value),
@@ -135,6 +137,7 @@ export class FeudService extends HasNodecgLogger {
 
         this.feudBoard.value.answers[answerIndex].guessed = true;
         this.feudState.value.anyGuessMadeBy[this.feudState.value.teamInPlay] = true;
+        this.nodecg.sendMessage('feud:answerGuessed', answerIndex);
 
         if (answerIndex === 0) {
             // The highest-value answer was revealed
@@ -181,6 +184,8 @@ export class FeudService extends HasNodecgLogger {
         } else {
             this.feudState.value.teamInPlay = this.getOpposingTeam(this.feudState.value.teamInPlay);
         }
+
+        this.nodecg.sendMessage('feud:noAnswerGuessedFaceoff');
     }
 
     completePlayOrPass(teamToPlay: FeudTeam) {
@@ -210,6 +215,7 @@ export class FeudService extends HasNodecgLogger {
         }
 
         this.feudBoard.value.answers[answerIndex].guessed = true;
+        this.nodecg.sendMessage('feud:answerGuessed', answerIndex);
 
         if (this.feudBoard.value.answers.every((answer) => answer.guessed)) {
             this.endRound(this.feudState.value.teamInPlay);
@@ -248,8 +254,9 @@ export class FeudService extends HasNodecgLogger {
         }
 
         // the value of the answer used to steal points is excluded from the score
-        this.endRound(this.feudState.value.teamInPlay);
+        this.endRound(this.feudState.value.teamInPlay, true);
         this.feudBoard.value.answers[answerIndex].guessed = true;
+        this.nodecg.sendMessage('feud:answerGuessed', answerIndex);
     }
 
     private markNoAnswerGuessedSteal() {
@@ -257,7 +264,7 @@ export class FeudService extends HasNodecgLogger {
             throw new Error('Cannot try to steal at this time');
         }
 
-        this.endRound(this.getOpposingTeam(this.feudState.value.teamInPlay));
+        this.endRound(this.getOpposingTeam(this.feudState.value.teamInPlay), false);
     }
 
     revealLowestAnswerNotGuessed() {
@@ -272,6 +279,7 @@ export class FeudService extends HasNodecgLogger {
         }
 
         this.feudBoard.value.answers[answerToRevealIndex].guessed = true;
+        this.nodecg.sendMessage('feud:answerGuessed', answerToRevealIndex);
     }
 
     startNewRound() {
@@ -287,7 +295,7 @@ export class FeudService extends HasNodecgLogger {
         };
     }
 
-    private endRound(winner: FeudTeam) {
+    private endRound(winner: FeudTeam, stealSuccessful: boolean | null = null) {
         let pointsWon = this.feudBoard.value.answers
             .filter((answer) => answer.guessed)
             .reduce((result, answer) => result + answer.value, 0);
@@ -304,6 +312,8 @@ export class FeudService extends HasNodecgLogger {
             state: 'END_OF_ROUND',
             winner: winner,
             pointsWon,
+            stealSuccessful,
+            strikes: stealSuccessful == null && this.feudState.value.state === 'WAITING_FOR_ANSWER' ? this.feudState.value.strikes : undefined,
         };
     }
 

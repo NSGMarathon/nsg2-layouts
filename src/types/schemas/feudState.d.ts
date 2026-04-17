@@ -32,6 +32,8 @@ export type FeudState =
 			state: 'END_OF_ROUND';
 			winner: 'teamA' | 'teamB';
 			pointsWon: number;
+			stealSuccessful: boolean | null;
+			strikes?: number;
 	  }
 	| {
 			state: 'WAITING_FOR_STEAL';
