@@ -218,6 +218,59 @@ Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/standalone-bingo.h
 The `standalone-bingo` graphic is currently only tested using a 16:9 viewport, and might not respond well to being used 
 in other setups.
 
+### Feud
+
+nsg2-layouts includes graphics and game state management for a Family Feud clone.  
+To use it, a set of questions must be added to the configuration file as such:
+
+```json
+{
+  "feudQuestions": [
+    {
+      "question": "Question 1",
+      "internalRoundName": "Round 1",
+      "board": [
+        { "answer": "Answer 1", "value": 53 },
+        { "answer": "Answer 2", "value": 11 },
+        { "answer": "Answer 3", "value": 5 },
+        { "answer": "Answer 4", "value": 4 },
+        { "answer": "Answer 5", "value": 4 },
+        { "answer": "Answer 6", "value": 3 },
+        { "answer": "Answer 7", "value": 3 },
+        { "answer": "Answer 8", "value": 2 },
+        { "answer": "Answer 9", "value": 1 },
+        { "answer": "Answer 10", "value": 1 }
+      ]
+    }
+  ]
+}
+```
+
+The `question` and `internalRoundName` properties are only shown in control surfaces, never in public-facing graphics. 
+A question is expected to have at least 8 answers. All answers after the 8th answer aren't used during gameplay.
+
+Use the "Assets" and "Mixer" panels of the NodeCG dashboard to assign sound cues to the graphics. This bundle does 
+currently not bundle any sound effects of its own.
+
+#### Buzzer
+
+The Feud buzzer may be handled by the `feud-buzzer-handler` graphic. The graphic can be configured with the following 
+query parameters: 
+
+- `team-a-key`: Key to press to buzz in the 1st team. Default: L
+- `team-b-key`: Key to press to buzz in the 2nd team. Default: R
+- `team`: Team buzzer state to show on-screen. Must be one of "A", "B" or "both". Default: both
+- `no-audio`: Disables audio playback
+
+Note that this graphic is also responsible for playing buzzer sound effects. To hear these, ensure that one instance of 
+this graphic can play sound back into your audio mixer.
+
+The buzzer may alternatively be handled through our Companion module.
+
+#### Board
+
+The `feud-board` graphic displays the Feud board and plays back sound effects for correct and incorrect answers.
+
 ## npm commands
 
 - `build`: Create a production-ready build.
