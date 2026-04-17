@@ -291,16 +291,19 @@ export class FeudService extends HasNodecgLogger {
             .filter((answer, i) => answer.guessed && (excludeIndexFromSum == null || excludeIndexFromSum !== i))
             .reduce((result, answer) => result + answer.value, 0);
 
+        let pointsWon = summedAnswerValue;
         if (this.feudBoard.value.roundNumber === 3) {
-            this.feudTeamInfo.value[winner].score += summedAnswerValue * 2;
+            pointsWon *= 2;
         } else if (this.feudBoard.value.roundNumber === 4) {
-            this.feudTeamInfo.value[winner].score += summedAnswerValue * 3;
-        } else {
-            this.feudTeamInfo.value[winner].score += summedAnswerValue;
+            pointsWon *= 3;
         }
+
+        this.feudTeamInfo.value[winner].score += pointsWon;
+
         this.feudState.value = {
             state: 'END_OF_ROUND',
             winner: winner,
+            pointsWon,
         };
     }
 
