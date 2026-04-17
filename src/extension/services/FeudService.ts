@@ -247,8 +247,9 @@ export class FeudService extends HasNodecgLogger {
             throw new Error(`Answer at index ${answerIndex} has already been guessed`);
         }
 
+        // the value of the answer used to steal points is excluded from the score
+        this.endRound(this.feudState.value.teamInPlay);
         this.feudBoard.value.answers[answerIndex].guessed = true;
-        this.endRound(this.feudState.value.teamInPlay, answerIndex);
     }
 
     private markNoAnswerGuessedSteal() {
@@ -286,9 +287,9 @@ export class FeudService extends HasNodecgLogger {
         };
     }
 
-    private endRound(winner: FeudTeam, excludeIndexFromSum?: number) {
+    private endRound(winner: FeudTeam) {
         const summedAnswerValue = this.feudBoard.value.answers
-            .filter((answer, i) => answer.guessed && (excludeIndexFromSum == null || excludeIndexFromSum !== i))
+            .filter((answer, i) => answer.guessed)
             .reduce((result, answer) => result + answer.value, 0);
 
         let pointsWon = summedAnswerValue;
