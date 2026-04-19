@@ -4,15 +4,18 @@ import { FeudTeamInfo } from 'types/schemas/feudTeamInfo';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import { Configschema } from 'types/schemas';
+import { FeudLowerThirdMode } from 'types/schemas/feudLowerThirdMode';
 
 const feudBoard = nodecg.Replicant<FeudBoard>('feudBoard');
 const feudState = nodecg.Replicant<FeudState>('feudState');
 const feudTeamInfo = nodecg.Replicant<FeudTeamInfo>('feudTeamInfo');
+const feudLowerThirdMode = nodecg.Replicant<FeudLowerThirdMode>('feudLowerThirdMode');
 
 interface FeudStore {
     feudBoard: FeudBoard;
     feudState: FeudState;
     feudTeamInfo: FeudTeamInfo;
+    feudLowerThirdMode: FeudLowerThirdMode;
 }
 
 export const feudConfig = (nodecg.bundleConfig as Configschema).feudQuestions;
@@ -22,11 +25,15 @@ export const useFeudStore = defineStore('feud', {
         feudBoard: null,
         feudState: null,
         feudTeamInfo: null,
+        feudLowerThirdMode: 'HIDDEN',
     } as unknown as FeudStore),
     actions: {
         setTeamNames(teamAName: string, teamBName: string) {
             feudTeamInfo.value!.teamA.name = teamAName;
             feudTeamInfo.value!.teamB.name = teamBName;
+        },
+        setLowerThirdMode(newValue: FeudLowerThirdMode) {
+            feudLowerThirdMode.value = newValue;
         },
     },
     getters: {
@@ -48,4 +55,9 @@ export const useFeudStore = defineStore('feud', {
     }
 });
 
-export const initFeudStore = createReplicantStoreInitializer([feudBoard, feudState, feudTeamInfo], useFeudStore);
+export const initFeudStore = createReplicantStoreInitializer([
+    feudBoard,
+    feudState,
+    feudTeamInfo,
+    feudLowerThirdMode,
+], useFeudStore);

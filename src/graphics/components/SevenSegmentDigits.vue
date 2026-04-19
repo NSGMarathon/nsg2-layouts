@@ -4,7 +4,8 @@
         :class="{
             flash: props.flash,
             [`color-${props.color}`]: isPresetColor,
-            'custom-color': !isPresetColor
+            'custom-color': !isPresetColor,
+            [`align-${props.align}`]: true,
         }"
         :style="{
             '--custom-color': props.color
@@ -27,10 +28,12 @@ const props = withDefaults(defineProps<{
     padDigits?: boolean
     flash?: boolean
     color?: 'teal' | 'red' | string
+    align?: 'left' | 'right'
 }>(), {
     padDigits: false,
     flash: false,
-    color: 'teal'
+    color: 'teal',
+    align: 'right',
 });
 
 const isPresetColor = computed(() => props.color === 'teal' || props.color === 'red');
@@ -78,11 +81,18 @@ const isPresetColor = computed(() => props.color === 'teal' || props.color === '
             color: colors.$vfd-red-unlit;
         }
     }
+
+    &.align-right .digits, &.align-right .always-lit-segment {
+        right: 0;
+    }
+
+    &.align-left .digits, &.align-left .always-lit-segment {
+        left: 0;
+    }
 }
 
 .digits, .always-lit-segment {
     position: absolute;
-    right: 0;
 }
 
 @keyframes digits-flash {

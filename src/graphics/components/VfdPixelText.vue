@@ -2,6 +2,7 @@
     <div
         ref="wrapper"
         class="vfd-pixel-text"
+        :class="`color-${props.color}`"
         :style="{
             fontSize: `${props.fontSize}px`,
             height: `${characterHeight}px`,
@@ -61,11 +62,13 @@ const props = withDefaults(defineProps<{
     fontSize: number
     textContent?: string | null
     align?: 'center' | 'left' | 'right'
-    textAlign?: 'center' | 'left' | 'right',
+    textAlign?: 'center' | 'left' | 'right'
     progressBar?: { start: number, end: number, current: number, showStartEnd?: boolean }
+    color?: 'teal' | 'red'
 }>(), {
     align: 'center',
-    textAlign: 'center'
+    textAlign: 'center',
+    color: 'teal',
 });
 
 const emit = defineEmits<{
@@ -236,7 +239,6 @@ const progressBarInfo = computed(() => {
 
 .vfd-pixel-text {
     font-family: 'HD44780A00 5x8';
-    color: colors.$vfd-teal;
     display: flex;
     text-rendering: geometricPrecision;
     position: relative;
@@ -244,10 +246,25 @@ const progressBarInfo = computed(() => {
     > span {
         position: absolute;
     }
+
+    &.color-teal {
+        color: colors.$vfd-teal;
+
+        > .background {
+            color: colors.$vfd-teal-unlit;
+        }
+    }
+
+    &.color-red {
+        color: colors.$vfd-red;
+
+        > .background {
+            color: colors.$vfd-red-unlit;
+        }
+    }
 }
 
 .background {
-    color: colors.$vfd-teal-unlit;
     position: absolute;
 }
 </style>

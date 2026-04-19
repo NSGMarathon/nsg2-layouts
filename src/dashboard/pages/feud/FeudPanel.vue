@@ -209,9 +209,16 @@
                     </div>
                 </ipl-space>
                 <div class="grow layout vertical center-vertical center-horizontal m-t-8">
-                    <ipl-space style="width: 10em;">
-                        <div class="title">Answers</div>
-                        <ipl-toggle v-model="showAnswers" style="height: 2.5em" />
+                    <ipl-space style="width: 13em;">
+                        <ipl-radio
+                            :model-value="feudStore.feudLowerThirdMode"
+                            :options="lowerThirdModeOptions"
+                            label="Lower third"
+                            name="lowerThirdMode"
+                            @update:model-value="feudStore.setLowerThirdMode($event)"
+                        />
+                        <div class="title m-t-8">Answers</div>
+                        <ipl-toggle v-model="showAnswers" style="height: 2.5em; width: 10em; margin: 0 auto" />
                     </ipl-space>
                 </div>
             </div>
@@ -221,7 +228,15 @@
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplMessage, IplSelect, IplSpace, IplToggle, pluralize } from '@iplsplatoon/vue-components';
+import {
+    IplButton,
+    IplMessage,
+    IplRadio,
+    IplSelect,
+    IplSpace,
+    IplToggle,
+    pluralize
+} from '@iplsplatoon/vue-components';
 import { feudConfig, useFeudStore } from 'client-shared/stores/FeudStore';
 import { computed, ref } from 'vue';
 import FeudTeamManagementDialog from './FeudTeamManagementDialog.vue';
@@ -273,6 +288,13 @@ const canClickAnyBoardSpace = computed(() => {
 const allAnswersGuessed = computed(() => feudStore.feudBoard.answers.every((answer) => answer.guessed));
 
 const showAnswers = ref(!params.has('hide-answers'));
+
+const lowerThirdModeOptions = [
+    { name: 'Hidden', value: 'HIDDEN' },
+    { name: 'Team 1', value: 'TEAM_A' },
+    { name: 'Team 2', value: 'TEAM_B' },
+    { name: 'Both teams', value: 'BOTH_TEAMS' },
+];
 
 function getOpponent(team: FeudTeam): FeudTeam {
     return team === 'teamA' ? 'teamB' : 'teamA';
