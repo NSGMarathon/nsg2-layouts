@@ -13,6 +13,7 @@ export class TimerService extends HasNodecgLogger {
     private readonly timer: livesplitCore.Timer;
     private readonly obsConnectorService: ObsConnectorService;
     private readonly scheduleService: ScheduleService;
+    private mustCompleteInterstitials = false;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, scheduleService: ScheduleService) {
         super(nodecg);
@@ -79,6 +80,11 @@ export class TimerService extends HasNodecgLogger {
 
         if (this.obsConnectorService.gameplaySceneInProgram() && this.activeSpeedrun.value != null && this.activeSpeedrun.value.timerStartTime == null) {
             this.setLastStartTime();
+        }
+
+        if (this.scheduleService.anyIncompleteInterstitialsBeforeActiveRun()) {
+            this.mustCompleteInterstitials = true;
+            this.logger.warn('Run timer was started with some incomplete interstitials! These interstitials will be forcibly completed soon.');
         }
     }
 
@@ -216,6 +222,14 @@ export class TimerService extends HasNodecgLogger {
             rawTime: millis,
             timestamp: Date.now()
         };
+
+        // This is a last-resort fallback, so it's OK if these leftover interstitials are completed a little late.
+        // It's more important that the speedrun is definitely running before we complete the interstitials.
+        if (millis > 60000 && this.mustCompleteInterstitials) {
+            this.mustCompleteInterstitials = false;
+            this.logger.info('Forcing incomplete interstitials to complete since timer has been running for 60 seconds');
+            this.scheduleService.completeInterstitialsBeforeActiveRun();
+        }
     }
 
     private initGameTime() {

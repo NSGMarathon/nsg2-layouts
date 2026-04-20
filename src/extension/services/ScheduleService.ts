@@ -1,5 +1,13 @@
 import type NodeCG from '@nodecg/types';
-import type { ActiveSpeedrun, Configschema, Schedule, ScheduleImportStatus, Speedrun, Talent } from 'types/schemas';
+import type {
+    ActiveSpeedrun,
+    Configschema,
+    OtherScheduleItem,
+    Schedule,
+    ScheduleImportStatus,
+    Speedrun,
+    Talent
+} from 'types/schemas';
 import { OengusClient } from '../clients/OengusClient';
 import { TalentService } from './TalentService';
 import { v4 as uuidV4 } from 'uuid';
@@ -79,6 +87,30 @@ export class ScheduleService extends HasNodecgLogger {
             throw new Error(`Schedule item with ID ${scheduleItemId} is not an interstitial`);
         }
         scheduleItem.completed = completed;
+    }
+
+    getInterstitialsBeforeActiveRun(): OtherScheduleItem[] {
+        const activeItemIndex = this.schedule.value.items.findIndex(scheduleItem => scheduleItem.id === this.activeSpeedrun.value?.id);
+        if (activeItemIndex === -1) return [];
+
+        const result: OtherScheduleItem[] = [];
+        for (let i = activeItemIndex - 1; i >= 0; i--) {
+            const scheduleItem = this.schedule.value.items[i];
+            if (scheduleItem.type === 'SPEEDRUN') break;
+            result.push(scheduleItem);
+        }
+        return result.reverse();
+    }
+
+    completeInterstitialsBeforeActiveRun() {
+        const interstitials = this.getInterstitialsBeforeActiveRun();
+        interstitials.forEach((interstitial) => {
+            interstitial.completed = true;
+        });
+    }
+
+    anyIncompleteInterstitialsBeforeActiveRun() {
+        return this.getInterstitialsBeforeActiveRun().some((interstitial) => !interstitial.completed);
     }
 
     getScheduleItem(scheduleItemId: string): Schedule['items'][number] {

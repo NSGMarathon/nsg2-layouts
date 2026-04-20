@@ -19,7 +19,7 @@
                     :type="timerStore.timer.state === 'RUNNING' ? 'warning' : 'info'"
                     class="m-t-8"
                 >
-                    Remember to complete all interstitials before starting the next run.
+                    Remember to complete all interstitials and setup blocks before starting the next run.
                 </ipl-message>
             </div>
             <system-status-display
