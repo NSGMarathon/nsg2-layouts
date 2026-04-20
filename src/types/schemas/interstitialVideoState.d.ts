@@ -13,4 +13,5 @@ export type InterstitialVideoState =
 	| {
 			isRunning: true;
 			returnToScene: string;
+			timeRemainingMillis?: number;
 	  };

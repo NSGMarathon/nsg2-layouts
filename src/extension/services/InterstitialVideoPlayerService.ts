@@ -31,7 +31,7 @@ export class InterstitialVideoPlayerService extends HasNodecgLogger {
         this.mediaSourceUpdateInterval = undefined;
         this.playlistPlayTimeout = undefined;
 
-        this.interstitialVideoState.value.isRunning = false;
+        this.interstitialVideoState.value = { isRunning: false };
     }
 
     async play(file: VideoFile, returnToScene: string) {
@@ -74,9 +74,11 @@ export class InterstitialVideoPlayerService extends HasNodecgLogger {
                 .then(result => {
                     if (result.mediaState !== 'OBS_MEDIA_STATE_PLAYING' || !this.interstitialVideoState.value.isRunning) {
                         clearInterval(this.mediaSourceUpdateInterval);
-                        this.interstitialVideoState.value.isRunning = false;
+                        this.interstitialVideoState.value = { isRunning: false };
                         return;
                     }
+
+                    this.interstitialVideoState.value.timeRemainingMillis = result.mediaDuration - result.mediaCursor;
 
                     if (result.mediaCursor > result.mediaDuration - TIME_REMAINING_BEFORE_INTERSTITIAL_VIDEO_STOP_MILLIS) {
                         this.logger.debug('Interstitial video is done');

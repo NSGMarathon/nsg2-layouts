@@ -32,10 +32,16 @@
         />
         <ipl-button
             class="m-t-8"
-            label="Play video"
             :disabled="obsStore.obsState.transitionInProgress || obsStore.obsState.status !== 'CONNECTED' || videoFileStore.interstitialVideoState.isRunning"
             @click="interstitialVideoPlayerDialog?.open()"
-        />
+        >
+            <template v-if="!videoFileStore.interstitialVideoState.isRunning || videoFileStore.interstitialVideoState.timeRemainingMillis == null">
+                PLAY VIDEO
+            </template>
+            <template v-else>
+                {{ formatDurationMillis(videoFileStore.interstitialVideoState.timeRemainingMillis) }} REMAINING
+            </template>
+        </ipl-button>
     </ipl-space>
 </template>
 
@@ -49,6 +55,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { inject } from 'vue';
 import { InterstitialVideoPlayerDialogInjectionKey } from '../helpers/Injections';
 import { useVideoFileStore } from 'client-shared/stores/VideoFileStore';
+import { formatDurationMillis } from 'client-shared/helpers/StringHelper';
 
 library.add(faGamepad);
 

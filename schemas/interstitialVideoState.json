@@ -21,6 +21,9 @@
                 },
                 "returnToScene": {
                     "type": "string"
+                },
+                "timeRemainingMillis": {
+                    "type": "number"
                 }
             }
         }

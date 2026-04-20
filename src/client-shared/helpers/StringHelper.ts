@@ -32,6 +32,10 @@ export function formatScheduleItemEstimate(scheduleItem: ScheduleItem): string {
     }
 }
 
+export function formatDurationMillis(duration: number): string {
+    return Duration.fromMillis(duration).toFormat('h:mm:ss');
+}
+
 export function formatDuration(duration: string): string {
     return Duration.fromISO(duration).toFormat('h:mm:ss');
 }
