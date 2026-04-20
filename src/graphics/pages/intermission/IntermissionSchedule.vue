@@ -78,7 +78,12 @@ const scheduleStore = useScheduleStore();
 const timerStore = useTimerStore();
 const talentStore = useTalentStore();
 
-const timerFinished = computed(() => timerStore.timer.state === 'FINISHED');
+// Before we start a run, we sometimes demonstrate how to use the timer to the runner by letting them start and stop it once.
+// This messes with the displayed schedule, since it thinks the active speedrun has been completed until we reset the timer again.
+// To work around this, we ignore a finished timer if the timer ran for less than a minute before being ended.
+// Technically the logic breaks down if you've got a run that lasts less than a minute, but I don't think that's very important.
+const timerFinished = computed(() => timerStore.timer.state === 'FINISHED' && timerStore.timer.time.rawTime > 60000);
+
 // When seeking to the next speedrun, the timer state may be reset before or after the active speedrun is changed.
 // If the timer state is reset before the active speedrun is switched, the schedule may briefly flash an incorrect state before switching to the correct one.
 // Due to this, we wait 50ms before fully committing to a schedule update to ensure no other state updates come in within that timeframe.
