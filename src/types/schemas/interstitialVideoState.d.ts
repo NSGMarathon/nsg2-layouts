@@ -6,7 +6,11 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface InterstitialVideoState {
-	isRunning: boolean;
-	returnToScene: 'INTERMISSION' | 'PREVIEW';
-}
+export type InterstitialVideoState =
+	| {
+			isRunning: false;
+	  }
+	| {
+			isRunning: true;
+			returnToScene: string;
+	  };

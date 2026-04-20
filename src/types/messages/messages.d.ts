@@ -2,7 +2,6 @@ import { ObsConfig, ObsConnectionInfo, Talent, VideoFile, VideoInputAssignment }
 import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
-import { InterstitialVideoState } from '../schemas/interstitialVideoState';
 import { FeudTeam } from '../feud';
 
 export interface MessageInputMap {
@@ -52,7 +51,7 @@ export interface MessageInputMap {
 
     'videos:loadSpeedruns': never
     'videos:loadInterstitials': never
-    'videos:playInterstitial': { file: VideoFile, returnToScene: InterstitialVideoState['returnToScene'] }
+    'videos:playInterstitial': { file: VideoFile, returnToScene: string }
 
     'speedrunPlaylist:play': never
     'speedrunPlaylist:stop': never

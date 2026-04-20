@@ -20,13 +20,14 @@
                 </template>
             </ipl-dialog-title>
             <div class="layout horizontal center-horizontal">
-                <ipl-radio
+                <ipl-select
                     v-model="returnToScene"
                     label="After video, return to..."
                     :options="returnToSceneOptions"
                     name="returnToScene"
+                    style="width: 18em"
                 />
-                <div class="m-l-32">
+                <div class="m-l-16">
                     <ipl-radio
                         v-model="order"
                         label="Order by..."
@@ -64,7 +65,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { IplButton, IplDialog, IplDialogTitle, IplRadio, IplSpace } from '@iplsplatoon/vue-components';
+import { IplButton, IplDialog, IplDialogTitle, IplRadio, IplSelect, IplSpace } from '@iplsplatoon/vue-components';
 import { useVideoFileStore } from 'client-shared/stores/VideoFileStore';
 import { VideoFile } from 'types/schemas';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -72,7 +73,6 @@ import { faRotate } from '@fortawesome/free-solid-svg-icons/faRotate';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useObsStore } from 'client-shared/stores/ObsStore';
-import { InterstitialVideoState } from 'types/schemas/interstitialVideoState';
 import { DateTime } from 'luxon';
 
 library.add(faRotate);
@@ -80,11 +80,51 @@ library.add(faRotate);
 const videoFileStore = useVideoFileStore();
 const obsStore = useObsStore();
 
-const returnToScene = ref<InterstitialVideoState['returnToScene']>('INTERMISSION');
-const returnToSceneOptions = computed(() => [
-    { name: 'Intermission', value: 'INTERMISSION' },
-    { name: 'Preview Scene', value: 'PREVIEW', enabled: obsStore.obsState.previewScene != null }
-]);
+function getDefaultReturnToScene() {
+    return obsStore.obsConfig.intermissionScene ?? obsStore.obsState.scenes?.[0] ?? '';
+}
+
+const returnToScene = ref<string>(getDefaultReturnToScene());
+const returnToSceneOptions = computed(() => (obsStore.obsState.scenes ?? [])
+    .filter((scene) =>
+        // "utility scenes" that should never be switched to
+        scene !== obsStore.obsConfig.videoInputsScene
+        && scene !== obsStore.obsConfig.interstitialVideoScene
+        && !obsStore.obsConfig.gameLayoutVideoFeedScenes.includes(scene)
+    )
+    .toSorted((a, b) => {
+        // there _has_ to be a better way of doing this, right?
+        if (a === obsStore.obsConfig.intermissionScene) {
+            return -1;
+        } else if (b === obsStore.obsConfig.intermissionScene) {
+            return 1;
+        }
+
+        if (a === obsStore.obsState.currentScene) {
+            return -1;
+        } else if (b === obsStore.obsState.currentScene) {
+            return 1;
+        }
+
+        if (a === obsStore.obsState.previewScene){
+            return -1;
+        } else if (b === obsStore.obsState.previewScene) {
+            return 1;
+        }
+
+        return a.localeCompare(b);
+    })
+    .map((scene) => {
+        if (scene === obsStore.obsConfig.intermissionScene) {
+            return { name: 'Intermission scene', value: scene };
+        } else if (scene === obsStore.obsState.currentScene) {
+            return { name: `${scene} (Currently in program)`, value: scene };
+        } else if (scene === obsStore.obsState.previewScene) {
+            return { name: `${scene} (Currently in preview)`, value: scene };
+        } else {
+            return { name: scene, value: scene };
+        }
+    }));
 
 const order = ref<'TIME_PLAYED' | 'NAME'>('TIME_PLAYED');
 const orderOptions = [
@@ -115,7 +155,7 @@ const isOpen = ref(false);
 const isLoading = ref(false);
 watch(isOpen, newValue => {
     if (!newValue) {
-        returnToScene.value = 'INTERMISSION';
+        returnToScene.value = getDefaultReturnToScene();
         isLoading.value = false;
     }
 });

@@ -5,6 +5,7 @@ import { JsonObject } from 'type-fest';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import { InterstitialVideoState } from 'types/schemas/interstitialVideoState';
 import { VideoFileService } from './VideoFileService';
+import { OBSWebSocketError } from 'obs-websocket-js';
 
 const TIME_REMAINING_BEFORE_INTERSTITIAL_VIDEO_STOP_MILLIS = 1500;
 
@@ -33,17 +34,15 @@ export class InterstitialVideoPlayerService extends HasNodecgLogger {
         this.interstitialVideoState.value.isRunning = false;
     }
 
-    async play(file: VideoFile, returnToScene: InterstitialVideoState['returnToScene']) {
+    async play(file: VideoFile, returnToScene: string) {
         clearTimeout(this.playlistPlayTimeout);
 
         const interstitialVideoScene = this.obsConnectorService.obsConfig.value.interstitialVideoScene;
+        const scenes = this.obsConnectorService.obsState.value.scenes;
         if (interstitialVideoScene == null) {
             throw new Error('Interstitial video scene must be configured to continue');
-        }
-        if (returnToScene === 'INTERMISSION' && this.obsConnectorService.obsConfig.value.intermissionScene == null) {
-            throw new Error('Intermission scene must be configured to continue');
-        } else if (returnToScene === 'PREVIEW' && this.obsConnectorService.obsState.value.previewScene == null) {
-            throw new Error('OBS must be set to Studio Mode to continue');
+        } else if (scenes == null || !scenes.some((scene) => scene === returnToScene)) {
+            throw new Error('The given return scene could not be found');
         }
 
         this.videoFileService.setInterstitialLastPlayed(file);
@@ -95,15 +94,23 @@ export class InterstitialVideoPlayerService extends HasNodecgLogger {
     }
 
     private async onVideoEnd() {
-        this.interstitialVideoState.value.isRunning = false;
+        if (!this.interstitialVideoState.value.isRunning) return;
+        const nextScene = this.interstitialVideoState.value.returnToScene;
+        this.interstitialVideoState.value = { isRunning: false };
 
-        const nextScene = this.interstitialVideoState.value.returnToScene === 'INTERMISSION'
-            ? this.obsConnectorService.obsConfig.value.intermissionScene
-            : this.obsConnectorService.obsState.value.previewScene;
-        if (nextScene == null) {
-            throw new Error('Failed to determine next scene to switch to');
+        try {
+            await this.obsConnectorService.setCurrentScene(nextScene);
+        } catch (e) {
+            // code 600 - "the resource was not found"
+            if (e instanceof OBSWebSocketError && e.code === 600) {
+                this.logger.warn('Return scene could not be found after interstitial video end. Attempting to return to intermission...');
+                const intermissionScene = this.obsConnectorService.obsConfig.value.intermissionScene;
+                if (intermissionScene != null && this.obsConnectorService.obsState.value.currentScene !== intermissionScene) {
+                    await this.obsConnectorService.setCurrentScene(intermissionScene);
+                }
+            }
+            this.logError('Unknown error switching scenes after interstitial video end', e);
         }
-        await this.obsConnectorService.setCurrentScene(nextScene);
     }
 
     private async configurePlaylistMediaSource(sceneName: string, videoFilePath: string) {
