@@ -225,7 +225,7 @@ export class TimerService extends HasNodecgLogger {
 
         // This is a last-resort fallback, so it's OK if these leftover interstitials are completed a little late.
         // It's more important that the speedrun is definitely running before we complete the interstitials.
-        if (millis > 60000 && this.mustCompleteInterstitials) {
+        if (this.mustCompleteInterstitials && millis > 60000) {
             this.mustCompleteInterstitials = false;
             this.logger.info('Forcing incomplete interstitials to complete since timer has been running for 60 seconds');
             this.scheduleService.completeInterstitialsBeforeActiveRun();
