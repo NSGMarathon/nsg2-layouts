@@ -467,7 +467,7 @@ export class ObsConnectorService extends HasNodecgLogger {
         // We can use a slightly modified build of obs-websocket to know when the program scene changes when the transition
         // begins instead of when it ends.
         if (this.sceneDataInTransitionEvents) {
-            this.callProgramSceneChangeListeners((event as unknown as { toScene: string }).toScene);
+            this.callProgramSceneChangeListeners((event as unknown as { toSceneName: string }).toSceneName);
         }
     }
 
