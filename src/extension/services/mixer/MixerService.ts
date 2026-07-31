@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { ActiveSpeedrun, ChannelItem, Configschema, MixerChannelAssignments, MixerState } from 'types/schemas';
 import { MetaArgument, UDPPort } from 'osc';
 import PQueue from 'p-queue';

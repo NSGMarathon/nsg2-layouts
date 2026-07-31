@@ -31,18 +31,18 @@ export default defineComponent({
 
     setup(props) {
         return {
-            beforeEnter: (elem: HTMLElement) => {
+            beforeEnter: (elem: Element) => {
                 gsap.set(elem, { opacity: 0 });
             },
-            enter: (elem: HTMLElement, done: gsap.Callback) => {
+            enter: (elem: Element, done: gsap.Callback) => {
                 gsap.to(elem, { opacity: 1, onComplete: done, duration: 0.35, ease: 'none', delay: props.enterDelay });
             },
-            beforeLeave: (elem: HTMLElement) => {
+            beforeLeave: (elem: Element) => {
                 if (props.mode === 'default') {
                     gsap.set(elem, { position: 'absolute' });
                 }
             },
-            leave: (elem: HTMLElement, done: gsap.Callback) => {
+            leave: (elem: Element, done: gsap.Callback) => {
                 gsap.to(elem, { opacity: 0, onComplete: done, duration: 0.35, ease: 'none' });
             }
         };

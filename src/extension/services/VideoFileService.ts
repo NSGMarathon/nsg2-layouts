@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { readdir } from 'fs/promises';
 import path from 'node:path';
 import type { Configschema, VideoFile, VideoFiles } from 'types/schemas';

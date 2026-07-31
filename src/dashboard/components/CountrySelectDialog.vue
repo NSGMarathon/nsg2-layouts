@@ -52,13 +52,13 @@ import { IplDialog, IplInput, IplSpace } from '@iplsplatoon/vue-components';
 import { computed, nextTick, ref, watch } from 'vue';
 import regions from '../../../flags/regions.json';
 import { isBlank } from 'shared/StringHelper';
-import { offset, shift, size, useFloating } from '@floating-ui/vue';
+import { FloatingElement, offset, shift, size, useFloating } from '@floating-ui/vue';
 
 const isOpen = ref(false);
 const query = ref('');
 const bundleName = nodecg.bundleName;
 const queryInput = ref<InstanceType<typeof IplInput>>();
-const dialog = ref<InstanceType<typeof IplDialog>>();
+const dialog = ref<FloatingElement>();
 const floatingTarget = ref<HTMLElement | null>(null);
 let selectCallback: ((countryCode: string) => void) | null = null;
 

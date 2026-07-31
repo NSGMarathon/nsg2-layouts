@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { MessageInputMap, MessageResultMap } from 'types/messages';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 

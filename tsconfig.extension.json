@@ -9,14 +9,13 @@
         ],
         "module": "commonjs",
         "rootDir": "src/",
-        "moduleResolution": "node",
-        "baseUrl": ".",
+        "moduleResolution": "bundler",
         "paths": {
             "types/*": [
-                "src/types/*"
+                "./src/types/*"
             ],
             "shared/*": [
-                "src/shared/*"
+                "./src/shared/*"
             ]
         },
         "outDir": "extension",

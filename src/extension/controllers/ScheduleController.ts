@@ -1,6 +1,6 @@
 import { BaseController } from './BaseController';
 import type { Configschema } from 'types/schemas';
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { ScheduleService } from '../services/ScheduleService';
 
 export class ScheduleController extends BaseController {

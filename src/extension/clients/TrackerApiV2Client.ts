@@ -1,6 +1,6 @@
 import { AbstractTrackerClient } from './AbstractTrackerClient';
 import axios, { AxiosInstance, isAxiosError } from 'axios';
-import  NodeCG from '@nodecg/types/types';
+import  NodeCG from '@nodecg/types';
 import type { AllBids, AllPrizes, Configschema, Milestones, PrizeStartEndRun } from 'types/schemas';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import { DateTime } from 'luxon';

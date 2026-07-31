@@ -13,25 +13,24 @@
         "experimentalDecorators": true,
         "skipLibCheck": true,
         "sourceMap": true,
-        "moduleResolution": "Node",
-        "baseUrl": ".",
+        "moduleResolution": "bundler",
         "types": [
-            "@nodecg/types/types/augment-window",
+            "@nodecg/types/augment-window",
             "@types/obs-studio/index"
         ],
         "strictNullChecks": true,
         "paths": {
             "types/*": [
-                "src/types/*"
+                "./src/types/*"
             ],
             "client-shared/*": [
-                "src/client-shared/*"
+                "./src/client-shared/*"
             ],
             "shared/*": [
-                "src/shared/*"
+                "./src/shared/*"
             ],
             "components/*": [
-                "src/graphics/components/*"
+                "./src/graphics/components/*"
             ]
         },
         "resolveJsonModule": true

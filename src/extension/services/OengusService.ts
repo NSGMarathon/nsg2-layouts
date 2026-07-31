@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { Configschema, OengusData } from 'types/schemas';
 import { OengusClient } from '../clients/OengusClient';
 import { DateTime } from 'luxon';

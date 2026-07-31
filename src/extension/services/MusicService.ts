@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { Configschema, MusicState } from 'types/schemas';
 import axios, { isAxiosError } from 'axios';
 import { Readable } from 'stream';

@@ -17,8 +17,8 @@ import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import { useTalentStore } from 'client-shared/stores/TalentStore';
 import { computed } from 'vue';
 import { IplSelect, IplSpace } from '@iplsplatoon/vue-components';
-import { SelectOptions } from '@iplsplatoon/vue-components/dist/types/select';
 import cloneDeep from 'lodash/cloneDeep';
+import { SelectOptions } from 'client-shared/types/select';
 
 const bingoStore = useBingoStore();
 const scheduleStore = useScheduleStore();

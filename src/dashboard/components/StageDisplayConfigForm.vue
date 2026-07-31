@@ -58,14 +58,12 @@
 import { useStageDisplayStore } from 'client-shared/stores/StageDisplayStore';
 import { IplButton, IplInput, IplRadio, IplSmallToggle } from '@iplsplatoon/vue-components';
 import { computed, ref, watch } from 'vue';
-import { SelectOptions } from '@iplsplatoon/vue-components/dist/types/select';
 import { StageDisplayState } from 'types/schemas/stageDisplayState';
+import { SelectOptions } from 'client-shared/types/select';
 
-withDefaults(defineProps<{
-    showStreamTechOptions: boolean
-}>(), {
-    showStreamTechOptions: false
-});
+defineProps<{
+    showStreamTechOptions?: boolean
+}>();
 
 const stageDisplayStore = useStageDisplayStore();
 

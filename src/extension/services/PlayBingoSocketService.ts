@@ -1,7 +1,7 @@
 import { BingoState } from 'types/schemas/bingoState';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import axios, { AxiosInstance } from 'axios';
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { Configschema } from 'types/schemas';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import { BingoConfig } from 'types/schemas/bingoConfig';

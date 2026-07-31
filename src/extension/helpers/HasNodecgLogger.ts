@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { Configschema } from 'types/schemas';
 import { createLogger } from './LogHelper';
 

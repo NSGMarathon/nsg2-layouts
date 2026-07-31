@@ -148,7 +148,7 @@ const nextSpeedrun = computed(() => {
     return scheduleStore.nextSpeedrun;
 });
 
-const useRotatingList = <T extends { id: number }>(list: MaybeRefOrGetter<UnwrapRef<T>[]>): { visibleItem: Ref<UnwrapRef<T> | null>, beforeShow: () => void, enabled: ComputedRef<boolean> } => {
+const useRotatingList = <T extends { id: number }>(list: MaybeRefOrGetter<UnwrapRef<T>[]>): { visibleItem: Ref<T | UnwrapRef<T> | null>, beforeShow: () => void, enabled: ComputedRef<boolean> } => {
     const visibleItem = ref<T | null>(null);
     const beforeShow = () => {
         const unwrappedList = toValue(list);

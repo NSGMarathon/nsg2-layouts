@@ -1,4 +1,4 @@
-import type NodeCGTypes from '@nodecg/types/types';
+import type NodeCGTypes from '@nodecg/types';
 import type * as Pinia from 'pinia';
 import cloneDeep from 'lodash/cloneDeep';
 import { Ref, watch, WatchSource } from 'vue';

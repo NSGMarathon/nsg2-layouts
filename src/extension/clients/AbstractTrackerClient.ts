@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { AllBids, AllPrizes, Configschema, Milestones } from 'types/schemas';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 

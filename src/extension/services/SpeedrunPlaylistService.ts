@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { Configschema, ObsState, SpeedrunPlaylistState } from 'types/schemas';
 import { ObsConnectorService } from './ObsConnectorService';
 import { ObsSceneItem } from 'types/obs';

@@ -1,5 +1,5 @@
 import type { AxiosInstance } from 'axios';
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { AllBids, AllPrizes, Configschema, Milestones } from 'types/schemas';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import axios, { isAxiosError } from 'axios';

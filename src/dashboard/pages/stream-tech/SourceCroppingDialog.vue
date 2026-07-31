@@ -163,6 +163,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { VideoInputAssignment } from 'types/schemas';
 import { ObsSceneItemTransform } from 'types/obs';
 import { faRotate } from '@fortawesome/free-solid-svg-icons/faRotate';
+import { getErrorMessage } from 'shared/StringHelper';
 
 library.add(faMagnifyingGlassPlus, faMagnifyingGlassMinus, faUpDown, faLeftRight, faRotate);
 
@@ -308,7 +309,7 @@ async function loadSourceScreenshot() {
         }
         loadingScreenshot.value = false;
     } catch (e) {
-        screenshotLoadingError.value = 'message' in e ? e.message : String(e);
+        screenshotLoadingError.value = getErrorMessage(e);
         loadingScreenshot.value = false;
     }
 }
@@ -322,7 +323,7 @@ function onSourceScreenshotLoad() {
     }
 }
 
-function onCropOutlineClick(e: PointerEvent) {
+function onCropOutlineClick(e: MouseEvent) {
     if (cropOutlineData == null) return;
     const classList = (e.target as HTMLElement).classList;
     if (classList.contains('handle') || classList.contains('crop-drag-box')) {
@@ -476,7 +477,7 @@ function onWindowMouseup() {
     dragStartPosition = null;
     croppingActive.value = false;
 }
-function onWindowMouseMove(e: PointerEvent) {
+function onWindowMouseMove(e: MouseEvent) {
     if (loadingScreenshot.value || dragStartPosition == null || cropWrapperSize == null || initialCropOutline == null || sceneItemTransform == null) return;
     const aspectRatio = getNumericAspectRatio();
     const newCropOutline = { ...initialCropOutline };

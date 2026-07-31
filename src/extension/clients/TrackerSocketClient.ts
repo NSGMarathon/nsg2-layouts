@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import type { Configschema, TrackerState } from 'types/schemas';
 import WebSocket from 'ws';
 import { createLogger } from '../helpers/LogHelper';

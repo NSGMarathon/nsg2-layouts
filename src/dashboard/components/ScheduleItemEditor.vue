@@ -88,7 +88,7 @@
                     >
                         <ipl-select
                             v-model="selectedScheduleItem.layout as string | null"
-                            :options="layoutOptions as Option[]"
+                            :options="layoutOptions"
                             class="max-width"
                             label="Layout"
                         />
@@ -300,9 +300,10 @@ import { layouts } from 'types/Layouts';
 import { v4 as uuidV4 } from 'uuid';
 import VideoFileSelect from './VideoFileSelect.vue';
 import { Duration } from 'luxon';
-import { Option } from '@iplsplatoon/vue-components/dist/types/select';
 import TalentSelectDialog from './TalentSelectDialog.vue';
 import { offset, shift, useFloating } from '@floating-ui/vue';
+import { SelectOptions } from 'client-shared/types/select';
+import { getErrorMessage } from 'shared/StringHelper';
 
 library.add(faUserPlus, faPlus, faXmark);
 
@@ -383,7 +384,7 @@ async function onSave() {
         await sendMessage('schedule:updateItem', selectedScheduleItem.value!);
         isOpen.value = false;
     } catch (e) {
-        saveError.value = 'message' in e ? e.message : String(e);
+        saveError.value = getErrorMessage(e);
     }
 }
 
@@ -428,7 +429,7 @@ function removeTeam(index: number) {
 const layoutOptions = [
     { name: 'None', value: null },
     ...Object.entries(layouts).map(([key, layout]) => ({ name: layout.name, value: key }))
-];
+] as SelectOptions;
 
 const timerModeOptions = [
     { name: 'Count-up (Default)', value: 'TIMER_COUNTUP' },

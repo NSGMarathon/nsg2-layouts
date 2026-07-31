@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 

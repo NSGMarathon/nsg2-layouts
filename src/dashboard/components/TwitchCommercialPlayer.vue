@@ -73,14 +73,13 @@ import { computed, ref, watch } from 'vue';
 import { DateTime } from 'luxon';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { TwitchCommercialState } from 'types/schemas';
+import { getErrorMessage } from 'shared/StringHelper';
+
+const props = defineProps<{
+    collapsible?: boolean
+}>();
 
 const twitchDataStore = useTwitchDataStore();
-
-const props = withDefaults(defineProps<{
-    collapsible: boolean
-}>(), {
-    collapsible: false
-});
 
 const endTimeText = ref('');
 const retryTimeText = ref('');
@@ -121,7 +120,7 @@ async function startCommercial(length: number) {
     try {
         await sendMessage('twitch:startCommercial', { length });
     } catch (e) {
-        commercialStartError.value = 'message' in e ? e.message : String(e);
+        commercialStartError.value = getErrorMessage(e);
     }
 }
 </script>

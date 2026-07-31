@@ -1,7 +1,7 @@
 import { type AxiosInstance, isAxiosError } from 'axios';
 import axios from 'axios';
 import { type Configschema, OengusData, OtherScheduleItem, Schedule, Speedrun, Talent } from 'types/schemas';
-import type NodeCG from '@nodecg/types/types';
+import type NodeCG from '@nodecg/types';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import { Duration } from 'luxon';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';

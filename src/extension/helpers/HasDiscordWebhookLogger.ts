@@ -1,5 +1,5 @@
 import { HasNodecgLogger } from './HasNodecgLogger';
-import  NodeCG from '@nodecg/types/types';
+import  NodeCG from '@nodecg/types';
 import { Configschema } from 'types/schemas';
 import { DiscordWebhookClient } from '../clients/DiscordWebhookClient';
 
