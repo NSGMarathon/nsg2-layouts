@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import checker from 'vite-plugin-checker';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     build: {
         outDir: 'extension',
         lib: {
@@ -31,13 +31,15 @@ export default defineConfig({
         }
     },
     plugins: [
-        checker({
-            typescript: {
-                tsconfigPath: 'tsconfig.extension.json'
-            }
-        }),
+        ...(mode === 'rush' ? [] : [
+            checker({
+                typescript: {
+                    tsconfigPath: 'tsconfig.extension.json'
+                }
+            })
+        ]),
         tsconfigPaths({
             projects: ['tsconfig.extension.json']
         })
     ]
-});
+}));

@@ -221,8 +221,10 @@ in other setups.
 ## npm commands
 
 - `build`: Create a production-ready build.
-- `build:dev`: Create a development build with better debugging options.
 - `build:clean`: Combines `build` and `clean` tasks.
+- `build:rush`: Create a production-ready build, skipping TypeScript checks in exchange for greatly improved build times 
+  (`build:browser:rush` is ~4x faster than `build:browser` and `build:extension:rush` is ~20x faster than `build:extension`.)  
+  Please take care and only use this with code that has already previously passed type checks.
 - `clean`: Removes built files.
 - `start`: Starts NodeCG.
 - `watch`: Runs a build and rebuilds when changes are found.

@@ -4,13 +4,15 @@ import NodeCGPlugin from '@inkfarer/vite-plugin-nodecg';
 import checker from 'vite-plugin-checker';
 import { resolve } from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     plugins: [
-        checker({
-            vueTsc: {
-                tsconfigPath: 'tsconfig.browser.json'
-            }
-        }),
+        ...(mode === 'rush' ? [] : [
+            checker({
+                vueTsc: {
+                    tsconfigPath: 'tsconfig.browser.json'
+                }
+            })
+        ]),
         vue(),
         NodeCGPlugin()
     ],
@@ -22,4 +24,4 @@ export default defineConfig({
             components: resolve(import.meta.dirname, 'src/graphics/components')
         }
     }
-});
+}));
