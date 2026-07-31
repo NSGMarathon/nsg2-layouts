@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import { Configschema, VideoFile } from 'types/schemas';
 import { ObsConnectorService } from './ObsConnectorService';
 import { JsonObject } from 'type-fest';

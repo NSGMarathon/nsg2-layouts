@@ -1,5 +1,5 @@
 import { AxiosInstance, isAxiosError } from 'axios';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema, TwitchData } from 'types/schemas';
 import axios from 'axios';
 import { REQUIRED_TWITCH_TOKEN_SCOPES } from 'shared/TwitchHelpers';

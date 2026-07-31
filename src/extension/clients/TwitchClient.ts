@@ -1,5 +1,5 @@
 import { AxiosInstance, isAxiosError } from 'axios';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema, TwitchData } from 'types/schemas';
 import { TwitchOauthClient } from './TwitchOauthClient';
 import { createTwitchApiClient } from '../helpers/TwitchApiClientHelper';

@@ -1,5 +1,5 @@
 import { BaseController } from './BaseController';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema } from 'types/schemas';
 import { SpeedrunPlaylistService } from '../services/SpeedrunPlaylistService';
 

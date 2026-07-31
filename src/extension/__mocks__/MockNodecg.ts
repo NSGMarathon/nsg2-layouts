@@ -1,7 +1,7 @@
 import express from 'express';
 import last from 'lodash/last';
 import cloneDeep from 'lodash/cloneDeep';
-import NodeCG from '@nodecg/types';
+import NodeCG from '@nodecg/types/types';
 import { beforeEach, jest } from '@jest/globals';
 import { Configschema } from 'types/schemas';
 

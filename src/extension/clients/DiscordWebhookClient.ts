@@ -1,5 +1,5 @@
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema } from 'types/schemas';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';

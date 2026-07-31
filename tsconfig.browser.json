@@ -16,7 +16,7 @@
         "moduleResolution": "Node",
         "baseUrl": ".",
         "types": [
-            "@nodecg/types/augment-window",
+            "@nodecg/types/types/augment-window",
             "@types/obs-studio/index"
         ],
         "strictNullChecks": true,

@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import { Configschema, TwitchData } from 'types/schemas';
 import { TwitchOauthClient } from '../clients/TwitchOauthClient';
 import axios, { AxiosInstance } from 'axios';

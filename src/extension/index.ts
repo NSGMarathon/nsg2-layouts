@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import { Configschema } from 'types/schemas';
 import { ScheduleController } from './controllers/ScheduleController';
 import { OengusClient } from './clients/OengusClient';

@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema, Speedrun } from 'types/schemas';
 import { IgdbClient, IgdbGameDataResponse } from '../clients/IgdbClient';
 import { DateTime } from 'luxon';

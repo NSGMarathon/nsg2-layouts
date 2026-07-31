@@ -3,7 +3,7 @@
 
 import { MetaArgument, UDPPort } from 'osc';
 import { dbToFloat } from './X32Util';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema } from 'types/schemas';
 import { MixerService } from './MixerService';
 

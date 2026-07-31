@@ -137,7 +137,7 @@
         "@fortawesome/vue-fontawesome": "~3.3.3",
         "@iplsplatoon/vue-components": "3.10.0",
         "@jest/globals": "^30.4.1",
-        "@nodecg/types": "^2.1.12",
+        "@nodecg/types": "^2.8.0",
         "@types/cookie": "^0.6.0",
         "@types/lodash": "^4.14.171",
         "@types/luxon": "^3.4.2",

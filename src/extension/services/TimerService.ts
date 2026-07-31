@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { ActiveSpeedrun, Configschema, Speedrun, Timer } from 'types/schemas';
 import * as livesplitCore from 'livesplit-core';
 import { DateTime, Duration } from 'luxon';

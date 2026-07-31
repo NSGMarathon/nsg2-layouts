@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema, CountdownData, CountdownTimer } from 'types/schemas';
 
 export class CountdownService {

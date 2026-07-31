@@ -1,5 +1,5 @@
 import { BaseController } from './BaseController';
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import {
     Configschema,
     ObsConnectionInfo,

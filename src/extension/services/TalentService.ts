@@ -1,4 +1,4 @@
-import type NodeCG from '@nodecg/types';
+import type NodeCG from '@nodecg/types/types';
 import type { Configschema, OtherScheduleItem, Schedule, Speedrun, Talent } from 'types/schemas';
 import { v4 as uuidV4 } from 'uuid';
 import mergeWith from 'lodash/mergeWith';
