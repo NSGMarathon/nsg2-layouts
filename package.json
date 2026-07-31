@@ -167,7 +167,7 @@
     },
     "dependencies": {
         "@floating-ui/vue": "^1.1.9",
-        "axios": "^1.6.8",
+        "axios": "^1.19.0",
         "axios-retry": "^4.5.0",
         "cookie": "^0.6.0",
         "livesplit-core": "^0.10.2",
