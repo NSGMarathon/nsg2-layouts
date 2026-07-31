@@ -6,6 +6,7 @@ export default {
     transform: {
         '^.+\\.m?[tj]sx?$': 'ts-jest'
     },
+    transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
     setupFilesAfterEnv: [
         './__mocks__/mockNodecg.ts',
         './__mocks__/MockBaseController.ts'

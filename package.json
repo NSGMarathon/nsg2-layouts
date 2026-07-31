@@ -143,7 +143,6 @@
         "@types/luxon": "^3.7.2",
         "@types/node": "^20.16.1",
         "@types/obs-studio": "^2.17.2",
-        "@types/uuid": "^9.0.8",
         "@types/ws": "^8.5.12",
         "@vitejs/plugin-vue": "^5.1.2",
         "@vue/compiler-sfc": "^3.3.7",
@@ -177,7 +176,7 @@
         "obs-websocket-js": "^5.0.6",
         "osc": "^2.4.5",
         "p-queue": "^8.0.1",
-        "uuid": "^10.0.0",
+        "uuid": "^14.0.1",
         "ws": "^8.18.0"
     },
     "jest": {
