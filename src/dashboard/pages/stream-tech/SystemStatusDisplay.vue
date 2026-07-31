@@ -4,7 +4,7 @@
         <table class="system-status-table max-width">
             <thead>
             <tr>
-                <th><img src="../../assets/img/obs-logo.png" title="OBS Studio"></th>
+                <th><font-awesome-icon class="icon" :icon="['fab', 'obs-studio']" title="OBS Studio" fixed-width /></th>
                 <th><font-awesome-icon class="icon" icon="music" title="Music" fixed-width /></th>
                 <th><font-awesome-icon class="icon" :icon="['fab', 'twitch']" title="Twitch" fixed-width /></th>
                 <th><font-awesome-icon class="icon" icon="dollar" title="Tracker" fixed-width /></th>
@@ -39,10 +39,11 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faMusic } from '@fortawesome/free-solid-svg-icons/faMusic';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTwitch } from '@fortawesome/free-brands-svg-icons/faTwitch';
+import { faObsStudio } from '@fortawesome/free-brands-svg-icons/faObsStudio';
 import { faDollar } from '@fortawesome/free-solid-svg-icons/faDollar';
 import { faVolumeHigh } from '@fortawesome/free-solid-svg-icons/faVolumeHigh';
 
-library.add(faMusic, faTwitch, faDollar, faVolumeHigh);
+library.add(faMusic, faTwitch, faDollar, faVolumeHigh, faObsStudio);
 
 const bundleConfig = nodecg.bundleConfig as Configschema;
 
