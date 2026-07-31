@@ -173,7 +173,7 @@
         "livesplit-core": "^0.10.2",
         "luxon": "^3.7.2",
         "mitt": "^3.0.1",
-        "obs-websocket-js": "^5.0.6",
+        "obs-websocket-js": "^5.0.8",
         "osc": "^2.4.5",
         "p-queue": "^8.0.1",
         "uuid": "^14.0.1",
