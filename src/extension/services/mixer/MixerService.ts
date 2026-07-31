@@ -24,8 +24,7 @@ export class MixerService extends HasNodecgLogger {
     private subscriptionRenewalInterval: NodeJS.Timeout | undefined = undefined;
     private readonly requestQueue: PQueue = new PQueue({
         concurrency: 20,
-        timeout: 500,
-        throwOnTimeout: true
+        timeout: 500
     });
     private inFlightRequests: Record<string, () => void> = { };
     private readonly oscState: Map<string, MetaArgument[]> = new Map();

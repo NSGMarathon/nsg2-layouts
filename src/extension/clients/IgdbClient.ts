@@ -67,7 +67,7 @@ export class IgdbClient {
                 'Content-Type': 'text/plain',
                 'Accept': 'application/json'
             }
-        }), { throwOnTimeout: true });
+        }));
 
         return response.data;
     }
@@ -90,7 +90,7 @@ export class IgdbClient {
                 'Content-Type': 'text/plain',
                 'Accept': 'application/json'
             }
-        }), { throwOnTimeout: true });
+        }));
 
         return response.data;
     }
