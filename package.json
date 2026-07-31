@@ -82,13 +82,6 @@
                 "file": "host.html",
                 "headerColor": "#262F40",
                 "fullbleed": true
-            },
-            {
-                "name": "feud",
-                "title": "4 - Game Show",
-                "file": "feud.html",
-                "headerColor": "#262F40",
-                "fullbleed": true
             }
         ],
         "graphics": [
@@ -118,21 +111,6 @@
                 "height": 1080
             },
             {
-                "file": "feud-board.html",
-                "width": 1920,
-                "height": 1080
-            },
-            {
-                "file": "feud-lower-third.html",
-                "width": 1920,
-                "height": 1080
-            },
-            {
-                "file": "feud-buzzer-handler.html",
-                "width": 1920,
-                "height": 1080
-            },
-            {
                 "file": "utility-stage-display.html",
                 "width": 1920,
                 "height": 1080
@@ -148,17 +126,6 @@
                     "png",
                     "gif"
                 ]
-            }
-        ],
-        "soundCues": [
-            {
-                "name": "feud-correct-answer"
-            },
-            {
-                "name": "feud-incorrect-answer"
-            },
-            {
-                "name": "feud-buzzer"
             }
         ]
     },
