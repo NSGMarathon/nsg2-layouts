@@ -3,7 +3,7 @@ import type NodeCG from '@nodecg/types';
 import type { AllBids, AllPrizes, Configschema, Milestones } from 'types/schemas';
 import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import axios, { isAxiosError } from 'axios';
-import { serialize, parse } from 'cookie';
+import { stringifySetCookie, parseCookie } from 'cookie';
 import { URLSearchParams } from 'url';
 import { isBlank } from 'shared/StringHelper';
 import { DateTime } from 'luxon';
@@ -178,7 +178,7 @@ export class TrackerClient extends AbstractTrackerClient {
         });
         this.axios.interceptors.request.use(config => {
             if (this.sessionId != null) {
-                const sessionCookie = serialize('sessionid', this.sessionId);
+                const sessionCookie = stringifySetCookie({ name: 'sessionid', value: this.sessionId });
                 if (Array.isArray(config.headers.Cookie)) {
                     config.headers.Cookie.push(sessionCookie);
                 } else if (config.headers.Cookie == null) {
@@ -347,7 +347,7 @@ export class TrackerClient extends AbstractTrackerClient {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     Referer: `${this.address}/admin/login/`,
-                    Cookie: csrfToken == null ? null : serialize('csrftoken', csrfToken)
+                    Cookie: csrfToken == null ? null : stringifySetCookie({ name: 'csrftoken', value: csrfToken })
                 },
                 maxRedirects: 0,
                 validateStatus: status => status === 302
@@ -369,7 +369,7 @@ export class TrackerClient extends AbstractTrackerClient {
 
     private findCookie(cookieName: string, setCookieHeader?: string[]): string | undefined {
         return setCookieHeader
-            ?.map(cookieHeader => parse(cookieHeader))
+            ?.map(cookieHeader => parseCookie(cookieHeader))
             .find(parsedHeader => Object.keys(parsedHeader).includes(cookieName))
             ?.[cookieName];
     }
