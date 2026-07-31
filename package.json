@@ -146,7 +146,7 @@
         "@types/ws": "^8.18.1",
         "@vitejs/plugin-vue": "^5.1.2",
         "@vue/compiler-sfc": "^3.3.7",
-        "gsap": "3.12.5",
+        "gsap": "3.15.0",
         "jest": "^30.4.2",
         "jest-mock-extended": "^4.0.1",
         "lodash": "^4.18.1",
