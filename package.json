@@ -156,13 +156,13 @@
         "trash-cli": "^7.2.0",
         "ts-jest": "^29.4.12",
         "typed-emitter": "^2.1.0",
-        "typescript": "^5.4.5",
+        "typescript": "^5.9.3",
         "vite": "5.4.2",
         "vite-plugin-checker": "^0.7.2",
         "vite-plugin-nodecg": "2.1.0",
         "vite-tsconfig-paths": "^5.0.1",
         "vue": "^3.3.7",
-        "vue-tsc": "^2.0.29",
+        "vue-tsc": "^2.2.12",
         "vuedraggable": "^4.1.0"
     },
     "dependencies": {
