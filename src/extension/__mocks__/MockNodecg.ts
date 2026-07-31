@@ -91,5 +91,22 @@ export const mockNodecg: NodeCG.ServerAPI<Configschema> = {
     bundleName: 'nsg2-layouts',
     sendMessage: mockSendMessage,
     // @ts-ignore
-    Logger: MockNodecgLogger
+    Logger: MockNodecgLogger,
+    config: {
+        logging: {
+            console: {
+                enabled: true,
+                level: 'info',
+                replicants: false,
+                timestamps: true
+            },
+            file: {
+                enabled: false,
+                level: 'info',
+                replicants: false,
+                timestamps: true,
+                path: ''
+            }
+        }
+    } as unknown as NodeCG.ServerAPI['config']
 };
