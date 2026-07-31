@@ -1,7 +1,7 @@
 @use './dashboard-colors';
 
+@use '../../client-shared/styles/layout';
 @import '@iplsplatoon/vue-components/style.css';
-@import '../../client-shared/styles/layout';
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
 
 body {

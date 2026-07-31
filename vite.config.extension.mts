@@ -4,18 +4,15 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import checker from 'vite-plugin-checker';
 
 export default defineConfig({
-    esbuild: {
-        keepNames: true
-    },
     build: {
         outDir: 'extension',
         lib: {
-            entry: resolve(__dirname, 'src/extension/index.ts'),
+            entry: resolve(import.meta.dirname, 'src/extension/index.ts'),
             name: 'extension',
             fileName: 'index',
             formats: ['cjs']
         },
-        rollupOptions: {
+        rolldownOptions: {
             external: [
                 'axios',
                 /lodash\/.*/,
@@ -27,7 +24,10 @@ export default defineConfig({
                 'osc',
                 /fs\/.*/,
                 /node:.*/
-            ]
+            ],
+            output: {
+                keepNames: true
+            }
         }
     },
     plugins: [

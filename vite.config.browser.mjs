@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import NodeCGPlugin from 'vite-plugin-nodecg';
+import NodeCGPlugin from '@inkfarer/vite-plugin-nodecg';
 import checker from 'vite-plugin-checker';
 import { resolve } from 'path';
 
@@ -16,10 +16,10 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            types: resolve(__dirname, 'src/types'),
-            'client-shared': resolve(__dirname, 'src/client-shared'),
-            'shared': resolve(__dirname, 'src/shared'),
-            components: resolve(__dirname, 'src/graphics/components')
+            types: resolve(import.meta.dirname, 'src/types'),
+            'client-shared': resolve(import.meta.dirname, 'src/client-shared'),
+            'shared': resolve(import.meta.dirname, 'src/shared'),
+            components: resolve(import.meta.dirname, 'src/graphics/components')
         }
     }
 });
