@@ -1,0 +1,199 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "cluePosition": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2
+        }
+    },
+    "oneOf": [
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "WAITING_FOR_PLAYER_INFO",
+                        "STARTING_GAME",
+                        "STARTING_NEXT_ROUND",
+                        "FINAL_JEP_AWAITING_WAGERS",
+                        "FINAL_JEP_READING_CLUE",
+                        "FINAL_JEP_AWAITING_ANSWERS",
+                        "VIEW_FINAL_RESULT"
+                    ]
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastRevealedCategoryIndex", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["REVEALING_CATEGORIES"]
+                },
+                "lastRevealedCategoryIndex": {
+                    "type": "number"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "pickingPlayerIndex", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["PICKING_CLUE"]
+                },
+                "pickingPlayerIndex": {
+                    "type": "number"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastCluePickedByIndex", "cluePosition", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["READING_CLUE", "DAILY_DOUBLE_AWAITING_WAGER"]
+                },
+                "lastCluePickedByIndex": {
+                    "type": "number"
+                },
+                "cluePosition": {
+                    "$ref": "#/definitions/cluePosition"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["AWAITING_BUZZER"]
+                },
+                "lastCluePickedByIndex": {
+                    "type": "number"
+                },
+                "guessesMadeByIndices": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "cluePosition": {
+                    "$ref": "#/definitions/cluePosition"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastCluePickedByIndex", "pointsWaged", "cluePosition", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["DAILY_DOUBLE_READING_CLUE", "DAILY_DOUBLE_AWAITING_ANSWER"]
+                },
+                "lastCluePickedByIndex": {
+                    "type": "number"
+                },
+                "pointsWaged": {
+                    "type": "number"
+                },
+                "cluePosition": {
+                    "$ref": "#/definitions/cluePosition"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "buzzedByIndex", "cluePosition", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["AWAITING_ANSWER", "READING_CORRECT_ANSWER"]
+                },
+                "lastCluePickedByIndex": {
+                    "type": "number"
+                },
+                "guessesMadeByIndices": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "buzzedByIndex": {
+                    "type": "number"
+                },
+                "cluePosition": {
+                    "$ref": "#/definitions/cluePosition"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "contestantOrderBeforeRoundStart", "answerRevealedForIndices", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["FINAL_JEP_REVEALING_ANSWERS"]
+                },
+                "contestantOrderBeforeRoundStart": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "answerRevealedForIndices": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        }
+    ],
+    "default": {
+        "state": "WAITING_FOR_PLAYER_INFO",
+        "enteredAt": "1970-01-01T00:00:00Z"
+    }
+}

@@ -218,6 +218,47 @@ Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/standalone-bingo.h
 The `standalone-bingo` graphic is currently only tested using a 16:9 viewport, and might not respond well to being used 
 in other setups.
 
+### Jeopardy
+
+Jep stands for Jeopardy. To play, define the questions for each round of play in the configuration file as such:
+```json5
+{
+    "jeopardy": {
+        "firstRound": [
+            {
+                "categoryName": "Ancient Agriculture",
+                "clues": [
+                    {
+                        "prompt": "This robust New World crop descended from teosinte, which only had about a dozen kernels per ear",
+                        "answer": "maize"
+                    },
+                    {
+                        "prompt": "Used to break up the soil, it evolved from the prehistoric digging stick & was improved in the 18th century with a moldboard",
+                        "answer": "a plow",
+                        "isDailyDouble": true
+                    }
+                    // [...]
+                ]
+            }
+            // [...]
+        ],
+        "doubleJeopardy": [
+            // [...]
+        ],
+        "finalJeopardy": [
+            // [...]
+        ]
+    }
+}
+```
+Each round must contain 6 categories, and each category must contain 5 clues, besides Final Jeopardy, which has one 
+category and one clue. If these requirements aren't satisfied, the game will only be playable in a testing mode.
+
+Before starting the game, collect a signature and smaller "symbol" from each player. Upload them in the "Assets" tab of 
+the NodeCG dashboard under the "Jeopardy contestant signatures" and "Jeopardy contestant symbols" categories. 
+They'll be shown on the on-screen graphics at various points in the game. It is recommended to use a 3:2 aspect ratio 
+for both images. Examples are provided in the Extras directory in the root of this repository.
+
 ## npm commands
 
 - `build`: Create a production-ready build.

@@ -2,6 +2,8 @@ import { ObsConfig, ObsConnectionInfo, Talent, VideoFile, VideoInputAssignment }
 import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
+import { JepPlayers } from '../schemas/jepPlayers';
+import { CluePosition } from '../schemas/jepState';
 
 export interface MessageInputMap {
     'log:warning': string
@@ -58,6 +60,18 @@ export interface MessageInputMap {
     'todo:setCompleted': { categoryName: string, listItemName: string, completed: boolean }
 
     'stage-display:flash': never
+
+    'jep:reset': { useTestBoard: boolean }
+    'jep:setPlayerInfo': JepPlayers
+    'jep:revealCategory': never
+    'jep:pickClue': CluePosition
+    'jep:makeDailyDoubleWager': { amount: number }
+    'jep:finishReadingClue': never
+    'jep:answerClue': { isCorrect: boolean }
+    'jep:finishReadingAnswer': never
+    'finalJep:finishWagering': never
+    'finalJep:finishReadingClue': never
+    'finalJep:revealAnswer': { playerIndex: number, amountWagered: number, isCorrect: boolean }
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;

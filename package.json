@@ -129,6 +129,22 @@
                     "png",
                     "gif"
                 ]
+            },
+            {
+                "name": "jepContestantSignatures",
+                "title": "Jeopardy contestant signatures",
+                "allowedTypes": [
+                    "png",
+                    "webp"
+                ]
+            },
+            {
+                "name": "jepContestantSymbols",
+                "title": "Jeopardy contestant symbols",
+                "allowedTypes": [
+                    "png",
+                    "webp"
+                ]
             }
         ]
     },

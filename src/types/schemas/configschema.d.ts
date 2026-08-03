@@ -6,6 +6,15 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type ConfigJepBoard = {
+	categoryName: string;
+	clues: {
+		prompt: string;
+		answer: string;
+		isDailyDouble?: boolean;
+	}[];
+}[];
+
 export interface Configschema {
 	intermission?: {
 		addVisualizerSpace?: boolean;
@@ -105,6 +114,12 @@ export interface Configschema {
 			}[];
 			[k: string]: unknown;
 		}[];
+		[k: string]: unknown;
+	};
+	jeopardy?: {
+		firstRound?: ConfigJepBoard;
+		doubleJeopardy?: ConfigJepBoard;
+		finalJeopardy?: ConfigJepBoard;
 		[k: string]: unknown;
 	};
 	[k: string]: unknown;

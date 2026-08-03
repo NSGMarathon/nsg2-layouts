@@ -13,6 +13,38 @@
                 }
             },
             "required": ["number", "type"]
+        },
+        "configJepBoard": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["categoryName", "clues"],
+                "properties": {
+                    "categoryName": {
+                        "type": "string"
+                    },
+                    "clues": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["prompt", "answer"],
+                            "properties": {
+                                "prompt": {
+                                    "type": "string"
+                                },
+                                "answer": {
+                                    "type": "string"
+                                },
+                                "isDailyDouble": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "properties": {
@@ -183,6 +215,20 @@
                             }
                         }
                     }
+                }
+            }
+        },
+        "jeopardy": {
+            "type": "object",
+            "properties": {
+                "firstRound": {
+                    "$ref": "#/definitions/configJepBoard"
+                },
+                "doubleJeopardy": {
+                    "$ref": "#/definitions/configJepBoard"
+                },
+                "finalJeopardy": {
+                    "$ref": "#/definitions/configJepBoard"
                 }
             }
         }

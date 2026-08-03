@@ -1,0 +1,55 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["round", "usingTestBoard", "categories"],
+    "properties": {
+        "round": {
+            "type": "string",
+            "enum": ["NONE", "JEOPARDY", "DOUBLE_JEOPARDY", "FINAL_JEOPARDY"]
+        },
+        "usingTestBoard": {
+            "type": "boolean"
+        },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "clues"],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "clues": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["prompt", "answer", "answered"],
+                            "properties": {
+                                "prompt": {
+                                    "type": "string"
+                                },
+                                "answer": {
+                                    "type": "string"
+                                },
+                                "answered": {
+                                    "type": "boolean"
+                                },
+                                "isDailyDouble": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "default": {
+        "round": "NONE",
+        "usingTestBoard": false,
+        "categories": []
+    }
+}
