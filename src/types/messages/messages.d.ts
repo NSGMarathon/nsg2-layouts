@@ -2,7 +2,6 @@ import { ObsConfig, ObsConnectionInfo, Talent, VideoFile, VideoInputAssignment }
 import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
-import { JepPlayers } from '../schemas/jepPlayers';
 import { CluePosition } from '../schemas/jepState';
 import { JepPlayerUpdate } from '../../shared/JepConstants';
 
@@ -68,6 +67,7 @@ export interface MessageInputMap {
     'jep:pickClue': CluePosition
     'jep:makeDailyDoubleWager': { amount: number }
     'jep:finishReadingClue': never
+    'jep:buzzerEvent': { buzzedByIndex: number | null }
     'jep:answerClue': { isCorrect: boolean }
     'jep:finishReadingAnswer': never
     'finalJep:finishWagering': never

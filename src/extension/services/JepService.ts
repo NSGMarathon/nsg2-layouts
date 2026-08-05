@@ -191,6 +191,33 @@ export class JepService extends HasNodecgLogger {
         }
     }
 
+    buzzerEvent(buzzedByIndex: number | null) {
+        if (this.jepState.value.state !== 'AWAITING_BUZZER') {
+            throw new Error('Cannot answer buzzer events at this time');
+        }
+
+        if (buzzedByIndex == null) {
+            this.setState({
+                state: 'READING_CORRECT_ANSWER',
+                lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
+                cluePosition: this.jepState.value.cluePosition,
+                guessesMadeByIndices: this.jepState.value.guessesMadeByIndices
+            });
+        } else {
+            if (buzzedByIndex < 0 || buzzedByIndex >= JEP_PLAYER_COUNT) {
+                throw new Error(`Contestant ${buzzedByIndex + 1} does not exist`);
+            }
+
+            this.setState({
+                state: 'AWAITING_ANSWER',
+                buzzedByIndex,
+                lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
+                cluePosition: this.jepState.value.cluePosition,
+                guessesMadeByIndices: this.jepState.value.guessesMadeByIndices
+            });
+        }
+    }
+
     answerClue(isCorrect: boolean) {
         if (this.jepState.value.state !== 'DAILY_DOUBLE_AWAITING_ANSWER' && this.jepState.value.state !== 'AWAITING_ANSWER') {
             throw new Error('Cannot answer a clue at this time');
