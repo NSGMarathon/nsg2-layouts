@@ -70,6 +70,7 @@ export interface MessageInputMap {
     'jep:buzzerEvent': { buzzedByIndex: number | null }
     'jep:answerClue': { isCorrect: boolean }
     'jep:finishReadingAnswer': never
+    'jep:mostlyCompleteTestBoard': never
     'finalJep:finishWagering': never
     'finalJep:finishReadingClue': never
     'finalJep:revealAnswer': { playerIndex: number, amountWagered: number, isCorrect: boolean }

@@ -374,6 +374,31 @@ export class JepService extends HasNodecgLogger {
         }
     }
 
+    mostlyCompleteTestBoard() {
+        if (!this.jepBoard.value.usingTestBoard) {
+            throw new Error('This function is only available during testing');
+        }
+
+        const newBoard = cloneDeep(this.jepBoard.value.categories);
+        let anyCluesLeftUnanswered = false;
+
+        for (let i = 0; i < newBoard.length; i++) {
+            const category = newBoard[i];
+            for (let j = 0; j < category.clues.length; j++) {
+                const clue = category.clues[j];
+                if (!clue.answered) {
+                    if (anyCluesLeftUnanswered) {
+                        clue.answered = true;
+                    } else {
+                        anyCluesLeftUnanswered = true;
+                    }
+                }
+            }
+        }
+
+        this.jepBoard.value.categories = newBoard;
+    }
+
     private anyCluesRemaining() {
         return this.jepBoard.value.categories.some((cat) =>
             cat.clues.some((clue) => !clue.answered));
