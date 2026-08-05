@@ -16,37 +16,37 @@ export type JepState =
 				| 'FINAL_JEP_READING_CLUE'
 				| 'FINAL_JEP_AWAITING_ANSWERS'
 				| 'VIEW_FINAL_RESULT';
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'REVEALING_CATEGORIES';
 			lastRevealedCategoryIndex: number;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'PICKING_CLUE';
 			pickingContestantIndex: number;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'READING_CLUE' | 'DAILY_DOUBLE_AWAITING_WAGER';
 			lastCluePickedByIndex: number;
 			cluePosition: CluePosition;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'AWAITING_BUZZER';
 			lastCluePickedByIndex: number;
 			guessesMadeByIndices: number[];
 			cluePosition: CluePosition;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'DAILY_DOUBLE_READING_CLUE' | 'DAILY_DOUBLE_AWAITING_ANSWER';
 			lastCluePickedByIndex: number;
 			pointsWaged: number;
 			cluePosition: CluePosition;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'AWAITING_ANSWER';
@@ -54,20 +54,20 @@ export type JepState =
 			guessesMadeByIndices: number[];
 			buzzedByIndex: number;
 			cluePosition: CluePosition;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'READING_CORRECT_ANSWER';
 			lastCluePickedByIndex: number;
 			guessesMadeByIndices: number[];
 			cluePosition: CluePosition;
-			enteredAt: string;
+			lastUpdated: string;
 	  }
 	| {
 			state: 'FINAL_JEP_REVEALING_ANSWERS';
 			contestantOrderBeforeRoundStart: number[];
 			answerRevealedForIndices: number[];
-			enteredAt: string;
+			lastUpdated: string;
 	  };
 /**
  * @minItems 2

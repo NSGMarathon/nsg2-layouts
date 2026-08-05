@@ -14,7 +14,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "enteredAt"],
+            "required": ["state", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -28,7 +28,7 @@
                         "VIEW_FINAL_RESULT"
                     ]
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -36,7 +36,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastRevealedCategoryIndex", "enteredAt"],
+            "required": ["state", "lastRevealedCategoryIndex", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -45,7 +45,7 @@
                 "lastRevealedCategoryIndex": {
                     "type": "number"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -53,7 +53,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "pickingContestantIndex", "enteredAt"],
+            "required": ["state", "pickingContestantIndex", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -62,7 +62,7 @@
                 "pickingContestantIndex": {
                     "type": "number"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -70,7 +70,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "cluePosition", "enteredAt"],
+            "required": ["state", "lastCluePickedByIndex", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -82,7 +82,7 @@
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -90,7 +90,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "enteredAt"],
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -108,7 +108,7 @@
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -116,7 +116,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "pointsWaged", "cluePosition", "enteredAt"],
+            "required": ["state", "lastCluePickedByIndex", "pointsWaged", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -131,7 +131,7 @@
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -139,7 +139,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "buzzedByIndex", "cluePosition", "enteredAt"],
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "buzzedByIndex", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -160,7 +160,7 @@
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -168,7 +168,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "enteredAt"],
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -186,7 +186,7 @@
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -194,7 +194,7 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "contestantOrderBeforeRoundStart", "answerRevealedForIndices", "enteredAt"],
+            "required": ["state", "contestantOrderBeforeRoundStart", "answerRevealedForIndices", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
@@ -212,7 +212,7 @@
                         "type": "number"
                     }
                 },
-                "enteredAt": {
+                "lastUpdated": {
                     "type": "string"
                 }
             }
@@ -220,6 +220,6 @@
     ],
     "default": {
         "state": "WAITING_FOR_CONTESTANT_INFO",
-        "enteredAt": "1970-01-01T00:00:00Z"
+        "lastUpdated": "1970-01-01T00:00:00Z"
     }
 }

@@ -19,8 +19,8 @@ import { DateTime } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
 import { JepContestants } from 'types/schemas/jepContestants';
 
-type MapToOmitEntryTime<T> = T extends any ? Omit<T, 'enteredAt'> : never;
-type JepStateWithoutEntryTime = MapToOmitEntryTime<JepState>;
+type MapToOmitUpdateTime<T> = T extends any ? Omit<T, 'lastUpdated'> : never;
+type JepStateWithoutEntryTime = MapToOmitUpdateTime<JepState>;
 
 // Jep means Jeopardy. welcome to the state machine
 export class JepService extends HasNodecgLogger {
@@ -49,7 +49,7 @@ export class JepService extends HasNodecgLogger {
         this.logger.debug(`Received reset; useTestBoard=${useTestBoard}`);
         this.jepState.value = {
             state: 'WAITING_FOR_CONTESTANT_INFO',
-            enteredAt: '1970-01-01T00:00:00Z'
+            lastUpdated: '1970-01-01T00:00:00Z'
         };
         this.jepContestants.value = [];
         this.jepBoard.value = {
@@ -141,6 +141,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     pickClue(position: CluePosition) {
+        // todo: the ability to undo this action.
         this.logger.debug(`Revealing clue ${position}`);
         if (this.jepState.value.state !== 'PICKING_CLUE') {
             throw new Error('Cannot pick a clue at this time');
@@ -183,6 +184,8 @@ export class JepService extends HasNodecgLogger {
     }
 
     finishReadingClue() {
+        // todo: we're likely getting rid of this state during non-daily-double questions or modifying it some way
+        // (if the buzzer system is going to work in the way i think it will)
         this.logger.debug('Clue has finished getting read out');
         if (this.jepState.value.state === 'DAILY_DOUBLE_READING_CLUE') {
             this.setState({
@@ -526,7 +529,7 @@ export class JepService extends HasNodecgLogger {
         }
         this.jepState.value = {
             ...state,
-            enteredAt: DateTime.utc().toISO()
+            lastUpdated: DateTime.utc().toISO()
         };
     }
 
