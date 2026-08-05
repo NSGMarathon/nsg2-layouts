@@ -143,7 +143,7 @@
             "properties": {
                 "state": {
                     "type": "string",
-                    "enum": ["AWAITING_ANSWER", "READING_CORRECT_ANSWER"]
+                    "enum": ["AWAITING_ANSWER"]
                 },
                 "lastCluePickedByIndex": {
                     "type": "number"
@@ -156,6 +156,32 @@
                 },
                 "buzzedByIndex": {
                     "type": "number"
+                },
+                "cluePosition": {
+                    "$ref": "#/definitions/cluePosition"
+                },
+                "enteredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "enteredAt"],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": ["READING_CORRECT_ANSWER"]
+                },
+                "lastCluePickedByIndex": {
+                    "type": "number"
+                },
+                "guessesMadeByIndices": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
                 },
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"

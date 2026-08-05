@@ -201,53 +201,55 @@ export class JepService extends HasNodecgLogger {
         const cluePos = this.jepState.value.cluePosition;
         this.jepBoard.value.categories[cluePos[0]].clues[cluePos[1]].answered = true;
 
-        let answeringPlayerIndex: number;
+        let answeringContestantIndex: number;
         let value: number;
         if (isDailyDouble) {
-            answeringPlayerIndex = this.jepState.value.lastCluePickedByIndex;
+            answeringContestantIndex = this.jepState.value.lastCluePickedByIndex;
             // @ts-ignore: TS isn't smart enough to narrow down the type of jepState here
             value = this.jepState.value.pointsWaged;
         } else {
             // @ts-ignore: see above
-            answeringPlayerIndex = this.jepState.value.buzzedByIndex;
+            answeringContestantIndex = this.jepState.value.buzzedByIndex;
             value = this.getClueValue(cluePos);
         }
 
         if (isCorrect) {
-            this.jepPlayers.value[answeringPlayerIndex].score += value;
-            this.setState({
-                state: 'PICKING_CLUE',
-                pickingPlayerIndex: answeringPlayerIndex
-            });
+            this.jepPlayers.value[answeringContestantIndex].score += value;
+            if (this.anyCluesRemaining()) {
+                this.setState({
+                    state: 'PICKING_CLUE',
+                    pickingPlayerIndex: answeringContestantIndex
+                });
+            } else {
+                this.setState({
+                    state: 'STARTING_NEXT_ROUND'
+                });
+            }
         } else {
-            this.jepPlayers.value[answeringPlayerIndex].score -= value;
+            this.jepPlayers.value[answeringContestantIndex].score -= value;
 
             if (isDailyDouble) {
                 this.setState({
                     state: 'READING_CORRECT_ANSWER',
                     lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
-                    buzzedByIndex: answeringPlayerIndex,
                     cluePosition: cluePos,
-                    guessesMadeByIndices: [answeringPlayerIndex]
+                    guessesMadeByIndices: [answeringContestantIndex]
                 });
             } else {
                 // @ts-ignore: see above
-                if (this.jepState.value.guessesMadeByIndices.length === this.jepPlayers.value.length) {
+                let guessesMadeByIndices = this.jepState.value.guessesMadeByIndices;
+                if (!guessesMadeByIndices.includes(answeringContestantIndex)) {
+                    guessesMadeByIndices = guessesMadeByIndices.concat(answeringContestantIndex);
+                }
+
+                if (guessesMadeByIndices.length === this.jepPlayers.value.length) {
                     this.setState({
                         state: 'READING_CORRECT_ANSWER',
                         lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
-                        buzzedByIndex: answeringPlayerIndex,
                         cluePosition: cluePos,
-                        // @ts-ignore: see above
-                        guessesMadeByIndices: this.jepState.value.guessesMadeByIndices
+                        guessesMadeByIndices
                     });
                 } else {
-                    // @ts-ignore: see above
-                    let guessesMadeByIndices = this.jepState.value.guessesMadeByIndices;
-                    if (!guessesMadeByIndices.includes(answeringPlayerIndex)) {
-                        guessesMadeByIndices = guessesMadeByIndices.concat(answeringPlayerIndex);
-                    }
-
                     this.setState({
                         state: 'AWAITING_BUZZER',
                         lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -264,13 +266,10 @@ export class JepService extends HasNodecgLogger {
             throw new Error('Cannot finish reading the clue\'s answer at this time');
         }
 
-        const anyCluesRemaining = this.jepBoard.value.categories.some((cat) =>
-            cat.clues.some((clue) => !clue.answered));
-
-        if (anyCluesRemaining) {
+        if (this.anyCluesRemaining()) {
             this.setState({
                 state: 'PICKING_CLUE',
-                // We assume this code is only reached if the last answer given was incorrect
+                // We assume this code is only reached if the last answer given was incorrect, or we just played a Daily Double
                 pickingPlayerIndex: this.jepState.value.lastCluePickedByIndex
             });
         } else {
@@ -343,6 +342,11 @@ export class JepService extends HasNodecgLogger {
         } else {
             player.score -= amountWagered;
         }
+    }
+
+    private anyCluesRemaining() {
+        return this.jepBoard.value.categories.some((cat) =>
+            cat.clues.some((clue) => !clue.answered));
     }
 
     private getClueValue(position: CluePosition) {

@@ -49,10 +49,17 @@ export type JepState =
 			enteredAt: string;
 	  }
 	| {
-			state: 'AWAITING_ANSWER' | 'READING_CORRECT_ANSWER';
+			state: 'AWAITING_ANSWER';
 			lastCluePickedByIndex: number;
 			guessesMadeByIndices: number[];
 			buzzedByIndex: number;
+			cluePosition: CluePosition;
+			enteredAt: string;
+	  }
+	| {
+			state: 'READING_CORRECT_ANSWER';
+			lastCluePickedByIndex: number;
+			guessesMadeByIndices: number[];
 			cluePosition: CluePosition;
 			enteredAt: string;
 	  }
