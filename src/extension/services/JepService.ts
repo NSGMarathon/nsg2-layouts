@@ -5,8 +5,14 @@ import { JepPlayers } from 'types/schemas/jepPlayers';
 import { CluePosition, JepState } from 'types/schemas/jepState';
 import { JepBoard } from 'types/schemas/jepBoard';
 import {
-    JEP_CATEGORY_COUNT, JEP_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_CATEGORY_COUNT,
-    JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE,
+    JEP_CATEGORY_COUNT,
+    JEP_CLUE_VALUE_MULTIPLIER,
+    JEP_CLUES_PER_CATEGORY,
+    JEP_DAILY_DOUBLE_MIN_WAGER,
+    JEP_FINAL_JEOPARDY_CATEGORY_COUNT,
+    JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY,
+    JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE,
+    JEP_PLAYER_COUNT,
     JepPlayerUpdate
 } from 'shared/JepConstants';
 import { DeepReadonly } from 'ts-essentials';
@@ -103,6 +109,7 @@ export class JepService extends HasNodecgLogger {
         } else if (this.jepState.value.state === 'REVEALING_CATEGORIES') {
             if (this.jepBoard.value.round === 'FINAL_JEOPARDY') {
                 this.setState({ state: 'FINAL_JEP_AWAITING_WAGERS' });
+                this.logger.debug('Now awaiting Final Jeopardy wagers');
             } else if (this.jepState.value.lastRevealedCategoryIndex >= JEP_CATEGORY_COUNT - 1) {
                 if (this.jepBoard.value.round === 'JEOPARDY') {
                     this.setState({ state: 'PICKING_CLUE', pickingPlayerIndex: 0 })
@@ -153,10 +160,10 @@ export class JepService extends HasNodecgLogger {
         }
 
         const maxWagerAmount = Math.max(
-            this.jepBoard.value.round === 'JEOPARDY' ? 1000 : 2000,
+            (JEP_CLUE_VALUE_MULTIPLIER * (this.jepBoard.value.round === 'DOUBLE_JEOPARDY' ? 2 : 1) * JEP_CLUES_PER_CATEGORY),
             this.jepPlayers.value[this.jepState.value.lastCluePickedByIndex].score);
-        if (amount < 5 || amount > maxWagerAmount) {
-            throw new Error(`Wager must be between 5 and ${maxWagerAmount} points`);
+        if (amount < JEP_DAILY_DOUBLE_MIN_WAGER || amount > maxWagerAmount) {
+            throw new Error(`Wager must be between ${JEP_DAILY_DOUBLE_MIN_WAGER} and ${maxWagerAmount} points`);
         }
 
         this.setState({
@@ -339,7 +346,8 @@ export class JepService extends HasNodecgLogger {
     }
 
     private getClueValue(position: CluePosition) {
-        return (position[1] + 1) * (this.jepBoard.value.round === 'JEOPARDY' ? 200 : 400);
+        const multiplier = JEP_CLUE_VALUE_MULTIPLIER * (this.jepBoard.value.round === 'DOUBLE_JEOPARDY' ? 2 : 1);
+        return (position[1] + 1) * multiplier;
     }
 
     private setBoard(round: JepBoard['round']) {
