@@ -46,6 +46,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     reset(useTestBoard: boolean) {
+        this.logger.debug(`Received reset; useTestBoard=${useTestBoard}`);
         this.jepState.value = {
             state: 'WAITING_FOR_PLAYER_INFO',
             enteredAt: '1970-01-01T00:00:00Z'
@@ -89,6 +90,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     revealCategory() {
+        this.logger.debug('Requested to reveal a category');
         if (this.jepState.value.state === 'STARTING_NEXT_ROUND') {
             switch (this.jepBoard.value.round) {
                 case 'NONE':
@@ -106,13 +108,15 @@ export class JepService extends HasNodecgLogger {
                 state: 'REVEALING_CATEGORIES',
                 lastRevealedCategoryIndex: -1
             });
+            this.logger.debug('Updated board');
         } else if (this.jepState.value.state === 'REVEALING_CATEGORIES') {
             if (this.jepBoard.value.round === 'FINAL_JEOPARDY') {
                 this.setState({ state: 'FINAL_JEP_AWAITING_WAGERS' });
                 this.logger.debug('Now awaiting Final Jeopardy wagers');
             } else if (this.jepState.value.lastRevealedCategoryIndex >= JEP_CATEGORY_COUNT - 1) {
                 if (this.jepBoard.value.round === 'JEOPARDY') {
-                    this.setState({ state: 'PICKING_CLUE', pickingPlayerIndex: 0 })
+                    this.setState({ state: 'PICKING_CLUE', pickingPlayerIndex: 0 });
+                    this.logger.debug('Finished revealing Jeopardy categories');
                 } else {
                     const lowestScore = Math.min(...this.jepPlayers.value.map((p) => p.score));
                     const playersWithLowestScore = this.jepPlayers.value
@@ -125,9 +129,11 @@ export class JepService extends HasNodecgLogger {
                         state: 'PICKING_CLUE',
                         pickingPlayerIndex: playersWithLowestScore[selectedIndex].index
                     });
+                    this.logger.debug('Finished revealing Double Jeopardy categories');
                 }
             } else {
                 this.jepState.value.lastRevealedCategoryIndex++;
+                this.logger.debug(`Now revealed ${this.jepState.value.lastRevealedCategoryIndex + 1}/${JEP_CATEGORY_COUNT} categories`);
             }
         } else {
             throw new Error('Cannot reveal clue categories at this time');
@@ -135,6 +141,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     pickClue(position: CluePosition) {
+        this.logger.debug(`Revealing clue ${position}`);
         if (this.jepState.value.state !== 'PICKING_CLUE') {
             throw new Error('Cannot pick a clue at this time');
         }
@@ -155,6 +162,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     makeDailyDoubleWager(amount: number) {
+        this.logger.debug(`Daily Double wager made for ${amount} point(s)`);
         if (this.jepState.value.state !== 'DAILY_DOUBLE_AWAITING_WAGER') {
             throw new Error('Cannot wager for the Daily Double at this time');
         }
@@ -175,6 +183,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     finishReadingClue() {
+        this.logger.debug('Clue has finished getting read out');
         if (this.jepState.value.state === 'DAILY_DOUBLE_READING_CLUE') {
             this.setState({
                 ...this.jepState.value,
@@ -197,6 +206,7 @@ export class JepService extends HasNodecgLogger {
         }
 
         if (buzzedByIndex == null) {
+            this.logger.debug('No contestant buzzed in time');
             this.setState({
                 state: 'READING_CORRECT_ANSWER',
                 lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -219,6 +229,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     answerClue(isCorrect: boolean) {
+        this.logger.debug(`Clue has been answered ${isCorrect ? 'correctly' : 'incorrectly'}`);
         if (this.jepState.value.state !== 'DAILY_DOUBLE_AWAITING_ANSWER' && this.jepState.value.state !== 'AWAITING_ANSWER') {
             throw new Error('Cannot answer a clue at this time');
         }
@@ -241,6 +252,7 @@ export class JepService extends HasNodecgLogger {
         }
 
         if (isCorrect) {
+            this.logger.debug(`Contestant ${answeringContestantIndex + 1} gains ${value} point(s)`);
             this.jepPlayers.value[answeringContestantIndex].score += value;
             if (this.anyCluesRemaining()) {
                 this.setState({
@@ -253,9 +265,11 @@ export class JepService extends HasNodecgLogger {
                 });
             }
         } else {
+            this.logger.debug(`Contestant ${answeringContestantIndex + 1} loses ${value} point(s)`);
             this.jepPlayers.value[answeringContestantIndex].score -= value;
 
             if (isDailyDouble) {
+                this.logger.debug('Daily Double: Reading correct answer and continuing');
                 this.setState({
                     state: 'READING_CORRECT_ANSWER',
                     lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -270,6 +284,7 @@ export class JepService extends HasNodecgLogger {
                 }
 
                 if (guessesMadeByIndices.length === this.jepPlayers.value.length) {
+                    this.logger.debug('All contestants have guessed; Reading correct answer and continuing');
                     this.setState({
                         state: 'READING_CORRECT_ANSWER',
                         lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -277,6 +292,7 @@ export class JepService extends HasNodecgLogger {
                         guessesMadeByIndices
                     });
                 } else {
+                    this.logger.debug('Incorrect guess made; awaiting buzzer');
                     this.setState({
                         state: 'AWAITING_BUZZER',
                         lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -289,6 +305,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     finishReadingAnswer() {
+        this.logger.debug('Finished reading correct answer');
         if (this.jepState.value.state !== 'READING_CORRECT_ANSWER') {
             throw new Error('Cannot finish reading the clue\'s answer at this time');
         }
@@ -307,6 +324,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     finalJepFinishWagering() {
+        this.logger.debug('Final Jeopardy wagering has concluded');
         if (this.jepState.value.state !== 'FINAL_JEP_AWAITING_WAGERS') {
             throw new Error('Cannot continue the Final Jeopardy round at this time');
         }
@@ -315,6 +333,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     finalJepFinishReadingClue() {
+        this.logger.debug('Final Jeopardy clue has been read out');
         if (this.jepState.value.state !== 'FINAL_JEP_READING_CLUE') {
             throw new Error('Cannot finish reading the Final Jeopardy clue at this time');
         }
@@ -323,6 +342,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     finalJepRevealAnswer(playerIndex: number, amountWagered: number, isCorrect: boolean) {
+        this.logger.debug(`Final Jeopardy: contestant ${playerIndex + 1} has answered ${isCorrect ? 'correctly, and gains' : 'incorrectly, and loses'} ${amountWagered} point(s)`);
         const player = this.jepPlayers.value[playerIndex];
         if (player == null) {
             throw new Error('The selected player does not exist');
@@ -501,6 +521,9 @@ export class JepService extends HasNodecgLogger {
     }
 
     private setState(state: JepStateWithoutEntryTime) {
+        if (this.usingDebugLogging && this.jepState.value.state !== state.state) {
+            this.logger.debug(`State is now ${state.state}`);
+        }
         this.jepState.value = {
             ...state,
             enteredAt: DateTime.utc().toISO()
