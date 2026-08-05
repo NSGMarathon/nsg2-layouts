@@ -334,6 +334,9 @@ export class JepService extends HasNodecgLogger {
         if (amountWagered > maxWager) {
             throw new Error(`The largest allowed wager for the given player is ${maxWager} points`);
         }
+        if (amountWagered < 0) {
+            throw new Error('Final Jeopardy wager must not be negative');
+        }
 
         if (this.jepState.value.state === 'FINAL_JEP_AWAITING_ANSWERS') {
             const contestantOrder = this.jepPlayers.value
