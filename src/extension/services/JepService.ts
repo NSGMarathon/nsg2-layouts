@@ -33,6 +33,7 @@ export class JepService extends HasNodecgLogger {
 
         if (!this.configIsValid) {
             this.logger.info('Jeopardy config is missing or incomplete; only the testing board will be available.');
+            this.jepBoard.value.usingTestBoard = true;
         }
     }
 
@@ -327,31 +328,31 @@ export class JepService extends HasNodecgLogger {
         const usingTestBoard = this.jepBoard.value.usingTestBoard;
         let board: DeepReadonly<ConfigJepBoard>;
         if (usingTestBoard) {
-            const generateCategory = (categoryName: string, dailyDoubleIndex?: number) => ({
+            const generateCategory = (categoryIndex: number, categoryName: string, dailyDoubleIndex?: number) => ({
                 categoryName,
                 clues: Array.from({ length: JEP_CLUES_PER_CATEGORY }, (_, i) =>
-                    ({ prompt: `${categoryName} #${i + 1}`, answer: `Answer for ${categoryName} #${i + 1}`, isDailyDouble: dailyDoubleIndex === i }))
+                    ({ prompt: `The ${this.prettyPrintOrdinal(i + 1)} clue in the "${categoryName}" category`, answer: `clue used for testing (${categoryIndex}; ${i})`, isDailyDouble: dailyDoubleIndex === i }))
             });
 
             switch (round) {
                 case 'JEOPARDY':
                     board = [
-                        generateCategory('Bips', 2),
-                        generateCategory('Baps'),
-                        generateCategory('Bups'),
-                        generateCategory('Bops'),
-                        generateCategory('Beps'),
-                        generateCategory('Böps')
+                        generateCategory(0, 'Testing', 2),
+                        generateCategory(1, 'Cresting'),
+                        generateCategory(2, 'Jesting'),
+                        generateCategory(3, 'Resting'),
+                        generateCategory(4, 'Nesting'),
+                        generateCategory(5, 'Besting')
                     ];
                     break;
                 case 'DOUBLE_JEOPARDY':
                     board = [
-                        generateCategory('Gaming'),
-                        generateCategory('Acclaiming', 3),
-                        generateCategory('Blaming'),
-                        generateCategory('Flaming'),
-                        generateCategory('Taming'),
-                        generateCategory('Claiming', 4)
+                        generateCategory(0, 'Gaming'),
+                        generateCategory(1, 'Acclaiming', 3),
+                        generateCategory(2, 'Blaming'),
+                        generateCategory(3, 'Flaming'),
+                        generateCategory(4, 'Taming'),
+                        generateCategory(5, 'Claiming', 4)
                     ];
                     break;
                 case 'FINAL_JEOPARDY':
@@ -399,6 +400,19 @@ export class JepService extends HasNodecgLogger {
                 }))
             }))
         };
+    }
+
+    private prettyPrintOrdinal(number: number): string {
+        switch (number) {
+            case 1:
+                return '1st';
+            case 2:
+                return '2nd';
+            case 3:
+                return '3rd';
+            default:
+                return `${number}th`;
+        }
     }
 
     private setState(state: JepStateWithoutEntryTime) {
