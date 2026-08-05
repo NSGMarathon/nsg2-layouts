@@ -101,9 +101,9 @@ export class JepService extends HasNodecgLogger {
                 lastRevealedCategoryIndex: -1
             });
         } else if (this.jepState.value.state === 'REVEALING_CATEGORIES') {
-            if (this.jepBoard.value.round === 'FINAL_JEOPARDY' && this.jepState.value.lastRevealedCategoryIndex >= JEP_FINAL_JEOPARDY_CATEGORY_COUNT - 1) {
+            if (this.jepBoard.value.round === 'FINAL_JEOPARDY') {
                 this.setState({ state: 'FINAL_JEP_AWAITING_WAGERS' });
-            } else if (this.jepBoard.value.round !== 'FINAL_JEOPARDY' && this.jepState.value.lastRevealedCategoryIndex >= JEP_CATEGORY_COUNT - 1) {
+            } else if (this.jepState.value.lastRevealedCategoryIndex >= JEP_CATEGORY_COUNT - 1) {
                 if (this.jepBoard.value.round === 'JEOPARDY') {
                     this.setState({ state: 'PICKING_CLUE', pickingPlayerIndex: 0 })
                 } else {
