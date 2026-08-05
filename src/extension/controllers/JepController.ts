@@ -13,6 +13,7 @@ export class JepController extends BaseController {
         this.listen('jep:pickClue', (position) => jepService.pickClue(position));
         this.listen('jep:makeDailyDoubleWager', (args) => jepService.makeDailyDoubleWager(args.amount));
         this.listen('jep:finishReadingClue', () => jepService.finishReadingClue());
+        this.listen('jep:buzzerEvent', (args) => jepService.buzzerEvent(args.buzzedByIndex));
         this.listen('jep:answerClue', (args) => jepService.answerClue(args.isCorrect));
         this.listen('jep:finishReadingAnswer', () => jepService.finishReadingAnswer());
         this.listen('jep:mostlyCompleteTestBoard', () => jepService.mostlyCompleteTestBoard());
