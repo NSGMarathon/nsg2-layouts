@@ -4,6 +4,7 @@ import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorServ
 import { IgdbGameData } from '../../extension/services/IgdbService';
 import { JepPlayers } from '../schemas/jepPlayers';
 import { CluePosition } from '../schemas/jepState';
+import { JepPlayerUpdate } from '../../shared/JepConstants';
 
 export interface MessageInputMap {
     'log:warning': string
@@ -62,7 +63,7 @@ export interface MessageInputMap {
     'stage-display:flash': never
 
     'jep:reset': { useTestBoard: boolean }
-    'jep:setPlayerInfo': JepPlayers
+    'jep:setPlayerInfo': JepPlayerUpdate
     'jep:revealCategory': never
     'jep:pickClue': CluePosition
     'jep:makeDailyDoubleWager': { amount: number }

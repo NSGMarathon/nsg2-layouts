@@ -6,10 +6,12 @@ import { CluePosition, JepState } from 'types/schemas/jepState';
 import { JepBoard } from 'types/schemas/jepBoard';
 import {
     JEP_CATEGORY_COUNT, JEP_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_CATEGORY_COUNT,
-    JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE
+    JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE,
+    JepPlayerUpdate
 } from 'shared/JepConstants';
 import { DeepReadonly } from 'ts-essentials';
 import { DateTime } from 'luxon';
+import cloneDeep from 'lodash/cloneDeep';
 
 type MapToOmitEntryTime<T> = T extends any ? Omit<T, 'enteredAt'> : never;
 type JepStateWithoutEntryTime = MapToOmitEntryTime<JepState>;
@@ -50,15 +52,31 @@ export class JepService extends HasNodecgLogger {
         };
     }
 
-    setPlayerInfo(players: JepPlayers) {
+    setPlayerInfo(players: JepPlayerUpdate) {
+        this.logger.debug('Updating contestant data');
+        if (players.length !== JEP_PLAYER_COUNT) {
+            throw new Error(`The game must have ${JEP_PLAYER_COUNT} contestants`);
+        }
+
         const initializing = this.jepState.value.state === 'WAITING_FOR_PLAYER_INFO';
 
-        this.jepPlayers.value = players.map((p) => ({
-            name: p.name,
-            signatureUrl: p.signatureUrl,
-            symbolUrl: p.symbolUrl,
-            score: initializing ? 0 : p.score
-        }));
+        this.jepPlayers.value = players.map((p, i) => {
+            let score;
+            if (initializing) {
+                score = 0;
+            } else if (p.score == null) {
+                score = this.jepPlayers.value[i]?.score ?? 0;
+            } else {
+                score = p.score;
+            }
+
+            return ({
+                name: p.name,
+                signatureUrl: p.signatureUrl,
+                symbolUrl: p.symbolUrl,
+                score
+            });
+        });
         if (initializing) {
             this.setState({ state: 'STARTING_NEXT_ROUND' });
         }

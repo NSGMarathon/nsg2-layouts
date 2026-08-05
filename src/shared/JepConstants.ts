@@ -3,3 +3,5 @@ export const JEP_CLUES_PER_CATEGORY = 5;
 export const JEP_FINAL_JEOPARDY_CATEGORY_COUNT = 1;
 export const JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY = 1;
 export const JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE = 5;
+
+export type JepPlayerUpdate = (Omit<JepPlayers[number], 'score'> & { score: number | null })[];
