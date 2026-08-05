@@ -6,7 +6,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type JepPlayers = {
+export type JepContestants = {
 	name: string;
 	signatureUrl: string;
 	symbolUrl: string;

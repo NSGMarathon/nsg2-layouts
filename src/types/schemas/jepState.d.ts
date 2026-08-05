@@ -9,7 +9,7 @@
 export type JepState =
 	| {
 			state:
-				| 'WAITING_FOR_PLAYER_INFO'
+				| 'WAITING_FOR_CONTESTANT_INFO'
 				| 'STARTING_GAME'
 				| 'STARTING_NEXT_ROUND'
 				| 'FINAL_JEP_AWAITING_WAGERS'
@@ -25,7 +25,7 @@ export type JepState =
 	  }
 	| {
 			state: 'PICKING_CLUE';
-			pickingPlayerIndex: number;
+			pickingContestantIndex: number;
 			enteredAt: string;
 	  }
 	| {

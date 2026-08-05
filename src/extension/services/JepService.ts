@@ -1,7 +1,6 @@
 import type NodeCG from '@nodecg/types';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
 import { ConfigJepBoard, Configschema } from 'types/schemas';
-import { JepPlayers } from 'types/schemas/jepPlayers';
 import { CluePosition, JepState } from 'types/schemas/jepState';
 import { JepBoard } from 'types/schemas/jepBoard';
 import {
@@ -12,12 +11,13 @@ import {
     JEP_FINAL_JEOPARDY_CATEGORY_COUNT,
     JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY,
     JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE,
-    JEP_PLAYER_COUNT,
-    JepPlayerUpdate
+    JEP_CONTESTANT_COUNT,
+    JepContestantUpdate
 } from 'shared/JepConstants';
 import { DeepReadonly } from 'ts-essentials';
 import { DateTime } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
+import { JepContestants } from 'types/schemas/jepContestants';
 
 type MapToOmitEntryTime<T> = T extends any ? Omit<T, 'enteredAt'> : never;
 type JepStateWithoutEntryTime = MapToOmitEntryTime<JepState>;
@@ -26,7 +26,7 @@ type JepStateWithoutEntryTime = MapToOmitEntryTime<JepState>;
 export class JepService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly jepBoard: NodeCG.ServerReplicantWithSchemaDefault<JepBoard>;
-    private readonly jepPlayers: NodeCG.ServerReplicantWithSchemaDefault<JepPlayers>;
+    private readonly jepContestants: NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
     private readonly jepState: NodeCG.ServerReplicantWithSchemaDefault<JepState>;
     private readonly configIsValid: boolean;
 
@@ -35,7 +35,7 @@ export class JepService extends HasNodecgLogger {
 
         this.nodecg = nodecg;
         this.jepBoard = nodecg.Replicant('jepBoard') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepBoard>;
-        this.jepPlayers = nodecg.Replicant('jepPlayers') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepPlayers>;
+        this.jepContestants = nodecg.Replicant('jepContestants') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
         this.jepState = nodecg.Replicant('jepState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepState>;
         this.configIsValid = JepService.isConfigValid(nodecg.bundleConfig);
 
@@ -48,10 +48,10 @@ export class JepService extends HasNodecgLogger {
     reset(useTestBoard: boolean) {
         this.logger.debug(`Received reset; useTestBoard=${useTestBoard}`);
         this.jepState.value = {
-            state: 'WAITING_FOR_PLAYER_INFO',
+            state: 'WAITING_FOR_CONTESTANT_INFO',
             enteredAt: '1970-01-01T00:00:00Z'
         };
-        this.jepPlayers.value = [];
+        this.jepContestants.value = [];
         this.jepBoard.value = {
             round: 'NONE',
             usingTestBoard: !this.configIsValid || useTestBoard,
@@ -59,20 +59,20 @@ export class JepService extends HasNodecgLogger {
         };
     }
 
-    setPlayerInfo(players: JepPlayerUpdate) {
+    setContestantInfo(contestants: JepContestantUpdate) {
         this.logger.debug('Updating contestant data');
-        if (players.length !== JEP_PLAYER_COUNT) {
-            throw new Error(`The game must have ${JEP_PLAYER_COUNT} contestants`);
+        if (contestants.length !== JEP_CONTESTANT_COUNT) {
+            throw new Error(`The game must have ${JEP_CONTESTANT_COUNT} contestants`);
         }
 
-        const initializing = this.jepState.value.state === 'WAITING_FOR_PLAYER_INFO';
+        const initializing = this.jepState.value.state === 'WAITING_FOR_CONTESTANT_INFO';
 
-        this.jepPlayers.value = players.map((p, i) => {
+        this.jepContestants.value = contestants.map((p, i) => {
             let score;
             if (initializing) {
                 score = 0;
             } else if (p.score == null) {
-                score = this.jepPlayers.value[i]?.score ?? 0;
+                score = this.jepContestants.value[i]?.score ?? 0;
             } else {
                 score = p.score;
             }
@@ -115,19 +115,19 @@ export class JepService extends HasNodecgLogger {
                 this.logger.debug('Now awaiting Final Jeopardy wagers');
             } else if (this.jepState.value.lastRevealedCategoryIndex >= JEP_CATEGORY_COUNT - 1) {
                 if (this.jepBoard.value.round === 'JEOPARDY') {
-                    this.setState({ state: 'PICKING_CLUE', pickingPlayerIndex: 0 });
+                    this.setState({ state: 'PICKING_CLUE', pickingContestantIndex: 0 });
                     this.logger.debug('Finished revealing Jeopardy categories');
                 } else {
-                    const lowestScore = Math.min(...this.jepPlayers.value.map((p) => p.score));
-                    const playersWithLowestScore = this.jepPlayers.value
+                    const lowestScore = Math.min(...this.jepContestants.value.map((p) => p.score));
+                    const contestantsWithLowestScore = this.jepContestants.value
                         .map((p, i) => ({ ...p, index: i }))
                         .filter((p) => p.score === lowestScore);
 
                     // todo: need to actually resolve ties
-                    const selectedIndex = Math.floor(Math.random() * playersWithLowestScore.length);
+                    const selectedIndex = Math.floor(Math.random() * contestantsWithLowestScore.length);
                     this.setState({
                         state: 'PICKING_CLUE',
-                        pickingPlayerIndex: playersWithLowestScore[selectedIndex].index
+                        pickingContestantIndex: contestantsWithLowestScore[selectedIndex].index
                     });
                     this.logger.debug('Finished revealing Double Jeopardy categories');
                 }
@@ -156,7 +156,7 @@ export class JepService extends HasNodecgLogger {
 
         this.setState({
             state: clue.isDailyDouble ? 'DAILY_DOUBLE_AWAITING_WAGER' : 'READING_CLUE',
-            lastCluePickedByIndex: this.jepState.value.pickingPlayerIndex,
+            lastCluePickedByIndex: this.jepState.value.pickingContestantIndex,
             cluePosition: position
         });
     }
@@ -169,7 +169,7 @@ export class JepService extends HasNodecgLogger {
 
         const maxWagerAmount = Math.max(
             (JEP_CLUE_VALUE_MULTIPLIER * (this.jepBoard.value.round === 'DOUBLE_JEOPARDY' ? 2 : 1) * JEP_CLUES_PER_CATEGORY),
-            this.jepPlayers.value[this.jepState.value.lastCluePickedByIndex].score);
+            this.jepContestants.value[this.jepState.value.lastCluePickedByIndex].score);
         if (amount < JEP_DAILY_DOUBLE_MIN_WAGER || amount > maxWagerAmount) {
             throw new Error(`Wager must be between ${JEP_DAILY_DOUBLE_MIN_WAGER} and ${maxWagerAmount} points`);
         }
@@ -214,7 +214,7 @@ export class JepService extends HasNodecgLogger {
                 guessesMadeByIndices: this.jepState.value.guessesMadeByIndices
             });
         } else {
-            if (buzzedByIndex < 0 || buzzedByIndex >= JEP_PLAYER_COUNT) {
+            if (buzzedByIndex < 0 || buzzedByIndex >= JEP_CONTESTANT_COUNT) {
                 throw new Error(`Contestant ${buzzedByIndex + 1} does not exist`);
             }
 
@@ -253,11 +253,11 @@ export class JepService extends HasNodecgLogger {
 
         if (isCorrect) {
             this.logger.debug(`Contestant ${answeringContestantIndex + 1} gains ${value} point(s)`);
-            this.jepPlayers.value[answeringContestantIndex].score += value;
+            this.jepContestants.value[answeringContestantIndex].score += value;
             if (this.anyCluesRemaining()) {
                 this.setState({
                     state: 'PICKING_CLUE',
-                    pickingPlayerIndex: answeringContestantIndex
+                    pickingContestantIndex: answeringContestantIndex
                 });
             } else {
                 this.setState({
@@ -266,7 +266,7 @@ export class JepService extends HasNodecgLogger {
             }
         } else {
             this.logger.debug(`Contestant ${answeringContestantIndex + 1} loses ${value} point(s)`);
-            this.jepPlayers.value[answeringContestantIndex].score -= value;
+            this.jepContestants.value[answeringContestantIndex].score -= value;
 
             if (isDailyDouble) {
                 this.logger.debug('Daily Double: Reading correct answer and continuing');
@@ -283,7 +283,7 @@ export class JepService extends HasNodecgLogger {
                     guessesMadeByIndices = guessesMadeByIndices.concat(answeringContestantIndex);
                 }
 
-                if (guessesMadeByIndices.length === this.jepPlayers.value.length) {
+                if (guessesMadeByIndices.length === this.jepContestants.value.length) {
                     this.logger.debug('All contestants have guessed; Reading correct answer and continuing');
                     this.setState({
                         state: 'READING_CORRECT_ANSWER',
@@ -314,7 +314,7 @@ export class JepService extends HasNodecgLogger {
             this.setState({
                 state: 'PICKING_CLUE',
                 // We assume this code is only reached if the last answer given was incorrect, or we just played a Daily Double
-                pickingPlayerIndex: this.jepState.value.lastCluePickedByIndex
+                pickingContestantIndex: this.jepState.value.lastCluePickedByIndex
             });
         } else {
             this.setState({
@@ -341,46 +341,46 @@ export class JepService extends HasNodecgLogger {
         this.setState({ state: 'FINAL_JEP_AWAITING_ANSWERS' });
     }
 
-    finalJepRevealAnswer(playerIndex: number, amountWagered: number, isCorrect: boolean) {
-        this.logger.debug(`Final Jeopardy: contestant ${playerIndex + 1} has answered ${isCorrect ? 'correctly, and gains' : 'incorrectly, and loses'} ${amountWagered} point(s)`);
-        const player = this.jepPlayers.value[playerIndex];
-        if (player == null) {
-            throw new Error('The selected player does not exist');
+    finalJepRevealAnswer(contestantIndex: number, amountWagered: number, isCorrect: boolean) {
+        this.logger.debug(`Final Jeopardy: contestant ${contestantIndex + 1} has answered ${isCorrect ? 'correctly, and gains' : 'incorrectly, and loses'} ${amountWagered} point(s)`);
+        const contestant = this.jepContestants.value[contestantIndex];
+        if (contestant == null) {
+            throw new Error('The selected contestant does not exist');
         }
 
-        // We deviate from the rules by allowing players with zero or negative score to keep playing.
+        // We deviate from the rules by allowing contestants with zero or negative score to keep playing.
         // If you finished the round with a score between -5 and 5, your maximum wager is 5 points.
-        const maxWager = Math.max(JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE, Math.abs(player.score));
+        const maxWager = Math.max(JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE, Math.abs(contestant.score));
         if (amountWagered > maxWager) {
-            throw new Error(`The largest allowed wager for the given player is ${maxWager} points`);
+            throw new Error(`The largest allowed wager for the given contestant is ${maxWager} points`);
         }
         if (amountWagered < 0) {
             throw new Error('Final Jeopardy wager must not be negative');
         }
 
         if (this.jepState.value.state === 'FINAL_JEP_AWAITING_ANSWERS') {
-            const contestantOrder = this.jepPlayers.value
-                .map((player, i) => [player.score, i])
+            const contestantOrder = this.jepContestants.value
+                .map((contestant, i) => [contestant.score, i])
                 .sort((a, b) => a[0] - b[0])
                 .map((p) => p[1]);
 
             this.setState({
                 state: 'FINAL_JEP_REVEALING_ANSWERS',
                 contestantOrderBeforeRoundStart: contestantOrder,
-                answerRevealedForIndices: [playerIndex]
+                answerRevealedForIndices: [contestantIndex]
             });
         } else if (this.jepState.value.state === 'FINAL_JEP_REVEALING_ANSWERS') {
-            if (this.jepState.value.answerRevealedForIndices.includes(playerIndex)) {
-                throw new Error('The answer has already been revealed for the given player');
+            if (this.jepState.value.answerRevealedForIndices.includes(contestantIndex)) {
+                throw new Error('The answer has already been revealed for the given contestant');
             }
 
-            if (this.jepState.value.answerRevealedForIndices.length === this.jepPlayers.value.length - 1) {
+            if (this.jepState.value.answerRevealedForIndices.length === this.jepContestants.value.length - 1) {
                 this.setState({ state: 'VIEW_FINAL_RESULT' });
             } else {
                 this.setState({
                     state: 'FINAL_JEP_REVEALING_ANSWERS',
                     contestantOrderBeforeRoundStart: this.jepState.value.contestantOrderBeforeRoundStart,
-                    answerRevealedForIndices: this.jepState.value.answerRevealedForIndices.concat(playerIndex)
+                    answerRevealedForIndices: this.jepState.value.answerRevealedForIndices.concat(contestantIndex)
                 });
             }
         } else {
@@ -388,9 +388,9 @@ export class JepService extends HasNodecgLogger {
         }
 
         if (isCorrect) {
-            player.score += amountWagered;
+            contestant.score += amountWagered;
         } else {
-            player.score -= amountWagered;
+            contestant.score -= amountWagered;
         }
     }
 

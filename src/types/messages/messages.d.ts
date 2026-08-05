@@ -3,7 +3,7 @@ import { ScheduleItem } from '../ScheduleHelpers';
 import { ObsSceneItemTransform } from '../../extension/services/ObsConnectorService';
 import { IgdbGameData } from '../../extension/services/IgdbService';
 import { CluePosition } from '../schemas/jepState';
-import { JepPlayerUpdate } from '../../shared/JepConstants';
+import { JepContestantUpdate } from '../../shared/JepConstants';
 
 export interface MessageInputMap {
     'log:warning': string
@@ -62,7 +62,7 @@ export interface MessageInputMap {
     'stage-display:flash': never
 
     'jep:reset': { useTestBoard: boolean }
-    'jep:setPlayerInfo': JepPlayerUpdate
+    'jep:setContestantInfo': JepContestantUpdate
     'jep:revealCategory': never
     'jep:pickClue': CluePosition
     'jep:makeDailyDoubleWager': { amount: number }
@@ -73,7 +73,7 @@ export interface MessageInputMap {
     'jep:mostlyCompleteTestBoard': never
     'finalJep:finishWagering': never
     'finalJep:finishReadingClue': never
-    'finalJep:revealAnswer': { playerIndex: number, amountWagered: number, isCorrect: boolean }
+    'finalJep:revealAnswer': { contestantIndex: number, amountWagered: number, isCorrect: boolean }
 }
 
 type MessagesWithoutReturnValues = Exclude<keyof MessageInputMap, keyof InnerMessageResultMap>;

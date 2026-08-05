@@ -85,6 +85,13 @@
                 "file": "host.html",
                 "headerColor": "#262F40",
                 "fullbleed": true
+            },
+            {
+                "name": "jep",
+                "title": "4 - Game Show",
+                "file": "jep.html",
+                "headerColor": "#262F40",
+                "fullbleed": true
             }
         ],
         "graphics": [
@@ -115,6 +122,11 @@
             },
             {
                 "file": "utility-stage-display.html",
+                "width": 1920,
+                "height": 1080
+            },
+            {
+                "file": "jep-buzzer-handler.html",
                 "width": 1920,
                 "height": 1080
             }

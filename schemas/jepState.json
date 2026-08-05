@@ -19,7 +19,7 @@
                 "state": {
                     "type": "string",
                     "enum": [
-                        "WAITING_FOR_PLAYER_INFO",
+                        "WAITING_FOR_CONTESTANT_INFO",
                         "STARTING_GAME",
                         "STARTING_NEXT_ROUND",
                         "FINAL_JEP_AWAITING_WAGERS",
@@ -53,13 +53,13 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "pickingPlayerIndex", "enteredAt"],
+            "required": ["state", "pickingContestantIndex", "enteredAt"],
             "properties": {
                 "state": {
                     "type": "string",
                     "enum": ["PICKING_CLUE"]
                 },
-                "pickingPlayerIndex": {
+                "pickingContestantIndex": {
                     "type": "number"
                 },
                 "enteredAt": {
@@ -219,7 +219,7 @@
         }
     ],
     "default": {
-        "state": "WAITING_FOR_PLAYER_INFO",
+        "state": "WAITING_FOR_CONTESTANT_INFO",
         "enteredAt": "1970-01-01T00:00:00Z"
     }
 }

@@ -8,7 +8,7 @@ export class JepController extends BaseController {
         super(nodecg);
 
         this.listen('jep:reset', (args) => jepService.reset(args.useTestBoard));
-        this.listen('jep:setPlayerInfo', (args) => jepService.setPlayerInfo(args));
+        this.listen('jep:setContestantInfo', (args) => jepService.setContestantInfo(args));
         this.listen('jep:revealCategory', () => jepService.revealCategory());
         this.listen('jep:pickClue', (position) => jepService.pickClue(position));
         this.listen('jep:makeDailyDoubleWager', (args) => jepService.makeDailyDoubleWager(args.amount));
@@ -19,6 +19,6 @@ export class JepController extends BaseController {
         this.listen('jep:mostlyCompleteTestBoard', () => jepService.mostlyCompleteTestBoard());
         this.listen('finalJep:finishWagering', () => jepService.finalJepFinishWagering());
         this.listen('finalJep:finishReadingClue', () => jepService.finalJepFinishReadingClue());
-        this.listen('finalJep:revealAnswer', (args) => jepService.finalJepRevealAnswer(args.playerIndex, args.amountWagered, args.isCorrect));
+        this.listen('finalJep:revealAnswer', (args) => jepService.finalJepRevealAnswer(args.contestantIndex, args.amountWagered, args.isCorrect));
     }
 }
