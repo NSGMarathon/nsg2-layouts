@@ -74,7 +74,7 @@
             "properties": {
                 "state": {
                     "type": "string",
-                    "enum": ["READING_CLUE", "DAILY_DOUBLE_AWAITING_WAGER"]
+                    "enum": ["DAILY_DOUBLE_AWAITING_WAGER"]
                 },
                 "lastCluePickedByIndex": {
                     "type": "number"
@@ -90,11 +90,11 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "cluePosition", "lastUpdated"],
+            "required": ["state", "lastCluePickedByIndex", "guessesMadeByIndices", "buzzerEnabled", "cluePosition", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
-                    "enum": ["AWAITING_BUZZER"]
+                    "enum": ["PREPARING_CLUE"]
                 },
                 "lastCluePickedByIndex": {
                     "type": "number"
@@ -104,6 +104,9 @@
                     "items": {
                         "type": "number"
                     }
+                },
+                "buzzerEnabled": {
+                    "type": "boolean"
                 },
                 "cluePosition": {
                     "$ref": "#/definitions/cluePosition"
@@ -120,7 +123,7 @@
             "properties": {
                 "state": {
                     "type": "string",
-                    "enum": ["DAILY_DOUBLE_READING_CLUE", "DAILY_DOUBLE_AWAITING_ANSWER"]
+                    "enum": ["DAILY_DOUBLE_AWAITING_ANSWER"]
                 },
                 "lastCluePickedByIndex": {
                     "type": "number"

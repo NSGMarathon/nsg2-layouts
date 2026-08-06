@@ -66,7 +66,7 @@ export interface MessageInputMap {
     'jep:revealCategory': never
     'jep:pickClue': CluePosition
     'jep:makeDailyDoubleWager': { amount: number }
-    'jep:finishReadingClue': never
+    'jep:enableBuzzer': never
     'jep:buzzerEvent': { buzzedByIndex: number | null }
     'jep:answerClue': { isCorrect: boolean }
     'jep:finishReadingAnswer': never

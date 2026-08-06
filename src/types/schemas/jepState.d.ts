@@ -29,20 +29,21 @@ export type JepState =
 			lastUpdated: string;
 	  }
 	| {
-			state: 'READING_CLUE' | 'DAILY_DOUBLE_AWAITING_WAGER';
+			state: 'DAILY_DOUBLE_AWAITING_WAGER';
 			lastCluePickedByIndex: number;
 			cluePosition: CluePosition;
 			lastUpdated: string;
 	  }
 	| {
-			state: 'AWAITING_BUZZER';
+			state: 'PREPARING_CLUE';
 			lastCluePickedByIndex: number;
 			guessesMadeByIndices: number[];
+			buzzerEnabled: boolean;
 			cluePosition: CluePosition;
 			lastUpdated: string;
 	  }
 	| {
-			state: 'DAILY_DOUBLE_READING_CLUE' | 'DAILY_DOUBLE_AWAITING_ANSWER';
+			state: 'DAILY_DOUBLE_AWAITING_ANSWER';
 			lastCluePickedByIndex: number;
 			pointsWaged: number;
 			cluePosition: CluePosition;

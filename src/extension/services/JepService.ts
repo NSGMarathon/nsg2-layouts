@@ -155,11 +155,21 @@ export class JepService extends HasNodecgLogger {
             throw new Error('Selected clue has already been answered');
         }
 
-        this.setState({
-            state: clue.isDailyDouble ? 'DAILY_DOUBLE_AWAITING_WAGER' : 'READING_CLUE',
-            lastCluePickedByIndex: this.jepState.value.pickingContestantIndex,
-            cluePosition: position
-        });
+        if (clue.isDailyDouble) {
+            this.setState({
+                state: 'DAILY_DOUBLE_AWAITING_WAGER',
+                lastCluePickedByIndex: this.jepState.value.pickingContestantIndex,
+                cluePosition: position
+            });
+        } else {
+            this.setState({
+                state: 'PREPARING_CLUE',
+                lastCluePickedByIndex: this.jepState.value.pickingContestantIndex,
+                buzzerEnabled: false,
+                guessesMadeByIndices: [],
+                cluePosition: position
+            });
+        }
     }
 
     makeDailyDoubleWager(amount: number) {
@@ -176,40 +186,33 @@ export class JepService extends HasNodecgLogger {
         }
 
         this.setState({
-            state: 'DAILY_DOUBLE_READING_CLUE',
+            state: 'DAILY_DOUBLE_AWAITING_ANSWER',
             lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
             cluePosition: this.jepState.value.cluePosition,
             pointsWaged: amount
         });
     }
 
-    finishReadingClue() {
-        // todo: we're likely getting rid of this state during non-daily-double questions or modifying it some way
-        // (if the buzzer system is going to work in the way i think it will)
-        this.logger.debug('Clue has finished getting read out');
-        if (this.jepState.value.state === 'DAILY_DOUBLE_READING_CLUE') {
-            this.setState({
-                ...this.jepState.value,
-                state: 'DAILY_DOUBLE_AWAITING_ANSWER'
-            });
-        } else if (this.jepState.value.state === 'READING_CLUE') {
-            this.setState({
-                ...this.jepState.value,
-                state: 'AWAITING_BUZZER',
-                guessesMadeByIndices: []
-            });
-        } else {
-            throw new Error('Cannot finish reading a clue at this time');
+    enableBuzzer() {
+        if (this.jepState.value.state !== 'PREPARING_CLUE') {
+            throw new Error('Cannot enable the buzzer at this time');
         }
+
+        this.setState({
+            ...this.jepState.value,
+            buzzerEnabled: true
+        });
     }
 
     buzzerEvent(buzzedByIndex: number | null) {
-        if (this.jepState.value.state !== 'AWAITING_BUZZER') {
+        if (this.jepState.value.state !== 'PREPARING_CLUE') {
             throw new Error('Cannot answer buzzer events at this time');
         }
 
         if (buzzedByIndex == null) {
             this.logger.debug('No contestant buzzed in time');
+            this.markClueAnswered(this.jepState.value.cluePosition);
+
             this.setState({
                 state: 'READING_CORRECT_ANSWER',
                 lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
@@ -240,7 +243,7 @@ export class JepService extends HasNodecgLogger {
         const isDailyDouble = this.jepState.value.state === 'DAILY_DOUBLE_AWAITING_ANSWER';
 
         const cluePos = this.jepState.value.cluePosition;
-        this.jepBoard.value.categories[cluePos[0]].clues[cluePos[1]].answered = true;
+        this.markClueAnswered(cluePos);
 
         let answeringContestantIndex: number;
         let value: number;
@@ -297,10 +300,11 @@ export class JepService extends HasNodecgLogger {
                 } else {
                     this.logger.debug('Incorrect guess made; awaiting buzzer');
                     this.setState({
-                        state: 'AWAITING_BUZZER',
+                        state: 'PREPARING_CLUE',
                         lastCluePickedByIndex: this.jepState.value.lastCluePickedByIndex,
                         guessesMadeByIndices,
-                        cluePosition: cluePos
+                        cluePosition: cluePos,
+                        buzzerEnabled: false
                     });
                 }
             }
@@ -422,6 +426,10 @@ export class JepService extends HasNodecgLogger {
         this.jepBoard.value.categories = newBoard;
     }
 
+    private markClueAnswered(cluePos: CluePosition) {
+        this.jepBoard.value.categories[cluePos[0]].clues[cluePos[1]].answered = true;
+    }
+
     private anyCluesRemaining() {
         return this.jepBoard.value.categories.some((cat) =>
             cat.clues.some((clue) => !clue.answered));
@@ -469,7 +477,7 @@ export class JepService extends HasNodecgLogger {
                             categoryName: 'Cephalopods',
                             clues: [{
                                 prompt: 'The main characters in this shooter franchise are squid-like inklings who shoot multicolored goo at each other',
-                                answer: 'Splatoon'
+                                answer: 'splatoon'
                             }]
                         }
                     ];
