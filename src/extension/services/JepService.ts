@@ -369,7 +369,7 @@ export class JepService extends HasNodecgLogger {
         }
 
         // We deviate from the rules by allowing contestants with zero or negative score to keep playing.
-        // If you finished the round with a score between -5 and 5, your maximum wager is 5 points.
+        // Players with very low scores are still able to make a small wager
         const maxWager = Math.max(JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE, Math.abs(contestant.score));
         if (amountWagered > maxWager) {
             throw new Error(`The largest allowed wager for the given contestant is ${maxWager} points`);
