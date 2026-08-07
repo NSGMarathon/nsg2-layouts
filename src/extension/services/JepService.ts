@@ -42,6 +42,8 @@ export class JepService extends HasNodecgLogger {
         if (!this.configIsValid) {
             this.logger.info('Jeopardy config is missing or incomplete; only the testing board will be available.');
             this.jepBoard.value.usingTestBoard = true;
+        } else {
+            this.logger.info('Jeopardy config is OK');
         }
     }
 

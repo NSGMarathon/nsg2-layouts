@@ -70,9 +70,9 @@
                 <template v-for="(cat, i) of jepStore.jepBoard.categories">
                     <ipl-space
                         class="category-name layout horizontal center-vertical center-horizontal"
-                        :class="{ 'next-category-to-reveal': jepStore.jepState.state === 'REVEALING_CATEGORIES' && jepStore.jepState.lastRevealedCategoryIndex + 1 === i }"
+                        :class="{ 'smaller': (revealedCategories[i]?.length ?? 0) >= 18 }"
                     >
-                        {{ jepStore.jepState.state !== 'REVEALING_CATEGORIES' || jepStore.jepState.lastRevealedCategoryIndex + 1 >= i ? cat.name : '???' }}
+                        {{ revealedCategories[i] ?? '???' }}
                     </ipl-space>
                     <ipl-space
                         v-for="(clue, j) of cat.clues"
@@ -192,6 +192,8 @@ library.add(faUserEdit, faExclamation);
 
 const jepStore = useJepStore();
 
+// todo: make that change to revealing categories you wanted to make
+
 const contestantManagementDialog = useTemplateRef('contestantManagementDialog');
 const finalJeopardyResults = ref<{ maxWager: number | null, wager: number, submitted: boolean }[]>([]);
 
@@ -210,6 +212,15 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.clearInterval(showTimerUpdateInterval);
+});
+
+const revealedCategories = computed(() => {
+    if (jepStore.jepState.state === 'REVEALING_CATEGORIES') {
+        // @ts-expect-error
+        return jepStore.jepBoard.categories.map((cat, i) => jepStore.jepState.lastRevealedCategoryIndex >= i ? cat.name : null);
+    } else {
+        return jepStore.jepBoard.categories.map((cat) => cat.name);
+    }
 });
 
 const focusedContestantIndex = computed(() => {
@@ -324,17 +335,10 @@ body {
             font-size: 1em !important;
             overflow-wrap: anywhere;
             position: relative;
+            min-height: 3em;
 
-            &.next-category-to-reveal {
-                outline: 2px solid #fff;
-
-                &:before {
-                    content: 'Next:';
-                    font-size: 0.75em;
-                    position: absolute;
-                    top: -1.2em;
-                    left: 0;
-                }
+            &.smaller {
+                font-size: 0.75em !important;
             }
         }
 

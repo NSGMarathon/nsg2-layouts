@@ -1,8 +1,17 @@
 <template>
     <ipl-space class="board-actions m-t-16 layout vertical center-horizontal center-vertical">
-        <div v-if="jepStore.jepState.state === 'REVEALING_CATEGORIES'">
-            Revealing categories...
-        </div>
+        <template v-if="jepStore.jepState.state === 'REVEALING_CATEGORIES'">
+            <template v-if="jepStore.jepBoard.round === 'FINAL_JEOPARDY'">
+                Revealing the category...
+            </template>
+            <template v-else-if="nextCategoryToReveal != null">
+                <div class="next-category-label">The next category is...</div>
+                <div class="next-category">{{ nextCategoryToReveal }}</div>
+            </template>
+            <template v-else>
+                Waiting...
+            </template>
+        </template>
         <div v-else-if="jepStore.jepState.state === 'PICKING_CLUE'">
             <jep-contestant-indicator :contestant-index="jepStore.jepState.pickingContestantIndex" /> picks a clue
         </div>
@@ -45,8 +54,11 @@
 import { useJepStore } from 'client-shared/stores/JepStore';
 import JepContestantIndicator from './JepContestantIndicator.vue';
 import { IplSpace } from '@iplsplatoon/vue-components';
+import { computed } from 'vue';
 
 const jepStore = useJepStore();
+
+const nextCategoryToReveal = computed(() => jepStore.jepState.state === 'REVEALING_CATEGORIES' ? jepStore.jepBoard.categories[jepStore.jepState.lastRevealedCategoryIndex + 1]?.name : null);
 </script>
 
 <style scoped lang="scss">
@@ -54,6 +66,16 @@ const jepStore = useJepStore();
     font-size: 1.25em;
     min-height: 6rem;
     text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.next-category-label {
+    font-size: 0.75em;
+}
+
+.next-category {
+    font-weight: 700;
+    font-size: 1.25em;
     overflow-wrap: anywhere;
 }
 </style>
