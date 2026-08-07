@@ -13,9 +13,7 @@ export type JepState =
 				| 'STARTING_GAME'
 				| 'STARTING_NEXT_ROUND'
 				| 'FINAL_JEP_AWAITING_WAGERS'
-				| 'FINAL_JEP_READING_CLUE'
-				| 'FINAL_JEP_AWAITING_ANSWERS'
-				| 'VIEW_FINAL_RESULT';
+				| 'FINAL_JEP_READING_CLUE';
 			lastUpdated: string;
 	  }
 	| {
@@ -65,9 +63,19 @@ export type JepState =
 			lastUpdated: string;
 	  }
 	| {
-			state: 'FINAL_JEP_REVEALING_ANSWERS';
-			contestantOrderBeforeRoundStart: number[];
-			answerRevealedForIndices: number[];
+			state: 'FINAL_JEP_REVEALING_ANSWERS' | 'FINAL_JEP_AWAITING_ANSWERS' | 'VIEW_FINAL_RESULT';
+			finalJeopardyWagers: (
+				| {
+						scoreBeforeAnswer: number;
+						answerRevealed: false;
+				  }
+				| {
+						scoreBeforeAnswer: number;
+						answerRevealed: true;
+						answerIsCorrect: boolean;
+						amountWagered: number;
+				  }
+			)[];
 			lastUpdated: string;
 	  };
 /**

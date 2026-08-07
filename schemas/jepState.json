@@ -23,9 +23,7 @@
                         "STARTING_GAME",
                         "STARTING_NEXT_ROUND",
                         "FINAL_JEP_AWAITING_WAGERS",
-                        "FINAL_JEP_READING_CLUE",
-                        "FINAL_JEP_AWAITING_ANSWERS",
-                        "VIEW_FINAL_RESULT"
+                        "FINAL_JEP_READING_CLUE"
                     ]
                 },
                 "lastUpdated": {
@@ -197,22 +195,49 @@
         {
             "type": "object",
             "additionalProperties": false,
-            "required": ["state", "contestantOrderBeforeRoundStart", "answerRevealedForIndices", "lastUpdated"],
+            "required": ["state", "finalJeopardyWagers", "lastUpdated"],
             "properties": {
                 "state": {
                     "type": "string",
-                    "enum": ["FINAL_JEP_REVEALING_ANSWERS"]
+                    "enum": ["FINAL_JEP_REVEALING_ANSWERS", "FINAL_JEP_AWAITING_ANSWERS", "VIEW_FINAL_RESULT"]
                 },
-                "contestantOrderBeforeRoundStart": {
+                "finalJeopardyWagers": {
                     "type": "array",
                     "items": {
-                        "type": "number"
-                    }
-                },
-                "answerRevealedForIndices": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["scoreBeforeAnswer", "answerRevealed"],
+                                "properties": {
+                                    "scoreBeforeAnswer": {
+                                        "type": "number"
+                                    },
+                                    "answerRevealed": {
+                                        "const": false
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["scoreBeforeAnswer", "answerRevealed", "answerIsCorrect", "amountWagered"],
+                                "properties": {
+                                    "scoreBeforeAnswer": {
+                                        "type": "number"
+                                    },
+                                    "answerRevealed": {
+                                        "const": true
+                                    },
+                                    "answerIsCorrect": {
+                                        "type": "boolean"
+                                    },
+                                    "amountWagered": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        ]
                     }
                 },
                 "lastUpdated": {

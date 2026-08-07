@@ -7,11 +7,11 @@ import {
     JEP_CATEGORY_COUNT,
     JEP_CLUE_VALUE_MULTIPLIER,
     JEP_CLUES_PER_CATEGORY,
+    JEP_CONTESTANT_COUNT,
     JEP_DAILY_DOUBLE_MIN_WAGER,
     JEP_FINAL_JEOPARDY_CATEGORY_COUNT,
     JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY,
     JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE,
-    JEP_CONTESTANT_COUNT,
     JepContestantUpdate
 } from 'shared/JepConstants';
 import { DeepReadonly } from 'ts-essentials';
@@ -345,14 +345,27 @@ export class JepService extends HasNodecgLogger {
             throw new Error('Cannot finish reading the Final Jeopardy clue at this time');
         }
 
-        this.setState({ state: 'FINAL_JEP_AWAITING_ANSWERS' });
+        this.setState({
+            state: 'FINAL_JEP_AWAITING_ANSWERS',
+            finalJeopardyWagers: this.jepContestants.value.map((contestant) => ({
+                scoreBeforeAnswer: contestant.score,
+                answerRevealed: false
+            }))
+        });
     }
 
     finalJepRevealAnswer(contestantIndex: number, amountWagered: number, isCorrect: boolean) {
+        if (this.jepState.value.state !== 'FINAL_JEP_REVEALING_ANSWERS' && this.jepState.value.state !== 'FINAL_JEP_AWAITING_ANSWERS') {
+            throw new Error('Cannot reveal a Final Jeopardy answer at this time');
+        }
+
         this.logger.debug(`Final Jeopardy: contestant ${contestantIndex + 1} has answered ${isCorrect ? 'correctly, and gains' : 'incorrectly, and loses'} ${amountWagered} point(s)`);
         const contestant = this.jepContestants.value[contestantIndex];
         if (contestant == null) {
             throw new Error('The selected contestant does not exist');
+        }
+        if (this.jepState.value.finalJeopardyWagers[contestantIndex].answerRevealed) {
+            throw new Error('The answer has already been revealed for the given contestant');
         }
 
         // We deviate from the rules by allowing contestants with zero or negative score to keep playing.
@@ -365,33 +378,24 @@ export class JepService extends HasNodecgLogger {
             throw new Error('Final Jeopardy wager must not be negative');
         }
 
-        if (this.jepState.value.state === 'FINAL_JEP_AWAITING_ANSWERS') {
-            const contestantOrder = this.jepContestants.value
-                .map((contestant, i) => [contestant.score, i])
-                .sort((a, b) => a[0] - b[0])
-                .map((p) => p[1]);
+        const newFinalJeopardyData = cloneDeep(this.jepState.value.finalJeopardyWagers);
+        newFinalJeopardyData[contestantIndex] = {
+            scoreBeforeAnswer: contestant.score,
+            answerRevealed: true,
+            answerIsCorrect: isCorrect,
+            amountWagered
+        }
 
+        if (newFinalJeopardyData.every((answer) => answer.answerRevealed)) {
+            this.setState({
+                state: 'VIEW_FINAL_RESULT',
+                finalJeopardyWagers: newFinalJeopardyData
+            });
+        } else {
             this.setState({
                 state: 'FINAL_JEP_REVEALING_ANSWERS',
-                contestantOrderBeforeRoundStart: contestantOrder,
-                answerRevealedForIndices: [contestantIndex]
+                finalJeopardyWagers: newFinalJeopardyData
             });
-        } else if (this.jepState.value.state === 'FINAL_JEP_REVEALING_ANSWERS') {
-            if (this.jepState.value.answerRevealedForIndices.includes(contestantIndex)) {
-                throw new Error('The answer has already been revealed for the given contestant');
-            }
-
-            if (this.jepState.value.answerRevealedForIndices.length === this.jepContestants.value.length - 1) {
-                this.setState({ state: 'VIEW_FINAL_RESULT' });
-            } else {
-                this.setState({
-                    state: 'FINAL_JEP_REVEALING_ANSWERS',
-                    contestantOrderBeforeRoundStart: this.jepState.value.contestantOrderBeforeRoundStart,
-                    answerRevealedForIndices: this.jepState.value.answerRevealedForIndices.concat(contestantIndex)
-                });
-            }
-        } else {
-            throw new Error('Cannot reveal a Final Jeopardy answer at this time');
         }
 
         if (isCorrect) {
