@@ -142,6 +142,9 @@
                     </ipl-button>
                 </ipl-space>
             </div>
+            <ipl-space class="show-timer">
+                {{ timeSinceLastUpdate }}
+            </ipl-space>
             <jep-read-only-dashboard-actions v-if="isReadOnly" />
             <jep-dashboard-actions v-else />
             <div class="contestant-list m-t-16">
@@ -166,8 +169,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
-import { IplButton, IplInput, IplSpace } from '@iplsplatoon/vue-components';
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import { IplButton, IplSpace } from '@iplsplatoon/vue-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUserEdit } from '@fortawesome/free-solid-svg-icons/faUserEdit';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -175,21 +178,15 @@ import JepContestantManagementDialog from './JepContestantManagementDialog.vue';
 import { useJepStore } from 'client-shared/stores/JepStore';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import ErrorDisplay from '../../components/ErrorDisplay.vue';
-import {
-    JEP_CLUE_VALUE_MULTIPLIER,
-    JEP_CLUES_PER_CATEGORY,
-    JEP_DAILY_DOUBLE_MIN_WAGER,
-    JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE
-} from 'shared/JepConstants';
+import { JEP_CLUES_PER_CATEGORY, JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE } from 'shared/JepConstants';
 import JepContestantIndicator from './JepContestantIndicator.vue';
 import { CluePosition } from 'types/schemas/jepState';
 import { faExclamation } from '@fortawesome/free-solid-svg-icons/faExclamation';
-import { DateTime } from 'luxon';
 import JepWagerInput from './JepWagerInput.vue';
-import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import JepDashboardActions from './JepDashboardActions.vue';
 import JepReadOnlyDashboardActions from './JepReadOnlyDashboardActions.vue';
 import JepDashboardClueDisplay from './JepDashboardClueDisplay.vue';
+import { DateTime } from 'luxon';
 
 library.add(faUserEdit, faExclamation);
 
@@ -201,7 +198,19 @@ const finalJeopardyResults = ref<{ maxWager: number | null, wager: number, submi
 const params = new URLSearchParams(window.location.search);
 const isReadOnly = params.has('ro') && params.get('ro') !== 'false';
 
-// const parsedUpdateTime = computed(() => DateTime.fromISO(jepStore.jepState.lastUpdated));
+const parsedUpdateTime = computed(() => DateTime.fromISO(jepStore.jepState.lastUpdated));
+const timeSinceLastUpdate = ref('00:00');
+let showTimerUpdateInterval: number | undefined = undefined;
+
+onMounted(() => {
+    showTimerUpdateInterval = window.setInterval(() => {
+        timeSinceLastUpdate.value = DateTime.now().diff(parsedUpdateTime.value, ['second', 'minute']).toFormat('mm:ss');
+    }, 100);
+});
+
+onUnmounted(() => {
+    window.clearInterval(showTimerUpdateInterval);
+});
 
 const focusedContestantIndex = computed(() => {
     switch (jepStore.jepState.state) {
@@ -351,6 +360,14 @@ body {
 
 .final-jeopardy-display {
     min-height: 12em;
+}
+
+.show-timer {
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    font-size: 1.15em;
+    min-width: 5em;
+    margin: 16px auto 0;
 }
 
 .contestant-list {
