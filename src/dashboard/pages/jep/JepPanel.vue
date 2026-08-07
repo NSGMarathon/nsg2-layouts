@@ -1,7 +1,10 @@
 <template>
     <div class="jep-panel">
         <error-display class="error-display" />
-        <ipl-space class="controls layout horizontal">
+        <ipl-space
+            v-if="!isReadOnly"
+            class="controls layout horizontal"
+        >
             <ipl-button
                 v-if="jepStore.jepBoard.usingTestBoard"
                 color="red"
@@ -16,28 +19,37 @@
                 @click="contestantManagementDialog?.open"
             />
         </ipl-space>
+        <div v-else />
+
         <div
             v-if="jepStore.jepState.state === 'WAITING_FOR_CONTESTANT_INFO'"
             class="layout vertical center-horizontal"
         >
             <div class="m-b-8">Welcome to Jeopardy!</div>
-            <ipl-button @click="contestantManagementDialog?.open">
+            <ipl-button
+                v-if="!isReadOnly"
+                @click="contestantManagementDialog?.open"
+            >
                 <font-awesome-icon icon="user-edit" />
                 Edit contestants
             </ipl-button>
         </div>
+
         <div
             v-else-if="jepStore.jepState.state === 'STARTING_NEXT_ROUND'"
             class="layout vertical center-horizontal"
         >
-            <div class="m-b-8">Starting a new round...</div>
+            <div>Starting a new round...</div>
             <ipl-button
+                v-if="!isReadOnly"
                 color="green"
+                class="m-t-8"
                 @click="revealCategory"
             >
                 Ready!
             </ipl-button>
         </div>
+
         <div
             v-else
             class="layout vertical"
@@ -48,22 +60,13 @@
                 class="board-display"
                 :style="{ '--row-count': JEP_CLUES_PER_CATEGORY + 1 }"
             >
-                <ipl-space
+                <jep-dashboard-clue-display
                     v-if="selectedClue != null"
+                    :title="`${selectedClue.categoryName} ${selectedClue.value}${selectedClue.isDailyDouble ? ' - Daily Double!' : ''}`"
+                    :prompt="selectedClue.prompt"
+                    :answer="selectedClue.answer"
                     class="selected-clue-overlay"
-                >
-                    <div class="category">
-                        {{ selectedClue.categoryName }} {{ selectedClue.value }} {{ selectedClue.isDailyDouble ? ' - Daily Double!' : '' }}
-                    </div>
-                    <div class="prompt">
-                        {{ selectedClue.prompt }}
-                        <div class="answer-label">Answer:</div>
-                        <div class="answer">
-                            {{ selectedClue.answer }}
-                        </div>
-                    </div>
-                    <div />
-                </ipl-space>
+                />
                 <template v-for="(cat, i) of jepStore.jepBoard.categories">
                     <ipl-space
                         class="category-name layout horizontal center-vertical center-horizontal"
@@ -73,49 +76,33 @@
                     </ipl-space>
                     <ipl-space
                         v-for="(clue, j) of cat.clues"
-                        clickable
+                        :clickable="!isReadOnly"
+                        :inert="selectedClue != null"
                         :disabled="clue.answered"
                         :color="selectedClue != null && selectedClue.position[0] === i && selectedClue.position[1] === j ? 'blue' : 'primary'"
+                        :class="{ answered: clue.answered }"
                         @click="pickClue([i, j])"
                     >
                         {{ jepStore.getClueValue(j) }}
                     </ipl-space>
                 </template>
             </div>
-            <ipl-space
-                v-else-if="
-                    jepStore.jepState.state === 'REVEALING_CATEGORIES' ||
-                    jepStore.jepState.state === 'FINAL_JEP_READING_CLUE' ||
-                    jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'
-                "
+            <jep-dashboard-clue-display
+                v-else-if="jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'"
+                title="The Final Jeopardy category is..."
+                :prompt="jepStore.finalJeopardyClue?.categoryName ?? ''"
                 class="final-jeopardy-display"
-            >
-                <div class="category-reveal-title">
-                    <template v-if="jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'">
-                        The Final Jeopardy category is...
-                    </template>
-                    <template v-else>
-                        Final Jeopardy - {{ finalJeopardyData?.categoryName }}
-                    </template>
-                </div>
-                <div
-                    v-if="jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'"
-                    class="category-reveal"
-                >
-                    {{ finalJeopardyData?.categoryName }}
-                </div>
-                <div
-                    v-else
-                    class="prompt-reveal"
-                >
-                    {{ finalJeopardyData?.prompt }}
-                </div>
-                <div>
-                    <template v-if="jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'">
-                        Waiting for wagers...
-                    </template>
-                </div>
-            </ipl-space>
+            />
+            <jep-dashboard-clue-display
+                v-else-if="
+                    jepStore.jepState.state === 'FINAL_JEP_READING_CLUE' ||
+                    isReadOnly && (jepStore.jepState.state === 'FINAL_JEP_AWAITING_ANSWERS' || jepStore.jepState.state === 'FINAL_JEP_REVEALING_ANSWERS')
+                "
+                :title="`Final Jeopardy - ${jepStore.finalJeopardyClue?.categoryName}`"
+                :prompt="jepStore.finalJeopardyClue?.prompt ?? ''"
+                :answer="jepStore.finalJeopardyClue?.answer ?? ''"
+                class="final-jeopardy-display"
+            />
             <div
                 v-else-if="jepStore.jepState.state === 'FINAL_JEP_AWAITING_ANSWERS' || jepStore.jepState.state === 'FINAL_JEP_REVEALING_ANSWERS'"
                 class="final-jeopardy-answer-section"
@@ -155,73 +142,8 @@
                     </ipl-button>
                 </ipl-space>
             </div>
-            <ipl-space class="board-actions m-t-16 layout vertical center-horizontal center-vertical">
-                <ipl-button
-                    v-if="jepStore.jepState.state === 'REVEALING_CATEGORIES'"
-                    @click="revealCategory"
-                >
-                    {{ jepStore.jepState.lastRevealedCategoryIndex === JEP_CLUES_PER_CATEGORY ? 'Continue' : jepStore.jepBoard.round === 'FINAL_JEOPARDY' ? 'Reveal the category' : 'Reveal a category' }}
-                </ipl-button>
-                <div v-else-if="jepStore.jepState.state === 'PICKING_CLUE'">
-                    <jep-contestant-indicator :contestant-index="jepStore.jepState.pickingContestantIndex" /> picks a clue
-                </div>
-                <div v-else-if="jepStore.jepState.state === 'PREPARING_CLUE'">
-                    {{ jepStore.jepState.buzzerEnabled ? 'Waiting for a player to buzz in...' : 'Waiting for the buzzers to be armed...' }}
-                </div>
-                <template v-else-if="jepStore.jepState.state === 'AWAITING_ANSWER' || jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_ANSWER'">
-                    <div class="m-b-8"><jep-contestant-indicator :contestant-index="jepStore.jepState.state === 'AWAITING_ANSWER' ? jepStore.jepState.buzzedByIndex : jepStore.jepState.lastCluePickedByIndex" /> to answer</div>
-                </template>
-                <template v-else-if="jepStore.jepState.state === 'READING_CORRECT_ANSWER'">
-                    <div class="m-b-8">Reading out the correct answer...</div>
-                    <ipl-button @click="finishReadingAnswer">
-                        Continue
-                    </ipl-button>
-                </template>
-                <form
-                    v-else-if="jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER'"
-                    style="display: contents"
-                    @submit.prevent
-                >
-                    <div class="layout horizontal">
-                        <jep-wager-input
-                            v-model="dailyDoubleWager"
-                            :max="maxDailyDoubleWager ?? 0"
-                            name="dailyDoubleWager"
-                            ref="dailyDoubleWagerInput"
-                        />
-                        <ipl-button
-                            @click="makeDailyDoubleWager"
-                            color="green"
-                            style="width: 6em;"
-                            class="m-l-64"
-                            :disabled="!dailyDoubleWagerValid"
-                        >
-                            <font-awesome-icon icon="check" /><br>
-                            Continue
-                        </ipl-button>
-                    </div>
-                </form>
-                <template v-else-if="jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'">
-                    <ipl-button @click="finalJepFinishWagering">
-                        Continue
-                    </ipl-button>
-                </template>
-                <template v-else-if="jepStore.jepState.state === 'FINAL_JEP_READING_CLUE'">
-                    <ipl-button @click="finalJepFinishReadingClue">
-                        Finish reading
-                    </ipl-button>
-                </template>
-                <template v-else-if="jepStore.jepState.state === 'FINAL_JEP_AWAITING_ANSWERS' || jepStore.jepState.state === 'FINAL_JEP_REVEALING_ANSWERS'">
-                    <div class="prompt m-b-16">{{ finalJeopardyData?.prompt }}</div>
-                    <div class="answer-label">Answer:</div>
-                    <div class="answer">
-                        {{ finalJeopardyData?.answer }}
-                    </div>
-                </template>
-                <template v-else-if="jepStore.jepState.state === 'VIEW_FINAL_RESULT'">
-                    It's over!
-                </template>
-            </ipl-space>
+            <jep-read-only-dashboard-actions v-if="isReadOnly" />
+            <jep-dashboard-actions v-else />
             <div class="contestant-list m-t-16">
                 <ipl-space
                     v-for="(contestant, i) of jepStore.jepContestants"
@@ -229,7 +151,12 @@
                     :class="{ 'guess-made': (jepStore.jepState.state === 'AWAITING_ANSWER' || jepStore.jepState.state === 'PREPARING_CLUE') && jepStore.jepState.guessesMadeByIndices.includes(i) }"
                 >
                     <jep-contestant-indicator :contestant-index="i" />
-                    <div class="contestant-score">{{ contestant.score }}</div>
+                    <div
+                        class="contestant-score"
+                        :class="{ 'is-negative': contestant.score < 0 }"
+                    >
+                        {{ contestant.score }}
+                    </div>
                 </ipl-space>
             </div>
         </div>
@@ -260,17 +187,20 @@ import { faExclamation } from '@fortawesome/free-solid-svg-icons/faExclamation';
 import { DateTime } from 'luxon';
 import JepWagerInput from './JepWagerInput.vue';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import JepDashboardActions from './JepDashboardActions.vue';
+import JepReadOnlyDashboardActions from './JepReadOnlyDashboardActions.vue';
+import JepDashboardClueDisplay from './JepDashboardClueDisplay.vue';
 
-library.add(faUserEdit, faExclamation, faCheck);
+library.add(faUserEdit, faExclamation);
 
 const jepStore = useJepStore();
 
 const contestantManagementDialog = useTemplateRef('contestantManagementDialog');
-const dailyDoubleWagerInput = useTemplateRef('dailyDoubleWagerInput');
-const dailyDoubleWager = ref(0);
 const finalJeopardyResults = ref<{ maxWager: number | null, wager: number, submitted: boolean }[]>([]);
 
-// todo: some kind of read-only mode for the host to stare at
+const params = new URLSearchParams(window.location.search);
+const isReadOnly = params.has('ro') && params.get('ro') !== 'false';
+
 // const parsedUpdateTime = computed(() => DateTime.fromISO(jepStore.jepState.lastUpdated));
 
 const focusedContestantIndex = computed(() => {
@@ -304,31 +234,7 @@ const selectedClue = computed(() => {
     return null;
 });
 
-const finalJeopardyData = computed(() => {
-    if (jepStore.jepBoard.round !== 'FINAL_JEOPARDY') {
-        return null;
-    }
-
-    return {
-        categoryName: jepStore.jepBoard.categories[0].name,
-        ...jepStore.jepBoard.categories[0].clues[0]
-    }
-});
-
-const maxDailyDoubleWager = computed(() => jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER' ? Math.max(
-    (JEP_CLUE_VALUE_MULTIPLIER * (jepStore.jepBoard.round === 'DOUBLE_JEOPARDY' ? 2 : 1) * JEP_CLUES_PER_CATEGORY),
-    jepStore.jepContestants[jepStore.jepState.lastCluePickedByIndex].score) : null);
-
-const dailyDoubleWagerValid = computed(() => dailyDoubleWager.value >= JEP_DAILY_DOUBLE_MIN_WAGER && dailyDoubleWager.value <= (maxDailyDoubleWager.value ?? 0));
-
 watch(() => jepStore.jepState, (newValue, oldValue) => {
-    if (newValue.state === 'DAILY_DOUBLE_AWAITING_WAGER') {
-        dailyDoubleWager.value = 0;
-        nextTick(() => {
-            dailyDoubleWagerInput.value?.focus();
-        });
-    }
-
     if (newValue.state === 'FINAL_JEP_AWAITING_ANSWERS' || newValue.state === 'FINAL_JEP_REVEALING_ANSWERS') {
         finalJeopardyResults.value = newValue.finalJeopardyWagers.map((wager) => ({
             maxWager: Math.max(JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE, Math.abs(wager.scoreBeforeAnswer)),
@@ -345,30 +251,13 @@ async function revealCategory() {
 }
 
 async function pickClue(position: CluePosition) {
-    if (jepStore.jepState.state === 'PICKING_CLUE') {
+    if (!isReadOnly && jepStore.jepState.state === 'PICKING_CLUE') {
         await sendMessage('jep:pickClue', position);
     }
 }
 
-async function finishReadingAnswer() {
-    await sendMessage('jep:finishReadingAnswer');
-}
-
-async function makeDailyDoubleWager() {
-    await sendMessage('jep:makeDailyDoubleWager', { amount: dailyDoubleWager.value });
-    dailyDoubleWager.value = 0;
-}
-
 async function mostlyCompleteTestBoard() {
     await sendMessage('jep:mostlyCompleteTestBoard');
-}
-
-async function finalJepFinishWagering() {
-    await sendMessage('finalJep:finishWagering');
-}
-
-async function finalJepFinishReadingClue() {
-    await sendMessage('finalJep:finishReadingClue');
 }
 
 async function finalJepRevealAnswer(contestantIndex: number, amountWagered: number, isCorrect: boolean) {
@@ -377,7 +266,16 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
 }
 </script>
 
+<style lang="scss">
+body {
+    margin: 0 !important;
+    overflow-y: hidden;
+}
+</style>
+
 <style scoped lang="scss">
+@use '../../styles/dashboard-colors';
+
 .jep-panel {
     height: 100vh;
     padding: 8px;
@@ -400,16 +298,6 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
     right: 8px;
 }
 
-.board-actions {
-    min-height: 7em;
-    text-align: center;
-    overflow-wrap: anywhere;
-
-    .ipl-button {
-        width: 10em;
-    }
-}
-
 .board-display {
     display: grid;
     grid-template-rows: repeat(var(--row-count), auto);
@@ -418,7 +306,7 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
     gap: 8px;
     position: relative;
 
-    > * {
+    > *:not(.selected-clue-overlay) {
         text-align: center !important;
         font-size: 1.5em !important;
         font-weight: 700;
@@ -441,7 +329,7 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
             }
         }
 
-        &:disabled {
+        &.answered {
             opacity: 0.25;
         }
     }
@@ -449,40 +337,9 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
 
 .selected-clue-overlay {
     position: absolute;
-    box-sizing: border-box;
     width: 100%;
     height: 100%;
     z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-
-    .category {
-        font-size: 0.75em;
-        font-weight: 400;
-        width: auto;
-        text-align: center;
-        padding: 0 8px;
-        border-bottom: 1px solid var(--ipl-input-color);
-    }
-
-    .prompt {
-        font-size: 1.5em;
-        overflow-wrap: anywhere;
-    }
-
-    .answer-label {
-        margin-top: 0.75em;
-        color: var(--ipl-input-color);
-        font-weight: 400;
-        font-size: 0.5em;
-    }
-
-    .answer {
-        font-weight: 400;
-        font-size: 0.75em;
-    }
 }
 
 .final-jeopardy-answer-section {
@@ -494,44 +351,6 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
 
 .final-jeopardy-display {
     min-height: 12em;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-
-    > .category-reveal-title {
-        font-size: 1.125em;
-        font-weight: 400;
-        width: auto;
-        text-align: center;
-        padding: 0 8px;
-        border-bottom: 1px solid var(--ipl-input-color);
-    }
-
-    > .category-reveal, > .prompt-reveal {
-        text-align: center;
-        overflow-wrap: anywhere;
-        font-weight: 700;
-    }
-
-    > .category-reveal {
-        font-size: 2em;
-    }
-
-    > .prompt-reveal {
-        font-size: 1.5em;
-    }
-}
-
-.answer-label {
-    color: var(--ipl-input-color);
-    font-weight: 400;
-    font-size: 0.75em;
-}
-
-.answer {
-    font-weight: 400;
-    font-size: 1.125em;
 }
 
 .contestant-list {
@@ -548,6 +367,10 @@ async function finalJepRevealAnswer(contestantIndex: number, amountWagered: numb
 
         > .contestant-score {
             font-weight: 700;
+
+            &.is-negative {
+                color: dashboard-colors.$state-red;
+            }
         }
 
         &.guess-made {

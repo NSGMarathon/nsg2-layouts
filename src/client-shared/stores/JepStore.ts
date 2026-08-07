@@ -3,7 +3,7 @@ import { JepState } from 'types/schemas/jepState';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import type NodeCG from '@nodecg/types';
-import { JEP_CLUE_VALUE_MULTIPLIER } from 'shared/JepConstants';
+import { JEP_CLUE_VALUE_MULTIPLIER, JEP_CLUES_PER_CATEGORY } from 'shared/JepConstants';
 import { JepContestants } from 'types/schemas/jepContestants';
 
 const jepBoard = nodecg.Replicant<JepBoard>('jepBoard');
@@ -33,6 +33,19 @@ export const useJepStore = defineStore('jep', {
             return (clueIndex: number) => {
                 const multiplier = JEP_CLUE_VALUE_MULTIPLIER * (state.jepBoard.round === 'DOUBLE_JEOPARDY' ? 2 : 1);
                 return (clueIndex + 1) * multiplier;
+            }
+        },
+        maxDailyDoubleWager: (state) => state.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER' ? Math.max(
+            (JEP_CLUE_VALUE_MULTIPLIER * (state.jepBoard.round === 'DOUBLE_JEOPARDY' ? 2 : 1) * JEP_CLUES_PER_CATEGORY),
+            state.jepContestants[state.jepState.lastCluePickedByIndex].score) : null,
+        finalJeopardyClue: (state) => {
+            if (state.jepBoard.round !== 'FINAL_JEOPARDY') {
+                return null;
+            }
+
+            return {
+                categoryName: state.jepBoard.categories[0].name,
+                ...state.jepBoard.categories[0].clues[0]
             }
         }
     }
