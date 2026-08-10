@@ -61,10 +61,10 @@
                 :style="{ '--row-count': JEP_CLUES_PER_CATEGORY + 1 }"
             >
                 <jep-dashboard-clue-display
-                    v-if="selectedClue != null"
-                    :title="`${selectedClue.categoryName} ${selectedClue.value}${selectedClue.isDailyDouble ? ' - Daily Double!' : ''}`"
-                    :prompt="selectedClue.prompt"
-                    :answer="selectedClue.answer"
+                    v-if="jepStore.selectedClue != null"
+                    :title="`${jepStore.selectedClue.categoryName} ${jepStore.selectedClue.value}${jepStore.selectedClue.isDailyDouble ? ' - Daily Double!' : ''}`"
+                    :prompt="jepStore.selectedClue.prompt"
+                    :answer="jepStore.selectedClue.answer"
                     class="selected-clue-overlay"
                 />
                 <template v-for="(cat, i) of jepStore.jepBoard.categories">
@@ -77,9 +77,9 @@
                     <ipl-space
                         v-for="(clue, j) of cat.clues"
                         :clickable="!isReadOnly"
-                        :inert="selectedClue != null"
+                        :inert="jepStore.selectedClue != null"
                         :disabled="clue.answered"
-                        :color="selectedClue != null && selectedClue.position[0] === i && selectedClue.position[1] === j ? 'blue' : 'primary'"
+                        :color="jepStore.selectedClue != null && jepStore.selectedClue.position[0] === i && jepStore.selectedClue.position[1] === j ? 'blue' : 'primary'"
                         :class="{ answered: clue.answered }"
                         @click="pickClue([i, j])"
                     >
@@ -150,7 +150,7 @@
             <div class="contestant-list m-t-16">
                 <ipl-space
                     v-for="(contestant, i) of jepStore.jepContestants"
-                    :color="focusedContestantIndex === i ? 'blue' : 'primary'"
+                    :color="jepStore.focusedContestantIndex === i ? 'blue' : 'primary'"
                     :class="{ 'guess-made': (jepStore.jepState.state === 'AWAITING_ANSWER' || jepStore.jepState.state === 'PREPARING_CLUE') && jepStore.jepState.guessesMadeByIndices.includes(i) }"
                 >
                     <jep-contestant-indicator :contestant-index="i" />
@@ -192,8 +192,6 @@ library.add(faUserEdit, faExclamation);
 
 const jepStore = useJepStore();
 
-// todo: make that change to revealing categories you wanted to make
-
 const contestantManagementDialog = useTemplateRef('contestantManagementDialog');
 const finalJeopardyResults = ref<{ maxWager: number | null, wager: number, submitted: boolean }[]>([]);
 
@@ -221,37 +219,6 @@ const revealedCategories = computed(() => {
     } else {
         return jepStore.jepBoard.categories.map((cat) => cat.name);
     }
-});
-
-const focusedContestantIndex = computed(() => {
-    switch (jepStore.jepState.state) {
-        case 'AWAITING_ANSWER':
-            return jepStore.jepState.buzzedByIndex;
-        case 'DAILY_DOUBLE_AWAITING_WAGER':
-        case 'DAILY_DOUBLE_AWAITING_ANSWER':
-            return jepStore.jepState.lastCluePickedByIndex;
-        case 'PICKING_CLUE':
-            return jepStore.jepState.pickingContestantIndex;
-        default:
-            return -1;
-    }
-});
-
-const selectedClue = computed(() => {
-    if ('cluePosition' in jepStore.jepState) {
-        const cluePos = jepStore.jepState.cluePosition as CluePosition;
-        const category = jepStore.jepBoard.categories[cluePos[0]];
-        if (category != null) {
-            return {
-                position: cluePos,
-                categoryName: category.name,
-                value: jepStore.getClueValue(cluePos[1]),
-                ...category.clues[cluePos[1]]
-            };
-        }
-    }
-
-    return null;
 });
 
 watch(() => jepStore.jepState, (newValue, oldValue) => {

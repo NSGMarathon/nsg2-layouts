@@ -129,6 +129,11 @@
                 "file": "jep-buzzer-handler.html",
                 "width": 1920,
                 "height": 1080
+            },
+            {
+                "file": "jep-board.html",
+                "width": 1920,
+                "height": 1080
             }
         ],
         "assetCategories": [

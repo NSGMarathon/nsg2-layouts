@@ -1,5 +1,5 @@
 import { JepBoard } from 'types/schemas/jepBoard';
-import { JepState } from 'types/schemas/jepState';
+import { CluePosition, JepState } from 'types/schemas/jepState';
 import { defineStore } from 'pinia';
 import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelper';
 import type NodeCG from '@nodecg/types';
@@ -47,6 +47,35 @@ export const useJepStore = defineStore('jep', {
                 categoryName: state.jepBoard.categories[0].name,
                 ...state.jepBoard.categories[0].clues[0]
             }
+        },
+        focusedContestantIndex: (state) => {
+            switch (state.jepState.state) {
+                case 'AWAITING_ANSWER':
+                    return state.jepState.buzzedByIndex;
+                case 'DAILY_DOUBLE_AWAITING_WAGER':
+                case 'DAILY_DOUBLE_AWAITING_ANSWER':
+                    return state.jepState.lastCluePickedByIndex;
+                case 'PICKING_CLUE':
+                    return state.jepState.pickingContestantIndex;
+                default:
+                    return -1;
+            }
+        },
+        selectedClue(state): { position: CluePosition, categoryName: string, value: number, prompt: string, answer: string, answered: boolean, isDailyDouble?: boolean } | null {
+            if ('cluePosition' in state.jepState) {
+                const cluePos = state.jepState.cluePosition as CluePosition;
+                const category = state.jepBoard.categories[cluePos[0]];
+                if (category != null) {
+                    return {
+                        position: cluePos,
+                        categoryName: category.name,
+                        value: this.getClueValue(cluePos[1]),
+                        ...category.clues[cluePos[1]]
+                    };
+                }
+            }
+
+            return null;
         }
     }
 });

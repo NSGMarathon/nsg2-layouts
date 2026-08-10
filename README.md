@@ -259,6 +259,24 @@ the NodeCG dashboard under the "Jeopardy contestant signatures" and "Jeopardy co
 They'll be shown on the on-screen graphics at various points in the game. It is recommended to use a 3:2 aspect ratio 
 for both images. Examples are provided in the Extras directory in the root of this repository.
 
+#### Dashboard
+
+Open the Jeopardy dashboard with the `ro` query parameter to view it in a read-only mode, made for the show presenter.  
+Example: `http://localhost:9090/bundles/nsg2-layouts/dashboard/jep.html?standalone=true&ro`
+
+#### Graphics
+
+The graphics for Jeopardy at NSG make use of the Mass Transit Mono font family, which cannot be included in this 
+repository. It must be installed on any machine displaying the show board graphic before use.
+
+Purchase a license to use Mass Transit Mono from [Gumroad](https://wendymurphyonline.gumroad.com/l/masstransitmono) or [Creative Market](https://creativemarket.com/wendyleftmealone/291528592-Mass-Transit-Mono-LED-Type-Family).
+
+#### Game board
+
+Open the Jeopardy board graphic with the `stage` query parameter to add additional elements intended to be shown on an 
+on-stage display visible to the contestants.
+Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/jep-board.html?stage`
+
 ## npm commands
 
 - `build`: Create a production-ready build.
