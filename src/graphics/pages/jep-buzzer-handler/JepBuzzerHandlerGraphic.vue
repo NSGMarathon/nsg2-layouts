@@ -46,6 +46,8 @@ const jepStore = useJepStore();
 watch(() => jepStore.jepState.state, (newValue, oldValue) => {
     if (jepStore.jepBoard.round === 'JEOPARDY' && newValue === 'REVEALING_CATEGORIES' && oldValue === 'STARTING_NEXT_ROUND') {
         nodecg.playSound('jep-board-reveal');
+    } else if (oldValue !== 'DAILY_DOUBLE_AWAITING_WAGER' && newValue === 'DAILY_DOUBLE_AWAITING_WAGER') {
+        nodecg.playSound('jep-daily-double');
     }
 });
 

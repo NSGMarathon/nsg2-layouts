@@ -170,6 +170,9 @@
             },
             {
                 "name": "jep-board-reveal"
+            },
+            {
+                "name": "jep-daily-double"
             }
         ]
     },

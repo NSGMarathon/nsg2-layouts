@@ -55,7 +55,8 @@
                                 (jepStore.jepBoard.round === 'FINAL_JEOPARDY' && tile.type === 'clue' && !tile.answered),
                             [tile.type]: true,
                             'final-jep-category-name': tile.type === 'category-name',
-                             'bg-board-panel': tile.type === 'category-name'
+                             'bg-board-panel': tile.type === 'category-name',
+                             'is-daily-double-clue': tile.type === 'clue' && tile.isDailyDouble
                         }"
                         :style="{ opacity: tile.type === 'none' ? '0' : '1' }"
                     >
@@ -74,9 +75,9 @@
                                 class="daily-double-cover"
                             />
                             <div class="clue-cover bg-board-panel layout horizontal center-horizontal center-vertical">
-                            <span v-show="!tile.answered && jepStore.jepBoard.round !== 'FINAL_JEOPARDY'">
-                                {{ jepStore.getClueValue(j) }}
-                            </span>
+                                <span v-show="!tile.answered && jepStore.jepBoard.round !== 'FINAL_JEOPARDY'">
+                                    {{ jepStore.getClueValue(j) }}
+                                </span>
                             </div>
                         </template>
                         <span
@@ -523,6 +524,10 @@ onMounted(() => {
             transform: scale(0.9) translateY(110%);
             transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
         }
+    }
+
+    &.is-daily-double-clue .clue-cover {
+        transition-delay: 0ms;
     }
 
     .clue-cover {
