@@ -48,6 +48,8 @@ watch(() => jepStore.jepState.state, (newValue, oldValue) => {
         nodecg.playSound('jep-board-reveal');
     } else if (oldValue !== 'DAILY_DOUBLE_AWAITING_WAGER' && newValue === 'DAILY_DOUBLE_AWAITING_WAGER') {
         nodecg.playSound('jep-daily-double');
+    } else if (newValue === 'FINAL_JEP_AWAITING_WAGERS') {
+        nodecg.playSound('jep-final-category-reveal');
     }
 });
 
