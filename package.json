@@ -163,6 +163,14 @@
                     "webp"
                 ]
             }
+        ],
+        "soundCues": [
+            {
+                "name": "jep-timeout"
+            },
+            {
+                "name": "jep-board-reveal"
+            }
         ]
     },
     "repository": "https://github.com/nodecg/nodecg.git",

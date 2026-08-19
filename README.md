@@ -277,6 +277,14 @@ Open the Jeopardy board graphic with the `stage` query parameter to add addition
 on-stage display visible to the contestants.
 Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/jep-board.html?stage`
 
+#### Buzzer Handler
+
+The `jep-buzzer-handler` graphic takes input from our buzzer system. The buzzer system executes actions by sending 
+keypresses to the graphic. To see which keypresses correspond to which actions, open the graphic in a web browser.
+
+The game's sound effects are also played out by this graphic. Use the "Assets" and "Mixer" panels of the NodeCG 
+dashboard to assign sound cues. This bundle does not include any sound effects of its own.
+
 ## npm commands
 
 - `build`: Create a production-ready build.

@@ -308,11 +308,7 @@ onMounted(() => {
         grid-template-columns: 150px minmax(0, auto) 150px;
         grid-template-rows: 1fr minmax(0, auto) 1fr;
         position: relative;
-        //transform-origin: 288.75px 421.75px;
-        //transform: scale(2);
         transform-origin: top left;
-        //transform: scale(7.2) translate3d(-156px, -354px, 0);
-        //transition: transform 750ms;
 
         > .side-panel-x {
             grid-row: span 3;
