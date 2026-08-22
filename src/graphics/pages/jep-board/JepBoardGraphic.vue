@@ -22,7 +22,7 @@
                         (jepStore.jepState.state === 'STARTING_NEXT_ROUND' ||
                         jepStore.jepState.state === 'REVEALING_CATEGORIES' ||
                         jepStore.jepState.state === 'WAITING_FOR_CONTESTANT_INFO') &&
-                        jepStore.jepBoard.round === 'JEOPARDY',
+                        (jepStore.jepBoard.round === 'JEOPARDY' || jepStore.jepBoard.round === 'NONE'),
                     'play-intro': (jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'STARTING_NEXT_ROUND') && jepStore.jepBoard.round === 'JEOPARDY'
                 }"
                 :style="{
