@@ -229,6 +229,9 @@
                 },
                 "finalJeopardy": {
                     "$ref": "#/definitions/configJepBoard"
+                },
+                "autoShowClueBoxOnDailyDouble": {
+                    "type": "boolean"
                 }
             }
         }

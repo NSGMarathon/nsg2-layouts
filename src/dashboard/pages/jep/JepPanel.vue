@@ -6,6 +6,34 @@
             class="controls layout horizontal"
         >
             <ipl-button
+                color="red"
+                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'NONE'"
+                class="m-r-8"
+                style="white-space: nowrap"
+                @click="jepStore.setScoreOverlayMode('NONE')"
+            >
+                <font-awesome-icon icon="xmark" />
+                No names
+            </ipl-button>
+            <ipl-button
+                color="blue"
+                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'COMPACT'"
+                class="m-r-8"
+                style="white-space: nowrap"
+                @click="jepStore.setScoreOverlayMode('COMPACT')"
+            >
+                <font-awesome-icon icon="address-card" />
+                Compact
+            </ipl-button>
+            <ipl-button
+                color="blue"
+                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'FULL'"
+                class="m-r-32"
+                @click="jepStore.setScoreOverlayMode('FULL')"
+            >
+                Full
+            </ipl-button>
+            <ipl-button
                 v-if="jepStore.jepBoard.usingTestBoard"
                 color="red"
                 icon="exclamation"
@@ -187,8 +215,10 @@ import JepDashboardActions from './JepDashboardActions.vue';
 import JepReadOnlyDashboardActions from './JepReadOnlyDashboardActions.vue';
 import JepDashboardClueDisplay from './JepDashboardClueDisplay.vue';
 import { DateTime } from 'luxon';
+import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
+import { faAddressCard } from '@fortawesome/free-solid-svg-icons/faAddressCard';
 
-library.add(faUserEdit, faExclamation);
+library.add(faUserEdit, faExclamation, faXmark, faAddressCard);
 
 const jepStore = useJepStore();
 

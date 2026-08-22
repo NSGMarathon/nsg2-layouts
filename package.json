@@ -134,6 +134,11 @@
                 "file": "jep-board.html",
                 "width": 1920,
                 "height": 1080
+            },
+            {
+                "file": "jep-camera-overlays.html",
+                "width": 1920,
+                "height": 1080
             }
         ],
         "assetCategories": [

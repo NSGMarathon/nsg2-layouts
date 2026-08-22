@@ -18,6 +18,7 @@ import { DeepReadonly } from 'ts-essentials';
 import { DateTime } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
 import { JepContestants } from 'types/schemas/jepContestants';
+import { JepOverlays } from 'types/schemas/jepOverlays';
 
 type MapToOmitUpdateTime<T> = T extends any ? Omit<T, 'lastUpdated'> : never;
 type JepStateWithoutEntryTime = MapToOmitUpdateTime<JepState>;
@@ -28,7 +29,9 @@ export class JepService extends HasNodecgLogger {
     private readonly jepBoard: NodeCG.ServerReplicantWithSchemaDefault<JepBoard>;
     private readonly jepContestants: NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
     private readonly jepState: NodeCG.ServerReplicantWithSchemaDefault<JepState>;
+    private readonly jepOverlays: NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
     private readonly configIsValid: boolean;
+    private readonly autoShowClueBoxOnDailyDouble: boolean;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         super(nodecg);
@@ -37,7 +40,9 @@ export class JepService extends HasNodecgLogger {
         this.jepBoard = nodecg.Replicant('jepBoard') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepBoard>;
         this.jepContestants = nodecg.Replicant('jepContestants') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
         this.jepState = nodecg.Replicant('jepState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepState>;
+        this.jepOverlays = nodecg.Replicant('jepOverlays') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
         this.configIsValid = JepService.isConfigValid(nodecg.bundleConfig);
+        this.autoShowClueBoxOnDailyDouble = nodecg.bundleConfig.jeopardy?.autoShowClueBoxOnDailyDouble ?? false;
 
         if (!this.configIsValid) {
             this.logger.info('Jeopardy config is missing or incomplete; only the testing board will be available.');
@@ -49,6 +54,7 @@ export class JepService extends HasNodecgLogger {
 
     reset(useTestBoard: boolean) {
         this.logger.debug(`Received reset; useTestBoard=${useTestBoard}`);
+        this.jepOverlays.value.scoreOverlayMode = 'NONE';
         this.jepState.value = {
             state: 'WAITING_FOR_CONTESTANT_INFO',
             lastUpdated: '1970-01-01T00:00:00Z'
@@ -58,6 +64,10 @@ export class JepService extends HasNodecgLogger {
             round: 'NONE',
             usingTestBoard: !this.configIsValid || useTestBoard,
             categories: []
+        };
+        this.jepOverlays.value = {
+            clueBoxVisible: false,
+            scoreOverlayMode: 'NONE'
         };
     }
 
@@ -193,6 +203,9 @@ export class JepService extends HasNodecgLogger {
             cluePosition: this.jepState.value.cluePosition,
             pointsWaged: amount
         });
+        if (this.autoShowClueBoxOnDailyDouble) {
+            this.jepOverlays.value.clueBoxVisible = true;
+        }
     }
 
     enableBuzzer() {
@@ -241,6 +254,8 @@ export class JepService extends HasNodecgLogger {
         if (this.jepState.value.state !== 'DAILY_DOUBLE_AWAITING_ANSWER' && this.jepState.value.state !== 'AWAITING_ANSWER') {
             throw new Error('Cannot answer a clue at this time');
         }
+
+        this.jepOverlays.value.clueBoxVisible = false;
 
         const isDailyDouble = this.jepState.value.state === 'DAILY_DOUBLE_AWAITING_ANSWER';
 
@@ -354,6 +369,7 @@ export class JepService extends HasNodecgLogger {
                 answerRevealed: false
             }))
         });
+        this.jepOverlays.value.scoreOverlayMode = 'NONE';
     }
 
     finalJepRevealAnswer(contestantIndex: number, amountWagered: number, isCorrect: boolean) {

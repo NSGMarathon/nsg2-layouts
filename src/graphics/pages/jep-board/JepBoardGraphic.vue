@@ -100,27 +100,11 @@
             v-if="isStageVariant"
             class="contestant-info"
         >
-            <div
-                v-for="(contestant, i) of jepStore.jepContestants"
-                class="contestant bg-panel"
-                :class="{ focused: jepStore.focusedContestantIndex === i }"
-            >
-                <div class="bg-inset layout horizontal center-horizontal center-vertical">
-                    <div class="layout horizontal center-vertical max-height">
-                        <div class="contestant-index">{{ i + 1 }}</div>
-                        <div
-                            class="contestant-symbol"
-                            :style="{ backgroundImage: `url('${contestant.symbolUrl}')` }"
-                        />
-                    </div>
-                    <seven-segment-digits
-                        :digit-count="7"
-                        :value="contestant.score"
-                        class="contestant-score"
-                        :color="contestant.score < 0 ? 'red' : 'teal'"
-                    />
-                </div>
-            </div>
+            <jep-contestant-display
+                v-for="(contestant, i) of jepStore.jepContestants.toReversed()"
+                :contestant="contestant"
+                :contestant-index="(jepStore.jepContestants.length - i - 1)"
+            />
             <div
                 v-if="jepStore.jepContestants.length === 0"
                 class="contestant bg-panel"
@@ -131,11 +115,11 @@
 
 <script setup lang="ts">
 import { useJepStore } from 'client-shared/stores/JepStore';
-import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { JEP_CATEGORY_COUNT, JEP_CLUES_PER_CATEGORY } from 'shared/JepConstants';
 import { computed, onMounted, useTemplateRef, watch } from 'vue';
 import gsap from 'gsap';
 import { JepBoard } from 'types/schemas/jepBoard';
+import JepContestantDisplay from 'components/jep/JepContestantDisplay.vue';
 
 // please note that this graphic was intended for a single segment and therefore might not be held up to the same
 // standards of quality as other parts of this repository :)
@@ -446,57 +430,6 @@ body {
     position: relative;
     border-top: 3px solid colors.$layout-gap;
     background-color: colors.$layout-gap;
-
-    > .contestant {
-        padding: 8px;
-
-        &.focused {
-            > * {
-                box-shadow: inset 0 0 32px colors.$vfd-red;
-            }
-
-            .contestant-index {
-                background-color: colors.$vfd-red;
-            }
-        }
-
-        > * {
-            height: 100%;
-            width: 100%;
-            justify-content: space-between;
-            padding: 8px 24px;
-            transition: box-shadow 200ms;
-        }
-
-        .contestant-symbol {
-            height: 100%;
-            aspect-ratio: 3 / 2;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
-        .contestant-index {
-            font-size: 50px;
-            color: colors.$vfd-background;
-            background-color: colors.$vfd-teal;
-            width: 55px;
-            height: 55px;
-            text-align: center;
-            line-height: 57px;
-            font-weight: 700;
-            margin-right: 24px;
-            transition: background-color 200ms;
-        }
-
-        .contestant-score {
-            font-size: 50px;
-
-            :deep(> *) {
-                transition: color 200ms;
-            }
-        }
-    }
 }
 
 .bg-board-panel {
@@ -561,7 +494,7 @@ body {
         position: absolute;
         top: 0;
         left: 0;
-        background: url('../../assets/img/jep-daily-double-overlay.png') center;
+        background: url('../../assets/img/jep-daily-double-overlay.png') no-repeat center;
         background-size: cover;
     }
 

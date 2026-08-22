@@ -15,8 +15,15 @@
         <template v-else-if="jepStore.jepState.state === 'AWAITING_ANSWER' || jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_ANSWER'">
             <div
                 v-if="jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_ANSWER'"
-                class="m-b-8"
+                class="layout vertical center-horizontal m-b-8"
             >
+                <ipl-button
+                    :disabled="jepStore.jepOverlays.clueBoxVisible"
+                    class="m-b-8"
+                    @click="jepStore.revealClueBox"
+                >
+                    Show clue overlay
+                </ipl-button>
                 Received a {{ jepStore.jepState.pointsWaged }} point wager
             </div>
             <div><jep-contestant-indicator :contestant-index="jepStore.jepState.state === 'AWAITING_ANSWER' ? jepStore.jepState.buzzedByIndex : jepStore.jepState.lastCluePickedByIndex" /> to answer</div>

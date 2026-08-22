@@ -286,6 +286,14 @@ keypresses to the graphic. To see which keypresses correspond to which actions, 
 The game's sound effects are also played out by this graphic. Use the "Assets" and "Mixer" panels of the NodeCG 
 dashboard to assign sound cues. This bundle does not include any sound effects of its own.
 
+#### Camera Overlays
+
+The `jep-camera-overlays` graphic displays clues during Daily Double and Final Jeopardy and player scores. 
+Keep in mind that during Daily Double clues the clue will take up approximately the left half of the graphic, so the 
+answering contestant should be visible in the right half of the camera frame.  
+During Final Jeopardy, the player score display is automatically hidden while the contestants decide their answers. 
+When the players are done answering, re-enable the score display to hide the clue.
+
 ## npm commands
 
 - `build`: Create a production-ready build.

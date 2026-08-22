@@ -120,6 +120,7 @@ export interface Configschema {
 		firstRound?: ConfigJepBoard;
 		doubleJeopardy?: ConfigJepBoard;
 		finalJeopardy?: ConfigJepBoard;
+		autoShowClueBoxOnDailyDouble?: boolean;
 		[k: string]: unknown;
 	};
 	[k: string]: unknown;

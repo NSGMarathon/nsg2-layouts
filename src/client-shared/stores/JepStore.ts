@@ -5,10 +5,12 @@ import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelp
 import type NodeCG from '@nodecg/types';
 import { JEP_CLUE_VALUE_MULTIPLIER, JEP_CLUES_PER_CATEGORY } from 'shared/JepConstants';
 import { JepContestants } from 'types/schemas/jepContestants';
+import { JepOverlays } from 'types/schemas/jepOverlays';
 
 const jepBoard = nodecg.Replicant<JepBoard>('jepBoard');
 const jepContestants = nodecg.Replicant<JepContestants>('jepContestants');
 const jepState = nodecg.Replicant<JepState>('jepState');
+const jepOverlays = nodecg.Replicant<JepOverlays>('jepOverlays');
 const jepContestantSignatures = nodecg.Replicant<NodeCG.AssetFile[]>('assets:jepContestantSignatures');
 const jepContestantSymbols = nodecg.Replicant<NodeCG.AssetFile[]>('assets:jepContestantSymbols');
 
@@ -16,6 +18,7 @@ interface JepStore {
     jepBoard: JepBoard
     jepContestants: JepContestants
     jepState: JepState
+    jepOverlays: JepOverlays
     'assets:jepContestantSignatures': NodeCG.AssetFile[]
     'assets:jepContestantSymbols': NodeCG.AssetFile[]
 }
@@ -25,6 +28,7 @@ export const useJepStore = defineStore('jep', {
         jepBoard: null,
         jepContestants: null,
         jepState: null,
+        jepOverlays: null,
         'assets:jepContestantSignatures': [],
         'assets:jepContestantSymbols': []
     } as unknown as JepStore),
@@ -77,6 +81,14 @@ export const useJepStore = defineStore('jep', {
 
             return null;
         }
+    },
+    actions: {
+        setScoreOverlayMode(newValue: JepOverlays['scoreOverlayMode']) {
+            jepOverlays.value!.scoreOverlayMode = newValue;
+        },
+        revealClueBox() {
+            jepOverlays.value!.clueBoxVisible = true;
+        }
     }
 });
 
@@ -84,6 +96,7 @@ export const initJepStore = createReplicantStoreInitializer([
     jepBoard,
     jepContestants,
     jepState,
+    jepOverlays,
     jepContestantSignatures,
     jepContestantSymbols
 ], useJepStore);

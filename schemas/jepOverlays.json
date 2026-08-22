@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["scoreOverlayMode", "clueBoxVisible"],
+    "properties": {
+        "scoreOverlayMode": {
+            "type": "string",
+            "enum": ["NONE", "COMPACT", "FULL"]
+        },
+        "clueBoxVisible": {
+            "type": "boolean"
+        }
+    },
+    "default": {
+        "scoreOverlayMode": "NONE",
+        "clueBoxVisible": false
+    }
+}
