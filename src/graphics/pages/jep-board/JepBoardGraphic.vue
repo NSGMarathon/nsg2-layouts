@@ -90,6 +90,73 @@
                         </span>
                     </td>
                 </tr>
+                <tbody>
+                    <tr>
+                        <th
+                            v-for="(category, i) of boardContent.heading"
+                            class="category-name bg-board-panel"
+                            :data-category-index="i"
+                            :class="{ 'smaller': (category?.name.length ?? 0) >= 18 }"
+                        >
+                                <span
+                                    :style="{
+                                        opacity: !category?.allCluesAnswered &&
+                                            jepStore.jepState.state !== 'STARTING_NEXT_ROUND' &&
+                                            jepStore.jepState.state !== 'WAITING_FOR_CONTESTANT_INFO' &&
+                                            (jepStore.jepState.state !== 'REVEALING_CATEGORIES' || jepStore.jepState.lastRevealedCategoryIndex >= i)
+                                                ? '1'
+                                                : '0'
+                                    }"
+                                >
+                                    {{ category?.name }}
+                                </span>
+                        </th>
+                    </tr>
+                    <tr v-for="(tileRow, j) of boardContent.tiles">
+                        <td
+                            v-for="(tile, i) of tileRow"
+                            :class="{
+                                active:
+                                    (jepStore.selectedClue != null && jepStore.selectedClue.position[0] === i && jepStore.selectedClue.position[1] === j) ||
+                                    (jepStore.jepBoard.round === 'FINAL_JEOPARDY' && tile.type === 'clue' && !tile.answered),
+                                [tile.type]: true,
+                                'final-jep-category-name': tile.type === 'category-name',
+                                 'bg-board-panel': tile.type === 'category-name',
+                                 'is-daily-double-clue': tile.type === 'clue' && tile.isDailyDouble
+                            }"
+                            :style="{ opacity: tile.type === 'none' ? '0' : '1' }"
+                        >
+                            <template v-if="tile.type === 'clue'">
+                                <div
+                                    class="clue-prompt layout horizontal center-horizontal center-vertical"
+                                    :class="{ 'smaller': tile.prompt.length >= 90 }"
+                                >
+                                    <span>
+                                        {{ tile.prompt }}
+                                    </span>
+                                </div>
+                                <div
+                                    v-if="tile.isDailyDouble"
+                                    v-show="jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER'"
+                                    class="daily-double-cover"
+                                />
+                                <div class="clue-cover bg-board-panel layout horizontal center-horizontal center-vertical">
+                                    <span v-show="!tile.answered && jepStore.jepBoard.round !== 'FINAL_JEOPARDY'">
+                                        {{ jepStore.getClueValue(j) }}
+                                    </span>
+                                </div>
+                            </template>
+                            <span
+                                v-else-if="tile.type === 'category-name'"
+                                :style="{
+                                    opacity: jepStore.jepState.state !== 'STARTING_NEXT_ROUND' && jepStore.jepState.state !== 'REVEALING_CATEGORIES' ? '1' : '0'
+                                }"
+                            >
+                                {{ tile.name }}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
             <div class="bg-timer" style="margin-top: 0" />
         </div>
@@ -382,43 +449,43 @@ body {
         // the clues on the original jeopardy board are revealed in a scripted order. the sequence is recreated here
         $reveal-time-scale: 400ms;
 
-        > tr:nth-child(2) > td:nth-child(4),
-        > tr:nth-child(3) > td:nth-child(6),
-        > tr:nth-child(4) > td:nth-child(4),
-        > tr:nth-child(5) > td:nth-child(2),
-        > tr:nth-child(6) > td:nth-child(1) {
+        tr:nth-child(2) > td:nth-child(4),
+        tr:nth-child(3) > td:nth-child(6),
+        tr:nth-child(4) > td:nth-child(4),
+        tr:nth-child(5) > td:nth-child(2),
+        tr:nth-child(6) > td:nth-child(1) {
             transition-delay: $reveal-time-scale;
         }
 
-        > tr:nth-child(2) > td:nth-child(1),
-        > tr:nth-child(3) > td:nth-child(3),
-        > tr:nth-child(4) > td:nth-child(2),
-        > tr:nth-child(5) > td:nth-child(5),
-        > tr:nth-child(6) > td:nth-child(4) {
+        tr:nth-child(2) > td:nth-child(1),
+        tr:nth-child(3) > td:nth-child(3),
+        tr:nth-child(4) > td:nth-child(2),
+        tr:nth-child(5) > td:nth-child(5),
+        tr:nth-child(6) > td:nth-child(4) {
             transition-delay: $reveal-time-scale * 2;
         }
 
-        > tr:nth-child(2) > td:nth-child(6),
-        > tr:nth-child(3) > td:nth-child(2),
-        > tr:nth-child(4) > td:nth-child(5),
-        > tr:nth-child(5) > td:nth-child(1),
-        > tr:nth-child(6) > td:nth-child(3) {
+        tr:nth-child(2) > td:nth-child(6),
+        tr:nth-child(3) > td:nth-child(2),
+        tr:nth-child(4) > td:nth-child(5),
+        tr:nth-child(5) > td:nth-child(1),
+        tr:nth-child(6) > td:nth-child(3) {
             transition-delay: $reveal-time-scale * 3;
         }
 
-        > tr:nth-child(2) > td:nth-child(3),
-        > tr:nth-child(3) > td:nth-child(4),
-        > tr:nth-child(4) > td:nth-child(3),
-        > tr:nth-child(5) > td:nth-child(6),
-        > tr:nth-child(6) > td:nth-child(5) {
+        tr:nth-child(2) > td:nth-child(3),
+        tr:nth-child(3) > td:nth-child(4),
+        tr:nth-child(4) > td:nth-child(3),
+        tr:nth-child(5) > td:nth-child(6),
+        tr:nth-child(6) > td:nth-child(5) {
             transition-delay: $reveal-time-scale * 4;
         }
 
-        > tr:nth-child(2) > td:nth-child(5),
-        > tr:nth-child(3) > td:nth-child(1),
-        > tr:nth-child(4) > td:nth-child(6),
-        > tr:nth-child(5) > td:nth-child(4),
-        > tr:nth-child(6) > td:nth-child(2) {
+        tr:nth-child(2) > td:nth-child(5),
+        tr:nth-child(3) > td:nth-child(1),
+        tr:nth-child(4) > td:nth-child(6),
+        tr:nth-child(5) > td:nth-child(4),
+        tr:nth-child(6) > td:nth-child(2) {
             transition-delay: $reveal-time-scale * 5;
         }
     }
