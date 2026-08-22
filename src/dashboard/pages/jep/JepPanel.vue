@@ -353,6 +353,10 @@ body {
         align-items: center;
         justify-content: space-between;
 
+        &.color-blue > .contestant-score.is-negative {
+            color: #ffa495;
+        }
+
         > .contestant-score {
             font-weight: 700;
 
