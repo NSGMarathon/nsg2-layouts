@@ -18,6 +18,7 @@
                 class="layout vertical center-horizontal m-b-8"
             >
                 <ipl-button
+                    v-if="props.isDirector"
                     :disabled="jepStore.jepOverlays.clueBoxVisible"
                     class="m-b-8"
                     @click="jepStore.revealClueBox"
@@ -102,6 +103,10 @@ import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+
+const props = defineProps<{
+    isDirector?: boolean
+}>();
 
 library.add(faCheck);
 

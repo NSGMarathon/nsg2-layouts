@@ -5,34 +5,36 @@
             v-if="!isReadOnly"
             class="controls layout horizontal"
         >
-            <ipl-button
-                color="red"
-                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'NONE'"
-                class="m-r-8"
-                style="white-space: nowrap"
-                @click="jepStore.setScoreOverlayMode('NONE')"
-            >
-                <font-awesome-icon icon="xmark" />
-                No names
-            </ipl-button>
-            <ipl-button
-                color="blue"
-                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'COMPACT'"
-                class="m-r-8"
-                style="white-space: nowrap"
-                @click="jepStore.setScoreOverlayMode('COMPACT')"
-            >
-                <font-awesome-icon icon="address-card" />
-                Compact
-            </ipl-button>
-            <ipl-button
-                color="blue"
-                :disabled="jepStore.jepOverlays.scoreOverlayMode === 'FULL'"
-                class="m-r-32"
-                @click="jepStore.setScoreOverlayMode('FULL')"
-            >
-                Full
-            </ipl-button>
+            <template v-if="showDirectorControls">
+                <ipl-button
+                    color="red"
+                    :disabled="jepStore.jepOverlays.scoreOverlayMode === 'NONE'"
+                    class="m-r-8"
+                    style="white-space: nowrap"
+                    @click="jepStore.setScoreOverlayMode('NONE')"
+                >
+                    <font-awesome-icon icon="xmark" />
+                    No names
+                </ipl-button>
+                <ipl-button
+                    color="blue"
+                    :disabled="jepStore.jepOverlays.scoreOverlayMode === 'COMPACT'"
+                    class="m-r-8"
+                    style="white-space: nowrap"
+                    @click="jepStore.setScoreOverlayMode('COMPACT')"
+                >
+                    <font-awesome-icon icon="address-card" />
+                    Compact
+                </ipl-button>
+                <ipl-button
+                    color="blue"
+                    :disabled="jepStore.jepOverlays.scoreOverlayMode === 'FULL'"
+                    class="m-r-32"
+                    @click="jepStore.setScoreOverlayMode('FULL')"
+                >
+                    Full
+                </ipl-button>
+            </template>
             <ipl-button
                 icon="rotate-left"
                 title="Undo last action"
@@ -182,7 +184,10 @@
                 {{ timeSinceLastUpdate }}
             </ipl-space>
             <jep-read-only-dashboard-actions v-if="isReadOnly" />
-            <jep-dashboard-actions v-else />
+            <jep-dashboard-actions
+                v-else
+                :is-director="showDirectorControls"
+            />
             <div class="contestant-list m-t-16">
                 <ipl-space
                     v-for="(contestant, i) of jepStore.jepContestants"
@@ -236,6 +241,7 @@ const finalJeopardyResults = ref<{ maxWager: number | null, wager: number, submi
 
 const params = new URLSearchParams(window.location.search);
 const isReadOnly = params.has('ro') && params.get('ro') !== 'false';
+const showDirectorControls = params.has('director') && params.get('director') !== 'false';
 
 const parsedUpdateTime = computed(() => DateTime.fromISO(jepStore.jepState.lastUpdated));
 const timeSinceLastUpdate = ref('00:00');

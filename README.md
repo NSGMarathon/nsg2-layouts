@@ -264,6 +264,9 @@ for both images. Examples are provided in the Extras directory in the root of th
 Open the Jeopardy dashboard with the `ro` query parameter to view it in a read-only mode, made for the show presenter.  
 Example: `http://localhost:9090/bundles/nsg2-layouts/dashboard/jep.html?standalone=true&ro`
 
+Open the Jeopardy dashboard with the `director` query parameter to reveal a few additional controls usually managed by 
+the show director.
+
 #### Graphics
 
 The graphics for Jeopardy at NSG make use of the Mass Transit Mono font family, which cannot be included in this 
