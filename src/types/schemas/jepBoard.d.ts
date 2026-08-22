@@ -8,6 +8,7 @@
 
 export interface JepBoard {
 	round: 'NONE' | 'JEOPARDY' | 'DOUBLE_JEOPARDY' | 'FINAL_JEOPARDY';
+	answeredClueCount: number;
 	usingTestBoard: boolean;
 	categories: {
 		name: string;

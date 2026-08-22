@@ -62,6 +62,7 @@ export class JepService extends HasNodecgLogger {
         this.jepContestants.value = [];
         this.jepBoard.value = {
             round: 'NONE',
+            answeredClueCount: 0,
             usingTestBoard: !this.configIsValid || useTestBoard,
             categories: []
         };
@@ -80,9 +81,13 @@ export class JepService extends HasNodecgLogger {
         const initializing = this.jepState.value.state === 'WAITING_FOR_CONTESTANT_INFO';
 
         this.jepContestants.value = contestants.map((p, i) => {
+            const existingContestant = this.jepContestants.value[i];
+
             let score;
+            let lastCorrectAnswerIndex = existingContestant?.lastCorrectAnswerIndex ?? -1;
             if (initializing) {
                 score = 0;
+                lastCorrectAnswerIndex = -1;
             } else if (p.score == null) {
                 score = this.jepContestants.value[i]?.score ?? 0;
             } else {
@@ -93,7 +98,8 @@ export class JepService extends HasNodecgLogger {
                 name: p.name,
                 signatureUrl: p.signatureUrl,
                 symbolUrl: p.symbolUrl,
-                score
+                score,
+                lastCorrectAnswerIndex
             });
         });
         if (initializing) {
@@ -130,16 +136,25 @@ export class JepService extends HasNodecgLogger {
                     this.setState({ state: 'PICKING_CLUE', pickingContestantIndex: 0 });
                     this.logger.debug('Finished revealing Jeopardy categories');
                 } else {
-                    const lowestScore = Math.min(...this.jepContestants.value.map((p) => p.score));
-                    const contestantsWithLowestScore = this.jepContestants.value
-                        .map((p, i) => ({ ...p, index: i }))
-                        .filter((p) => p.score === lowestScore);
+                    const lowestScore = Math.min(...this.jepContestants.value.map((c) => c.score));
+                    /*
+                     "if there is a tie for the contestant with the lowest score, the contestant with the last correct
+                     question among the tied players selects first"
 
-                    // todo: need to actually resolve ties
-                    const selectedIndex = Math.floor(Math.random() * contestantsWithLowestScore.length);
+                     note that no two contestants may have an equal lastCorrectAnswerIndex since that would imply
+                     that two contestants answered the same clue
+
+                     this technically breaks down and falls back onto player order if two or more players managed to never
+                     answer a single clue during the first round, but we don't expect that to happen
+                    */
+                    const contestantsWithLowestScore = this.jepContestants.value
+                        .map((c, i) => ({ ...c, index: i }))
+                        .filter((c) => c.score === lowestScore)
+                        .sort((a, b) => b.lastCorrectAnswerIndex - a.lastCorrectAnswerIndex);
+
                     this.setState({
                         state: 'PICKING_CLUE',
-                        pickingContestantIndex: contestantsWithLowestScore[selectedIndex].index
+                        pickingContestantIndex: contestantsWithLowestScore[0].index
                     });
                     this.logger.debug('Finished revealing Double Jeopardy categories');
                 }
@@ -277,6 +292,7 @@ export class JepService extends HasNodecgLogger {
         if (isCorrect) {
             this.logger.debug(`Contestant ${answeringContestantIndex + 1} gains ${value} point(s)`);
             this.jepContestants.value[answeringContestantIndex].score += value;
+            this.jepContestants.value[answeringContestantIndex].lastCorrectAnswerIndex = this.jepBoard.value.answeredClueCount;
             if (this.anyCluesRemaining()) {
                 this.setState({
                     state: 'PICKING_CLUE',
@@ -449,6 +465,7 @@ export class JepService extends HasNodecgLogger {
     }
 
     private markClueAnswered(cluePos: CluePosition) {
+        this.jepBoard.value.answeredClueCount++;
         this.jepBoard.value.categories[cluePos[0]].clues[cluePos[1]].answered = true;
     }
 
@@ -528,6 +545,7 @@ export class JepService extends HasNodecgLogger {
         this.jepBoard.value = {
             round,
             usingTestBoard,
+            answeredClueCount: 0,
             categories: board.map((category) => ({
                 name: category.categoryName,
                 clues: category.clues.map((clue) => ({

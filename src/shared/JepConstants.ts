@@ -9,4 +9,4 @@ export const JEP_FINAL_JEOPARDY_CATEGORY_COUNT = 1;
 export const JEP_FINAL_JEOPARDY_CLUES_PER_CATEGORY = 1;
 export const JEP_FINAL_JEOPARDY_MIN_MAX_WAGER_SIZE = 100;
 
-export type JepContestantUpdate = (Omit<JepContestants[number], 'score'> & { score: number | null })[];
+export type JepContestantUpdate = (Omit<JepContestants[number], 'score' | 'lastCorrectAnswerIndex'> & { score: number | null })[];

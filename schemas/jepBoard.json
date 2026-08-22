@@ -2,11 +2,14 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "type": "object",
     "additionalProperties": false,
-    "required": ["round", "usingTestBoard", "categories"],
+    "required": ["round", "answeredClueCount", "usingTestBoard", "categories"],
     "properties": {
         "round": {
             "type": "string",
             "enum": ["NONE", "JEOPARDY", "DOUBLE_JEOPARDY", "FINAL_JEOPARDY"]
+        },
+        "answeredClueCount": {
+            "type": "number"
         },
         "usingTestBoard": {
             "type": "boolean"
@@ -49,6 +52,7 @@
     },
     "default": {
         "round": "NONE",
+        "answeredClueCount": 0,
         "usingTestBoard": false,
         "categories": []
     }

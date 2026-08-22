@@ -4,7 +4,7 @@
     "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "score", "signatureUrl", "symbolUrl"],
+        "required": ["name", "score", "signatureUrl", "symbolUrl", "lastCorrectAnswerIndex"],
         "properties": {
             "name": {
                 "type": "string"
@@ -16,6 +16,9 @@
                 "type": "string"
             },
             "score": {
+                "type": "number"
+            },
+            "lastCorrectAnswerIndex": {
                 "type": "number"
             }
         }

@@ -11,4 +11,5 @@ export type JepContestants = {
 	signatureUrl: string;
 	symbolUrl: string;
 	score: number;
+	lastCorrectAnswerIndex: number;
 }[];

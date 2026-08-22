@@ -147,7 +147,8 @@ function open() {
                 signatureUrl: '',
                 symbolUrl: '',
                 updateScore: false,
-                score: 0
+                score: 0,
+                lastCorrectAnswerIndex: -1
             };
         } else {
             return {
