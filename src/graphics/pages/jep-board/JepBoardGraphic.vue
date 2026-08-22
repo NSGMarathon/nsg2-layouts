@@ -4,6 +4,10 @@
         :class="{ 'stage': isStageVariant, 'live': !isStageVariant }"
     >
         <div
+            class="active-buzzer-overlay"
+            :style="{ opacity: indicateBuzzersActive ? '1' : '0' }"
+        />
+        <div
             class="board-with-border"
             ref="boardElem"
         >
@@ -124,12 +128,14 @@ import JepContestantDisplay from 'components/jep/JepContestantDisplay.vue';
 // please note that this graphic was intended for a single segment and therefore might not be held up to the same
 // standards of quality as other parts of this repository :)
 
-// todo: enabled buzzer indicator
-
 const params = new URLSearchParams(window.location.search);
 const isStageVariant = params.has('stage') && params.get('stage') !== 'false';
 
 const jepStore = useJepStore();
+const indicateBuzzersActive = computed(() =>
+    isStageVariant &&
+    jepStore.jepState.state === 'PREPARING_CLUE' &&
+    jepStore.jepState.buzzerEnabled);
 
 const boardElem = useTemplateRef('boardElem');
 
@@ -335,6 +341,18 @@ body {
             grid-column: span 3;
         }
     }
+}
+
+.active-buzzer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 105px);
+    transition: opacity 85ms linear;
+    opacity: 0;
+    z-index: 1;
+    background: linear-gradient(to right, #ff0000 0%, transparent 5%, transparent 95%, #ff0000 100%);
 }
 
 .jep-board {

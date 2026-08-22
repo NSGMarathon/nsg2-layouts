@@ -18,8 +18,6 @@ import { onMounted, onUnmounted, watch } from 'vue';
 import { sendMessage } from 'client-shared/helpers/NodecgHelper';
 import { useJepStore } from 'client-shared/stores/JepStore';
 
-// todo: this thing needs to play out sound effects
-
 const params = new URLSearchParams(window.location.search);
 
 const buzzerKeyPrefix = 'buzz-';
