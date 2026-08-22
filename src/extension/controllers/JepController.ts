@@ -17,6 +17,7 @@ export class JepController extends BaseController {
         this.listen('jep:answerClue', (args) => jepService.answerClue(args.isCorrect));
         this.listen('jep:finishReadingAnswer', () => jepService.finishReadingAnswer());
         this.listen('jep:mostlyCompleteTestBoard', () => jepService.mostlyCompleteTestBoard());
+        this.listen('jep:undoLastAction', () => jepService.undoLastAction());
         this.listen('finalJep:finishWagering', () => jepService.finalJepFinishWagering());
         this.listen('finalJep:finishReadingClue', () => jepService.finalJepFinishReadingClue());
         this.listen('finalJep:revealAnswer', (args) => jepService.finalJepRevealAnswer(args.contestantIndex, args.amountWagered, args.isCorrect));

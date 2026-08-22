@@ -71,6 +71,7 @@ export interface MessageInputMap {
     'jep:answerClue': { isCorrect: boolean }
     'jep:finishReadingAnswer': never
     'jep:mostlyCompleteTestBoard': never
+    'jep:undoLastAction': never
     'finalJep:finishWagering': never
     'finalJep:finishReadingClue': never
     'finalJep:revealAnswer': { contestantIndex: number, amountWagered: number, isCorrect: boolean }

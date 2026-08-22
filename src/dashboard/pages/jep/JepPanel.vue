@@ -34,6 +34,14 @@
                 Full
             </ipl-button>
             <ipl-button
+                icon="rotate-left"
+                title="Undo last action"
+                :disabled="!canUndo"
+                color="red"
+                class="m-r-8"
+                @click="undoLastAction"
+            />
+            <ipl-button
                 v-if="jepStore.jepBoard.usingTestBoard"
                 color="red"
                 icon="exclamation"
@@ -217,8 +225,9 @@ import JepDashboardClueDisplay from './JepDashboardClueDisplay.vue';
 import { DateTime } from 'luxon';
 import { faXmark } from '@fortawesome/free-solid-svg-icons/faXmark';
 import { faAddressCard } from '@fortawesome/free-solid-svg-icons/faAddressCard';
+import { faRotateLeft } from '@fortawesome/free-solid-svg-icons/faRotateLeft';
 
-library.add(faUserEdit, faExclamation, faXmark, faAddressCard);
+library.add(faUserEdit, faExclamation, faXmark, faAddressCard, faRotateLeft);
 
 const jepStore = useJepStore();
 
@@ -231,6 +240,14 @@ const isReadOnly = params.has('ro') && params.get('ro') !== 'false';
 const parsedUpdateTime = computed(() => DateTime.fromISO(jepStore.jepState.lastUpdated));
 const timeSinceLastUpdate = ref('00:00');
 let showTimerUpdateInterval: number | undefined = undefined;
+
+const canUndo = computed(() =>
+    jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER' ||
+    jepStore.jepState.state === 'PREPARING_CLUE');
+
+async function undoLastAction() {
+    await sendMessage('jep:undoLastAction');
+}
 
 onMounted(() => {
     showTimerUpdateInterval = window.setInterval(() => {

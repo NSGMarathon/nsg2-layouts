@@ -168,7 +168,6 @@ export class JepService extends HasNodecgLogger {
     }
 
     pickClue(position: CluePosition) {
-        // todo: the ability to undo this action.
         this.logger.debug(`Revealing clue ${position}`);
         if (this.jepState.value.state !== 'PICKING_CLUE') {
             throw new Error('Cannot pick a clue at this time');
@@ -462,6 +461,17 @@ export class JepService extends HasNodecgLogger {
         }
 
         this.jepBoard.value.categories = newBoard;
+    }
+
+    undoLastAction() {
+        if (this.jepState.value.state === 'DAILY_DOUBLE_AWAITING_WAGER' || this.jepState.value.state === 'PREPARING_CLUE') {
+            this.setState({
+                state: 'PICKING_CLUE',
+                pickingContestantIndex: this.jepState.value.lastCluePickedByIndex
+            });
+        } else {
+            throw new Error(`Cannot undo in state "${this.jepState.value.state}"`);
+        }
     }
 
     private markClueAnswered(cluePos: CluePosition) {
