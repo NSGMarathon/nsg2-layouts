@@ -274,7 +274,8 @@ Purchase a license to use Mass Transit Mono from [Gumroad](https://wendymurphyon
 #### Game board
 
 Open the Jeopardy board graphic with the `stage` query parameter to add additional elements intended to be shown on an 
-on-stage display visible to the contestants.
+on-stage display visible to the contestants. It is made to be displayed on a 16:9, 1080p display. On displays with 
+different resolutions, try changing around the browser's zoom control until the text is scaled properly.
 Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/jep-board.html?stage`
 
 #### Buzzer Handler

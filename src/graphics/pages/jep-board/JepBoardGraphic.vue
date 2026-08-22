@@ -205,7 +205,7 @@ onMounted(() => {
         // css transitions aren't smart enough for this one, unfortunately
         // doing all this with css transforms is only kinda-sorta precise, but it definitely runs into some sort of
         // rounding errors or w/e it might be if you start pixel-peeping. i'm deeming it ok for this show
-        const scale = 1920 / width;
+        const scale = document.body.offsetWidth / width;
         boardTl
             .to(boardElem.value, {
                 transform: `scale(${scale}) translate3d(${x}px, ${y}px, 0)`,
@@ -286,8 +286,12 @@ onMounted(() => {
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&display=swap');
-</style>
 
+body {
+    width: 100lvw;
+    height: 100lvh;
+}
+</style>
 
 <style scoped lang="scss">
 @use '../../styles/constants';
