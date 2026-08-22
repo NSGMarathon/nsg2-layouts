@@ -15,9 +15,10 @@
                 :class="{
                     // if the underlay isn't hidden after the game starts, it'll sort of 'peek through' the game board as it zooms in and out
                     'with-underlay':
-                        jepStore.jepState.state === 'STARTING_NEXT_ROUND' ||
+                        (jepStore.jepState.state === 'STARTING_NEXT_ROUND' ||
                         jepStore.jepState.state === 'REVEALING_CATEGORIES' ||
-                        jepStore.jepState.state === 'WAITING_FOR_CONTESTANT_INFO',
+                        jepStore.jepState.state === 'WAITING_FOR_CONTESTANT_INFO') &&
+                        jepStore.jepBoard.round === 'JEOPARDY',
                     'play-intro': (jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'STARTING_NEXT_ROUND') && jepStore.jepBoard.round === 'JEOPARDY'
                 }"
                 :style="{
@@ -25,71 +26,6 @@
                     '--column-width': `${100 / JEP_CATEGORY_COUNT}%`
                 }"
             >
-                <tr>
-                    <th
-                        v-for="(category, i) of boardContent.heading"
-                        class="category-name bg-board-panel"
-                        :data-category-index="i"
-                        :class="{ 'smaller': (category?.name.length ?? 0) >= 18 }"
-                    >
-                        <span
-                            :style="{
-                                opacity: !category?.allCluesAnswered &&
-                                    jepStore.jepState.state !== 'STARTING_NEXT_ROUND' &&
-                                    jepStore.jepState.state !== 'WAITING_FOR_CONTESTANT_INFO' &&
-                                    (jepStore.jepState.state !== 'REVEALING_CATEGORIES' || jepStore.jepState.lastRevealedCategoryIndex >= i)
-                                    ? '1'
-                                    : '0'
-                            }"
-                        >
-                            {{ category?.name }}
-                        </span>
-                    </th>
-                </tr>
-                <tr v-for="(tileRow, j) of boardContent.tiles">
-                    <td
-                        v-for="(tile, i) of tileRow"
-                        :class="{
-                            active:
-                                (jepStore.selectedClue != null && jepStore.selectedClue.position[0] === i && jepStore.selectedClue.position[1] === j) ||
-                                (jepStore.jepBoard.round === 'FINAL_JEOPARDY' && tile.type === 'clue' && !tile.answered),
-                            [tile.type]: true,
-                            'final-jep-category-name': tile.type === 'category-name',
-                             'bg-board-panel': tile.type === 'category-name',
-                             'is-daily-double-clue': tile.type === 'clue' && tile.isDailyDouble
-                        }"
-                        :style="{ opacity: tile.type === 'none' ? '0' : '1' }"
-                    >
-                        <template v-if="tile.type === 'clue'">
-                            <div
-                                class="clue-prompt layout horizontal center-horizontal center-vertical"
-                                :class="{ 'smaller': tile.prompt.length >= 90 }"
-                            >
-                                <span>
-                                    {{ tile.prompt }}
-                                </span>
-                            </div>
-                            <div
-                                v-if="tile.isDailyDouble"
-                                v-show="jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER'"
-                                class="daily-double-cover"
-                            />
-                            <div class="clue-cover bg-board-panel layout horizontal center-horizontal center-vertical">
-                                <span v-show="!tile.answered && jepStore.jepBoard.round !== 'FINAL_JEOPARDY'">
-                                    {{ jepStore.getClueValue(j) }}
-                                </span>
-                            </div>
-                        </template>
-                        <span
-                            v-else-if="tile.type === 'category-name'"
-                            :style="{
-                                opacity: jepStore.jepState.state !== 'STARTING_NEXT_ROUND' && jepStore.jepState.state !== 'REVEALING_CATEGORIES' ? '1' : '0'
-                            }"
-                        >
-                            {{ tile.name }}
-                        </span>
-                    </td>
-                </tr>
                 <tbody>
                     <tr>
                         <th
