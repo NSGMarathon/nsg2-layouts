@@ -35,6 +35,42 @@
         "relay": { "type": ["boolean", "null"] },
         "emulated": { "type": ["boolean", "null"] },
         "layout": { "type": ["string", "null"] },
+        "contentAdvisory": {
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "message"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["PRESET"]
+                        },
+                        "message": {
+                            "type": "string",
+                            "enum": ["PHOTOSENSITIVE_EPILEPSY", "MOTION_SICKNESS", "GRAPHIC_SCENES"]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "message"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["CUSTOM"]
+                        },
+                        "message": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
         "timerMode": {
             "type": "string",
             "enum": ["TIMER_COUNTUP", "METRIC_TIMER_COUNTUP"],

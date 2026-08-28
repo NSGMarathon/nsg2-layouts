@@ -26,8 +26,8 @@
                     />
                 </div>
             </div>
-            <div class="layout-gap-right layout-gap-left grow middle-panel">
-                <div class="max-height layout vertical">
+            <div class="layout-gap-right layout-gap-left grow middle-panel layout vertical">
+                <div class="layout vertical">
                     <div class="bg-timer timer-wrapper grow layout vertical center-vertical">
                         <speedrun-details class="bg-inset" />
                         <speedrun-timer class="bg-inset m-t-8" />
@@ -41,13 +41,14 @@
                     class="camera-capture"
                     data-capture-index="0"
                 />
-                <div class="bg-panel layout vertical">
+                <div class="bg-panel layout vertical grow">
                     <div class="nameplate-layout">
                         <player-nameplate :index="2" class="max-width" fixed-height />
                         <player-nameplate :index="3" class="max-width" fixed-height />
                     </div>
                     <other-nameplate-grid class="m-x-16 m-t-4" />
-                    <media-box class="max-height m-y-16 m-x-16" />
+                    <media-box class="grow m-y-16 m-x-16" />
+                    <game-content-advisory narrow fixed-height class="layout-gap-top" />
                 </div>
             </div>
             <div class="layout vertical">
@@ -88,6 +89,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import TeamResultDisplay from '../TeamResultDisplay.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -100,9 +102,12 @@ import TeamResultDisplay from '../TeamResultDisplay.vue';
     overflow: hidden;
 }
 
+.camera-capture {
+    height: 280px;
+}
+
 .middle-panel {
-    display: grid;
-    grid-template-rows: 1fr 1fr 1.25fr;
+    overflow: hidden;
 }
 
 .timer-wrapper {
@@ -121,5 +126,9 @@ import TeamResultDisplay from '../TeamResultDisplay.vue';
 .nameplate-layout {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.content-advisory {
+    height: 64px;
 }
 </style>

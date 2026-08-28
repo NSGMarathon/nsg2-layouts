@@ -41,7 +41,9 @@
             <div
                 class="camera-capture"
                 data-capture-index="0"
-            />
+            >
+                <game-content-advisory class="layout-gap-bottom" />
+            </div>
             <div class="column">
                 <player-nameplate :index="1" />
                 <div class="bg-panel layout vertical grow">
@@ -62,6 +64,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import TeamResultDisplay from '../TeamResultDisplay.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -72,6 +75,10 @@ import TeamResultDisplay from '../TeamResultDisplay.vue';
     width: 100%;
     position: relative;
     overflow: hidden;
+}
+
+.camera-capture {
+    position: relative;
 }
 
 .other-content-row {
@@ -117,5 +124,12 @@ import TeamResultDisplay from '../TeamResultDisplay.vue';
     border-style: solid;
     border-width: 0 3px 3px 3px;
     border-color: colors.$layout-gap;
+}
+
+.content-advisory {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 </style>

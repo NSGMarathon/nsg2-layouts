@@ -315,7 +315,7 @@ export class ScheduleService extends HasNodecgLogger {
                         });
                         return result;
                     }
-                    if (key === 'commentatorIds' || key === 'videoFile' || key === 'timerMode') {
+                    if (key === 'commentatorIds' || key === 'videoFile' || key === 'timerMode' || key === 'contentAdvisory') {
                         // todo: atm no schedule importer knows commentator IDs, but this needs improved if that becomes possible
                         return objValue;
                     }

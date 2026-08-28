@@ -17,7 +17,7 @@
                 </div>
             </div>
             <large-separator direction="vertical" />
-            <div class="layout vertical max-width">
+            <div class="layout vertical max-width" style="position: relative; overflow: hidden">
                 <div class="layout horizontal grow layout-gap-top">
                     <div class="bg-panel grow layout-gap-right" />
                     <div
@@ -26,9 +26,12 @@
                     />
                     <div class="bg-panel grow layout-gap-left layout-gap-right" />
                 </div>
-                <div class="bg-timer timer-wrapper layout-gap-top layout-gap-right layout-gap-bottom layout horizontal center-horizontal center-vertical">
-                    <speedrun-timer class="bg-inset" />
-                    <speedrun-details class="m-l-16 bg-inset" />
+                <div class="under-game layout vertical layout-gap-top layout-gap-bottom layout-gap-right">
+                    <game-content-advisory fixed-height />
+                    <div class="bg-timer grow timer-wrapper layout horizontal center-horizontal center-vertical">
+                        <speedrun-timer class="bg-inset" />
+                        <speedrun-details class="m-l-16 bg-inset" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -43,6 +46,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import SpeedrunDetails from '../SpeedrunDetails.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -56,16 +60,18 @@ import MediaBox from 'components/MediaBox.vue';
     aspect-ratio: 4 / 3;
 }
 
-.timer-wrapper {
-    padding: 8px 14px;
+.under-game {
+    height: 160px;
 }
 
-.timer-wrapper {
-    height: 145px;
+.timer-wrapper > * {
+    width: 580px;
+    height: 110px;
+}
 
-    > * {
-        width: 580px;
-        height: 110px;
-    }
+.content-advisory {
+    width: 100%;
+    height: 32px;
+    font-size: 22px;
 }
 </style>

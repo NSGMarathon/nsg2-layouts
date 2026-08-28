@@ -11,6 +11,7 @@ import { createReplicantStoreInitializer } from 'client-shared/helpers/StoreHelp
 import { ScheduleItem, ScheduleItemType } from 'types/ScheduleHelpers';
 import { isBlank } from 'shared/StringHelper';
 import { isIgnorableScheduleItem } from 'shared/ScheduleHelper';
+import { getContentAdvisoryPresetMessage } from 'client-shared/helpers/ContentAdvisoryHelper';
 
 const schedule = nodecg.Replicant<Schedule>('schedule');
 const activeSpeedrun = nodecg.Replicant<ActiveSpeedrun>('activeSpeedrun');
@@ -136,6 +137,17 @@ export const useScheduleStore = defineStore('schedule', {
                 result.unshift(scheduleItem);
             }
             return result;
+        },
+        contentAdvisoryMessage(state) {
+            if (state.activeSpeedrun?.contentAdvisory == null) {
+                return null;
+            }
+
+            if (state.activeSpeedrun.contentAdvisory.type === 'CUSTOM') {
+                return state.activeSpeedrun.contentAdvisory.message;
+            } else {
+                return getContentAdvisoryPresetMessage(state.activeSpeedrun.contentAdvisory.message);
+            }
         }
     }
 });

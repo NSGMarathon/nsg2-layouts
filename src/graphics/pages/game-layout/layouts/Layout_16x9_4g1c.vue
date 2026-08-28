@@ -26,12 +26,13 @@
                 </div>
                 <player-nameplate :index="2" class="max-width" fixed-height />
             </div>
-            <div class="layout-gap-right layout-gap-left middle-panel">
+            <div class="layout-gap-right layout-gap-left middle-panel layout vertical">
                 <div
                     class="camera-capture"
                     data-capture-index="0"
                 />
-                <div class="layout vertical">
+                <div class="layout vertical" style="min-height: 250px">
+                    <game-content-advisory narrow class="layout-gap-top" />
                     <div class="bg-timer timer-wrapper grow layout vertical center-vertical layout-gap-top layout-gap-bottom">
                         <div class="bg-inset">
                             <speedrun-details />
@@ -39,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-panel layout vertical">
+                <div class="bg-panel layout vertical grow">
                     <other-nameplate-grid class="m-x-16 m-t-8" />
                     <media-box class="max-height m-y-64 m-x-64" />
                 </div>
@@ -82,6 +83,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import TeamResultDisplay from '../TeamResultDisplay.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -93,14 +95,16 @@ import TeamResultDisplay from '../TeamResultDisplay.vue';
     position: relative;
 }
 
+.camera-capture {
+    height: 300px;
+}
+
 .main-layout {
     display: grid;
     grid-template-columns: 1fr 475px 1fr;
 }
 
 .middle-panel {
-    display: grid;
-    grid-template-rows: 0.85fr 0.65fr 1.25fr;
     overflow: hidden;
 }
 

@@ -39,6 +39,16 @@ export interface Speedrun {
 	relay?: boolean | null;
 	emulated?: boolean | null;
 	layout?: string | null;
+	contentAdvisory?:
+		| null
+		| {
+				type: 'PRESET';
+				message: 'PHOTOSENSITIVE_EPILEPSY' | 'MOTION_SICKNESS' | 'GRAPHIC_SCENES';
+		  }
+		| {
+				type: 'CUSTOM';
+				message: string;
+		  };
 	timerMode: 'TIMER_COUNTUP' | 'METRIC_TIMER_COUNTUP';
 	videoFile?:
 		| null

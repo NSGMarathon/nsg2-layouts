@@ -22,7 +22,9 @@
             <div
                 class="game-capture"
                 data-capture-index="0"
-            />
+            >
+                <game-content-advisory fixed-height class="layout-gap-bottom" />
+            </div>
         </div>
         <large-separator direction="horizontal" />
     </div>
@@ -35,6 +37,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import SpeedrunDetails from '../SpeedrunDetails.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -47,9 +50,19 @@ import MediaBox from 'components/MediaBox.vue';
 .game-capture {
     aspect-ratio: 4 / 3;
     flex-grow: 1;
+    position: relative;
 }
 
 .timer-wrapper {
     padding: 8px 48px;
+}
+
+.content-advisory {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35px;
+    font-size: 22px;
 }
 </style>

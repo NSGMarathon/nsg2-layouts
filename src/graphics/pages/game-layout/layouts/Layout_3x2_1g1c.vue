@@ -19,13 +19,14 @@
                 </div>
             </div>
             <large-separator direction="vertical" />
-            <div class="layout vertical max-width">
+            <div class="layout vertical max-width" style="position: relative">
                 <div class="bg-panel grow" />
                 <div
                     class="game-capture"
                     data-capture-index="0"
                 />
                 <div class="bg-panel grow" />
+                <game-content-advisory fixed-height class="layout-gap-bottom" />
             </div>
         </div>
         <large-separator direction="horizontal" />
@@ -39,6 +40,7 @@ import SpeedrunTimer from '../SpeedrunTimer.vue';
 import SpeedrunDetails from '../SpeedrunDetails.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
+import GameContentAdvisory from '../GameContentAdvisory.vue';
 </script>
 
 <style scoped lang="scss">
@@ -56,5 +58,14 @@ import MediaBox from 'components/MediaBox.vue';
 
 .timer-wrapper {
     padding: 8px 14px;
+}
+
+.content-advisory {
+    position: absolute;
+    width: 100%;
+    height: 35px;
+    font-size: 22px;
+    top: 0;
+    left: 0;
 }
 </style>

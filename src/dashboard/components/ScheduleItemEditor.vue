@@ -82,23 +82,39 @@
                             class="max-width m-t-2"
                         />
                     </template>
-                    <div
-                        v-if="selectedScheduleItem.type === 'SPEEDRUN'"
-                        class="layout horizontal m-t-2"
-                    >
-                        <ipl-select
-                            v-model="selectedScheduleItem.layout as string | null"
-                            :options="layoutOptions"
-                            class="max-width"
-                            label="Layout"
-                        />
-                        <ipl-select
-                            v-model="selectedScheduleItem.timerMode as string | null"
-                            :options="timerModeOptions"
-                            class="m-l-8 max-width"
-                            label="Timer mode"
-                        />
-                    </div>
+                    <template v-if="selectedScheduleItem.type === 'SPEEDRUN'">
+                        <div class="layout horizontal m-t-2">
+                            <ipl-select
+                                v-model="selectedScheduleItem.layout as string | null"
+                                :options="layoutOptions"
+                                class="max-width"
+                                label="Layout"
+                            />
+                            <ipl-select
+                                v-model="selectedScheduleItem.timerMode as string | null"
+                                :options="timerModeOptions"
+                                class="m-l-8 max-width"
+                                label="Timer mode"
+                            />
+                        </div>
+                        <div class="layout horizontal m-t-2">
+                            <ipl-select
+                                :model-value="selectedContentAdvisory"
+                                name="contentAdvisory"
+                                :options="contentAdvisoryOptions as unknown as SelectOptions"
+                                label="Content advisory"
+                                @update:model-value="selectContentAdvisoryOption"
+                            />
+                            <ipl-input
+                                v-model="contentAdvisoryMessage"
+                                class="m-l-8"
+                                style="width: 80%"
+                                :disabled="selectedContentAdvisory !== 'CUSTOM'"
+                                name="contentAdvisoryMessage"
+                                label="Content advisory message"
+                            />
+                        </div>
+                    </template>
                     <div class="layout horizontal center-horizontal m-t-2">
                         <duration-input
                             v-model="selectedScheduleItem.estimate"
@@ -303,7 +319,8 @@ import { Duration } from 'luxon';
 import TalentSelectDialog from './TalentSelectDialog.vue';
 import { offset, shift, useFloating } from '@floating-ui/vue';
 import { SelectOptions } from 'client-shared/types/select';
-import { getErrorMessage } from 'shared/StringHelper';
+import { getErrorMessage, isBlank } from 'shared/StringHelper';
+import { getContentAdvisoryPresetMessage } from 'client-shared/helpers/ContentAdvisoryHelper';
 
 library.add(faUserPlus, faPlus, faXmark);
 
@@ -371,6 +388,15 @@ const isEmulated = computed({
 const saveError = ref<string | null>(null);
 async function onSave() {
     if (selectedScheduleItem.value == null) return;
+
+    if (selectedContentAdvisory.value === 'CUSTOM') {
+        if (isBlank(contentAdvisoryMessage.value)) {
+            (selectedScheduleItem.value as Speedrun).contentAdvisory = null;
+        } else {
+            (selectedScheduleItem.value as Speedrun).contentAdvisory!.message = contentAdvisoryMessage.value;
+        }
+    }
+
     try {
         // Talent removed from the schedule item may still be present in the talent map; This will remove them
         await sendMessage('talent:updateTalentItems', Object.values(talentItemMap.value).filter(talentItem => {
@@ -462,6 +488,16 @@ function selectScheduleItem(scheduleItem: ScheduleItem | null) {
                     talentIdSet.add(playerId.id);
                 });
             });
+
+            if (scheduleItem.contentAdvisory != null) {
+                if (scheduleItem.contentAdvisory?.type === 'CUSTOM') {
+                    contentAdvisoryMessage.value = scheduleItem.contentAdvisory.message;
+                } else {
+                    contentAdvisoryMessage.value = getContentAdvisoryPresetMessage(scheduleItem.contentAdvisory.message);
+                }
+            } else {
+                contentAdvisoryMessage.value = '';
+            }
         } else {
             scheduleItem.talentIds.forEach(talentId => {
                 talentIdSet.add(talentId.id);
@@ -494,6 +530,44 @@ function onVideoFileSelect(videoFile: VideoFile | null | undefined) {
         }
     }
 }
+
+const contentAdvisoryMessage = ref('');
+function selectContentAdvisoryOption(newValue: (typeof contentAdvisoryOptions)[number]['value']) {
+    if (selectedScheduleItem.value?.type !== 'SPEEDRUN') return;
+
+    contentAdvisoryMessage.value = getContentAdvisoryPresetMessage(newValue);
+    if (newValue === 'NONE') {
+        selectedScheduleItem.value.contentAdvisory = null;
+    } else if (newValue === 'CUSTOM') {
+        selectedScheduleItem.value.contentAdvisory = {
+            type: 'CUSTOM',
+            message: ''
+        };
+    } else {
+        selectedScheduleItem.value.contentAdvisory = {
+            type: 'PRESET',
+            message: newValue
+        };
+    }
+}
+const selectedContentAdvisory = computed(() => {
+    if (selectedScheduleItem.value?.type !== 'SPEEDRUN' || selectedScheduleItem.value?.contentAdvisory == null) {
+        return 'NONE';
+    }
+
+    if (selectedScheduleItem.value.contentAdvisory.type === 'CUSTOM') {
+        return 'CUSTOM';
+    }
+
+    return selectedScheduleItem.value.contentAdvisory.message;
+});
+const contentAdvisoryOptions = [
+    { name: 'None', value: 'NONE' },
+    { name: 'Photosensitive epilepsy', value: 'PHOTOSENSITIVE_EPILEPSY' },
+    { name: 'Motion sickness', value: 'MOTION_SICKNESS' },
+    { name: 'Graphic scenes', value: 'GRAPHIC_SCENES' },
+    { name: 'Custom message', value: 'CUSTOM' }
+] as const;
 
 defineExpose({
     open,
