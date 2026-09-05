@@ -82,11 +82,29 @@ export class ScheduleService extends HasNodecgLogger {
     }
 
     setInterstitialCompleted(scheduleItemId: string, completed: boolean) {
+        this.updateScheduleItemKey(scheduleItemId, 'interstitial', 'completed', completed);
+    }
+
+    // Update a single value of the given schedule item. Keep in mind that this function performs no validation or
+    // normalization.
+    updateScheduleItemKey<
+        Type extends 'interstitial' | 'speedrun',
+        Key extends keyof ScheduleItemType,
+        ScheduleItemType = Type extends 'speedrun' ? Speedrun : OtherScheduleItem,
+    >(scheduleItemId: string, scheduleItemType: Type, key: Key, newValue: ScheduleItemType[Key]) {
         const scheduleItem = this.getScheduleItem(scheduleItemId);
-        if (scheduleItem.type === 'SPEEDRUN') {
-            throw new Error(`Schedule item with ID ${scheduleItemId} is not an interstitial`);
+
+        if (
+            (scheduleItem.type === 'SPEEDRUN' && scheduleItemType !== 'speedrun') ||
+            (scheduleItem.type !== 'SPEEDRUN' && scheduleItemType === 'speedrun')
+        ) {
+            throw new Error(`Attempted to edit ${scheduleItemType === 'speedrun' ? 'a speedrun' : 'an interstitial'} where only ${scheduleItemType === 'speedrun' ? 'interstitials' : 'speedruns'} may be edited`);
         }
-        scheduleItem.completed = completed;
+
+        (scheduleItem as ScheduleItemType)[key] = newValue;
+        if (scheduleItemType === 'speedrun') {
+            this.speedrunService?.updateSpeedruns(scheduleItem);
+        }
     }
 
     getInterstitialsBeforeActiveRun(): OtherScheduleItem[] {

@@ -55,10 +55,7 @@ export class TimerService extends HasNodecgLogger {
     }
 
     private setLastStartTime() {
-        this.scheduleService.updateScheduleItem({
-            ...this.activeSpeedrun.value,
-            timerStartTime: this.timerRep.value.lastStartTime
-        } as Speedrun);
+        this.scheduleService.updateScheduleItemKey(this.activeSpeedrun.value!.id, 'speedrun', 'timerStartTime', this.timerRep.value.lastStartTime);
     }
 
     start(force = false) {

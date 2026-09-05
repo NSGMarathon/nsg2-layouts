@@ -59,10 +59,7 @@ export class VideoFileService extends HasNodecgLogger {
                 && !this.videoFiles.value.speedruns.some(speedrunVideoFile => scheduleItem.videoFile!.path === speedrunVideoFile.path)
             ) {
                 this.logger.warn(`Lost video file for speedrun "${scheduleItem.title} (${scheduleItem.category})"! (Was "${scheduleItem.videoFile.path}")`);
-                this.scheduleService.updateScheduleItem({
-                    ...scheduleItem,
-                    videoFile: null
-                });
+                this.scheduleService.updateScheduleItemKey(scheduleItem.id, 'speedrun', 'videoFile', null);
             }
         });
     }

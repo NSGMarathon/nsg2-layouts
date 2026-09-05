@@ -57,10 +57,7 @@ export class SpeedrunService {
 
         obsConnectorService.addProgramSceneChangeListener(sceneName => {
             if (this.activeSpeedrun.value != null && this.activeSpeedrun.value.firstGameplayTransitionTime == null && obsConnectorService.isGameplayScene(sceneName)) {
-                this.scheduleService.updateScheduleItem({
-                    ...this.activeSpeedrun.value,
-                    firstGameplayTransitionTime: DateTime.utc().toISO()
-                });
+                this.scheduleService.updateScheduleItemKey(this.activeSpeedrun.value.id, 'speedrun', 'firstGameplayTransitionTime', DateTime.utc().toISO());
             }
         });
     }
