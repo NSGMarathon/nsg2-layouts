@@ -10,6 +10,9 @@
         "lastStartTime": {
             "type": ["string", "null"]
         },
+        "rawTimeAtLastStartTime": {
+            "type": "number"
+        },
         "time": {
             "$ref": "defs/Duration.json"
         },
@@ -31,10 +34,11 @@
             }
         }
     },
-    "required": ["state", "time", "teamResults", "lastStartTime"],
+    "required": ["state", "time", "teamResults", "lastStartTime", "rawTimeAtLastStartTime"],
     "default": {
         "state": "STOPPED",
         "lastStartTime": null,
+        "rawTimeAtLastStartTime": 0,
         "time": {
             "hours": 0,
             "minutes": 0,

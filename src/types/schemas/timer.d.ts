@@ -9,6 +9,7 @@
 export interface Timer {
 	state: 'STOPPED' | 'RUNNING' | 'PAUSED' | 'FINISHED';
 	lastStartTime: string | null;
+	rawTimeAtLastStartTime: number;
 	time: Duration;
 	teamResults: {
 		[k: string]: {

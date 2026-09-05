@@ -1,5 +1,5 @@
 import type NodeCG from '@nodecg/types';
-import type { ActiveSpeedrun, Configschema, Speedrun, Timer } from 'types/schemas';
+import type { ActiveSpeedrun, Configschema, Timer } from 'types/schemas';
 import * as livesplitCore from 'livesplit-core';
 import { DateTime, Duration } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
@@ -68,6 +68,7 @@ export class TimerService extends HasNodecgLogger {
 
         this.timerRep.value.state = 'RUNNING';
         this.timerRep.value.lastStartTime = DateTime.utc().toISO();
+        this.timerRep.value.rawTimeAtLastStartTime = this.timerRep.value.time.rawTime;
         if (this.timer.currentPhase() === 0) {
             this.timer.start();
         } else {
@@ -169,6 +170,8 @@ export class TimerService extends HasNodecgLogger {
                 this.timer.undoSplit();
             }
             this.timerRep.value.state = 'RUNNING';
+            this.timerRep.value.lastStartTime = DateTime.utc().toISO();
+            this.timerRep.value.rawTimeAtLastStartTime = this.timerRep.value.time.rawTime;
         }
     }
 
@@ -188,6 +191,7 @@ export class TimerService extends HasNodecgLogger {
         this.timerRep.value = {
             state: 'STOPPED',
             lastStartTime: this.timerRep.value.lastStartTime,
+            rawTimeAtLastStartTime: this.timerRep.value.rawTimeAtLastStartTime,
             time: {
                 hours: 0,
                 minutes: 0,
