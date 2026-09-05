@@ -395,9 +395,9 @@ describe('TalentService', () => {
         });
     });
 
-    describe('getScheduleWithTalentIds', () => {
+    describe('assignTalentIds', () => {
         it('fills talent IDs with input', () => {
-            const result = talentService.getScheduleWithTalentIds([
+            const result = talentService.assignTalentIds([
                 {
                     type: 'OTHER',
                     title: 'Other Schedule Item',
@@ -492,7 +492,7 @@ describe('TalentService', () => {
         })
 
         it('handles talent missing from talent list', () => {
-            const result = talentService.getScheduleWithTalentIds([
+            const result = talentService.assignTalentIds([
                 {
                     type: 'OTHER',
                     title: 'Other Schedule Item',
@@ -579,7 +579,7 @@ describe('TalentService', () => {
         });
 
         it('throws if any talent in schedule has no IDs', () => {
-            expect(() => talentService.getScheduleWithTalentIds([
+            expect(() => talentService.assignTalentIds([
                 {
                     type: 'OTHER',
                     title: 'Other Schedule Item',

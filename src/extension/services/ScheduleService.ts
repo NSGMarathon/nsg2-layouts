@@ -58,10 +58,10 @@ export class ScheduleService extends HasNodecgLogger {
         this.validateDate(scheduleAndTalent.schedule.startTime);
 
         const newTalentList = this.talentService.mergeNewTalentList(scheduleAndTalent.talent);
-        const scheduleWithTalentIds = this.talentService.getScheduleWithTalentIds(scheduleAndTalent.schedule.items, newTalentList);
+        const scheduleWithTalentIds = this.talentService.assignTalentIds(scheduleAndTalent.schedule.items, newTalentList);
         if (this.schedule.value.id === slug && mergeExisting) {
             const mergedSchedule = this.mergeNewScheduleItems(scheduleWithTalentIds);
-            const scheduleWithTwitchCategories = await this.getScheduleWithTwitchGames(mergedSchedule);
+            const scheduleWithTwitchCategories = await this.assignTwitchGames(mergedSchedule);
             this.talent.value = newTalentList;
             this.schedule.value = {
                 source: 'OENGUS',
@@ -70,7 +70,7 @@ export class ScheduleService extends HasNodecgLogger {
                 items: scheduleWithTwitchCategories
             };
         } else {
-            const scheduleWithTwitchCategories = await this.getScheduleWithTwitchGames(scheduleWithTalentIds);
+            const scheduleWithTwitchCategories = await this.assignTwitchGames(scheduleWithTalentIds);
             this.talent.value = newTalentList;
             this.schedule.value = {
                 source: 'OENGUS',
@@ -246,14 +246,13 @@ export class ScheduleService extends HasNodecgLogger {
         });
     }
 
-    private async getScheduleWithTwitchGames(schedule: Schedule['items']): Promise<Schedule['items']> {
+    private async assignTwitchGames(schedule: Schedule['items']): Promise<Schedule['items']> {
         if (this.igdbService == null || !this.igdbService.isLoggedIn()) {
             this.logger.warn('Twitch integration is disabled. Schedule will be imported without Twitch category data.');
             return schedule;
         }
 
-        const newSchedule = cloneDeep(schedule);
-        const gameSearchResult = await Promise.allSettled(newSchedule.map(async (scheduleItem) => {
+        const gameSearchResult = await Promise.allSettled(schedule.map(async (scheduleItem) => {
             if (scheduleItem.type !== 'SPEEDRUN' || scheduleItem.twitchCategory != null) return;
             const gameData = await this.igdbService!.findGameForScheduleItem(scheduleItem);
             scheduleItem.twitchCategory = gameData?.category;
@@ -265,7 +264,7 @@ export class ScheduleService extends HasNodecgLogger {
             this.logger.warn('Encountered one or more errors searching for Twitch categories for schedule games');
             this.logger.debug('Encountered one or more errors searching for Twitch categories for schedule games', rejectedResults);
         }
-        return newSchedule;
+        return schedule;
     }
 
     private mergeNewScheduleItems(schedule: Schedule['items']): Schedule['items'] {

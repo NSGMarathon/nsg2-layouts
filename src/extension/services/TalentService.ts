@@ -47,8 +47,8 @@ export class TalentService extends HasNodecgLogger {
         return result;
     }
 
-    getScheduleWithTalentIds(schedule: Schedule['items'], talent: Talent): Schedule['items'] {
-        return cloneDeep(schedule).map(scheduleItem => {
+    assignTalentIds(schedule: Schedule['items'], talent: Talent): Schedule['items'] {
+        return schedule.map(scheduleItem => {
             if (scheduleItem.type === 'SPEEDRUN') {
                 return {
                     ...scheduleItem,
@@ -68,24 +68,21 @@ export class TalentService extends HasNodecgLogger {
     }
 
     updateTalentItems(talent: Talent) {
-        const newTalent = cloneDeep(this.talent.value);
         talent.forEach(talentItem => {
             if (!talentItem.id) {
                 throw new Error('All provided talent items must have IDs');
             }
 
-            const normalizedTalentItem = cloneDeep(talentItem);
-            normalizedTalentItem.socials = this.convertBlankKeysToNulls(talentItem.socials);
-            normalizedTalentItem.pronouns = isBlank(normalizedTalentItem.pronouns) ? null : normalizedTalentItem.pronouns;
+            talentItem.socials = this.convertBlankKeysToNulls(talentItem.socials);
+            talentItem.pronouns = isBlank(talentItem.pronouns) ? null : talentItem.pronouns;
 
             const existingTalentIndex = this.talent.value.findIndex(existingTalent => existingTalent.id === talentItem.id);
             if (existingTalentIndex === -1) {
-                newTalent.push(normalizedTalentItem);
+                this.talent.value.push(talentItem);
             } else {
-                newTalent[existingTalentIndex] = normalizedTalentItem;
+                this.talent.value[existingTalentIndex] = talentItem;
             }
         });
-        this.talent.value = newTalent;
     }
 
     talentItemExists(talentId: string) {
