@@ -430,7 +430,8 @@ export class OengusClient extends HasNodecgLogger {
                         twitch: this.findSocialUsername(runner.profile?.connections, 'TWITCH'),
                         youtube: this.findSocialUsername(runner.profile?.connections, 'YOUTUBE'),
                         twitter: this.findSocialUsername(runner.profile?.connections, 'TWITTER'),
-                        speedruncom: this.findSocialUsername(runner.profile?.connections, 'SPEEDRUNCOM')
+                        speedruncom: this.findSocialUsername(runner.profile?.connections, 'SPEEDRUNCOM'),
+                        discord: this.findSocialUsername(runner.profile?.connections, 'DISCORD')
                     }
                 };
 

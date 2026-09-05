@@ -17,6 +17,7 @@ export type Talent = {
 		youtube?: string | null;
 		twitter?: string | null;
 		speedruncom?: string | null;
+		discord?: string | null;
 		[k: string]: string | null;
 	};
 }[];

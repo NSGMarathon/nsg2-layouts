@@ -16,7 +16,8 @@
                     "twitch": { "type": ["string", "null"] },
                     "youtube": { "type": ["string", "null"] },
                     "twitter": { "type": ["string", "null"] },
-                    "speedruncom": { "type": ["string", "null"] }
+                    "speedruncom": { "type": ["string", "null"] },
+                    "discord": { "type": ["string", "null"] }
                 },
                 "additionalProperties": { "type": ["string", "null"] }
             }

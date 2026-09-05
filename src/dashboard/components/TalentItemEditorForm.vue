@@ -1,16 +1,25 @@
 <template>
     <div>
-        <ipl-input
-            v-model="props.modelValue.name"
-            name="name"
-            label="Name"
-            ref="nameInput"
-        />
-        <div class="layout horizontal m-t-4">
+        <div class="layout horizontal">
+            <ipl-input
+                v-model="props.modelValue.name"
+                name="name"
+                label="Name"
+                ref="nameInput"
+                style="width: 200%"
+            />
             <ipl-input
                 v-model="props.modelValue.pronouns"
                 name="pronouns"
                 label="Pronouns"
+                class="max-width m-l-8"
+            />
+        </div>
+        <div class="layout horizontal m-t-4">
+            <ipl-input
+                v-model="props.modelValue.socials.discord"
+                name="discord"
+                label="Discord"
                 class="max-width"
             />
             <country-code-select
