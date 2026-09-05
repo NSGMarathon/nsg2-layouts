@@ -13,6 +13,7 @@ export class TimerService extends HasNodecgLogger {
     private readonly timer: livesplitCore.Timer;
     private readonly obsConnectorService: ObsConnectorService;
     private readonly scheduleService: ScheduleService;
+    private tickInterval: NodeJS.Timeout | undefined = undefined;
     private mustCompleteInterstitials = false;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>, obsConnectorService: ObsConnectorService, scheduleService: ScheduleService) {
@@ -33,9 +34,8 @@ export class TimerService extends HasNodecgLogger {
             this.logger.info(`Recovered ${(missedTime / 1000).toFixed(2)} seconds of lost time`);
             this.start(true);
             livesplitCore.TimeSpan.fromSeconds(timeOffset / 1000).with(t => this.timer.setGameTime(t));
+            this.tickInterval = setInterval(this.tick.bind(this), 100);
         }
-
-        setInterval(this.tick.bind(this), 100);
 
         obsConnectorService.addProgramSceneChangeListener(sceneName => {
             if (
@@ -75,6 +75,8 @@ export class TimerService extends HasNodecgLogger {
             this.timer.resume();
         }
         this.initGameTime();
+        clearInterval(this.tickInterval);
+        this.tickInterval = setInterval(this.tick.bind(this), 100);
 
         if (this.obsConnectorService.gameplaySceneInProgram() && this.activeSpeedrun.value != null && this.activeSpeedrun.value.timerStartTime == null) {
             this.setLastStartTime();
@@ -116,6 +118,7 @@ export class TimerService extends HasNodecgLogger {
             }
             this.timer.split();
             this.timerRep.value.state = 'FINISHED';
+            clearInterval(this.tickInterval);
         }
     }
 
@@ -143,6 +146,7 @@ export class TimerService extends HasNodecgLogger {
         }
         this.timer.split();
         this.timerRep.value.state = 'FINISHED';
+        clearInterval(this.tickInterval);
     }
 
     // todo: doesn't work properly if nodecg is restarted after the timer is finished
@@ -172,6 +176,8 @@ export class TimerService extends HasNodecgLogger {
             this.timerRep.value.state = 'RUNNING';
             this.timerRep.value.lastStartTime = DateTime.utc().toISO();
             this.timerRep.value.rawTimeAtLastStartTime = this.timerRep.value.time.rawTime;
+            clearInterval(this.tickInterval);
+            this.tickInterval = setInterval(this.tick.bind(this), 100);
         }
     }
 
@@ -182,6 +188,7 @@ export class TimerService extends HasNodecgLogger {
 
         this.timer.pause();
         this.timerRep.value.state = 'PAUSED';
+        clearInterval(this.tickInterval);
     }
 
     reset() {
@@ -202,6 +209,7 @@ export class TimerService extends HasNodecgLogger {
             },
             teamResults: {}
         };
+        clearInterval(this.tickInterval);
     }
 
     isActive() {
@@ -213,8 +221,6 @@ export class TimerService extends HasNodecgLogger {
     }
 
     private tick() {
-        if (this.timerRep.value.state !== 'RUNNING') return;
-
         const gameTime = this.timer.currentTime().gameTime();
         if (gameTime == null) return;
         const millis = gameTime.totalSeconds() * 1000;
