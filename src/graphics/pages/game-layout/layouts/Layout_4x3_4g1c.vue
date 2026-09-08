@@ -26,7 +26,7 @@
                     />
                 </div>
             </div>
-            <div class="layout-gap-right layout-gap-left grow middle-panel layout vertical">
+            <div class="layout-gap-around grow middle-panel layout vertical">
                 <div class="layout vertical">
                     <div class="bg-timer timer-wrapper grow layout vertical center-vertical">
                         <speedrun-details class="bg-inset" />

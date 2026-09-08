@@ -1,7 +1,7 @@
 <template>
     <div
         class="separator"
-        :class="props.direction"
+        :class="[props.direction, props.linkAt == null ? undefined : `link-at-${props.linkAt}`]"
     >
         <div class="highlight" />
         <div class="core" />
@@ -11,7 +11,8 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-    direction: 'horizontal' | 'vertical'
+    direction: 'horizontal' | 'vertical',
+    linkAt?: 'end'
 }>();
 </script>
 
@@ -29,6 +30,11 @@ $separator-color-shadow: colors.$layout-gap;
     &.vertical {
         min-width: 14px;
         grid-template-columns: 3px 1fr 3px;
+
+        &.link-at-end > .core {
+            padding-bottom: 3px;
+            transform: translateY(3px);
+        }
     }
 
     &.horizontal {

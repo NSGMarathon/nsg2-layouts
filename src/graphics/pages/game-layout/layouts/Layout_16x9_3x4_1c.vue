@@ -1,7 +1,7 @@
 <template>
     <div class="layout-wrapper layout vertical">
         <div class="game-captures-row">
-            <div class="bg-panel grow layout-gap-right layout-gap-left" />
+            <div class="bg-panel grow layout-gap-right layout-gap-left layout-gap-top" />
             <div
                 class="game-capture"
                 data-capture-index="0"
@@ -17,7 +17,7 @@
                 class="game-capture"
                 data-capture-index="1"
             />
-            <div class="bg-panel grow layout-gap-right layout-gap-left" />
+            <div class="bg-panel grow layout-gap-right layout-gap-left layout-gap-top" />
         </div>
         <div class="other-content-row layout-gap-top">
             <div class="column">

@@ -5,13 +5,13 @@
                 class="camera-capture layout-gap-bottom"
                 data-capture-index="0"
             />
-            <div class="grow layout vertical bg-panel">
+            <div class="grow layout vertical bg-panel layout-gap-left layout-gap-right layout-gap-bottom">
                 <player-nameplate :index="0" fixed-height />
                 <other-nameplate-grid class="m-t-8 m-x-16" />
                 <media-box class="grow m-y-16 m-x-12" />
             </div>
         </div>
-        <large-separator direction="vertical" />
+        <large-separator direction="vertical" link-at="end" />
         <div class="layout vertical" style="overflow: hidden">
             <div
                 class="game-capture layout-gap-bottom"

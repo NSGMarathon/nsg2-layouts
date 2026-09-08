@@ -26,7 +26,7 @@
                 </div>
                 <player-nameplate :index="2" class="max-width" fixed-height />
             </div>
-            <div class="layout-gap-right layout-gap-left middle-panel layout vertical">
+            <div class="layout-gap-right layout-gap-left layout-gap-bottom middle-panel layout vertical">
                 <div
                     class="camera-capture"
                     data-capture-index="0"

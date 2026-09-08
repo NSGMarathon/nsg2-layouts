@@ -26,7 +26,7 @@
                 </div>
                 <player-nameplate :index="2" class="max-width" fixed-height />
             </div>
-            <div class="layout-gap-right layout-gap-left middle-panel">
+            <div class="middle-panel layout-gap-around">
                 <div class="layout vertical">
                     <game-content-advisory narrow class="layout-gap-bottom" />
                     <div class="bg-timer timer-wrapper grow layout vertical center-vertical layout-gap-bottom">
@@ -86,7 +86,7 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
 
 .main-layout {
     display: grid;
-    grid-template-columns: 1fr 475px 1fr;
+    grid-template-columns: 1fr 477px 1fr;
 }
 
 .middle-panel {

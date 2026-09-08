@@ -5,7 +5,7 @@
                 class="camera-capture layout-gap-bottom"
                 data-capture-index="0"
             />
-            <div class="grow layout vertical bg-panel">
+            <div class="grow layout vertical bg-panel layout-gap-right layout-gap-bottom layout-gap-left">
                 <player-nameplate :index="0" :max-concurrent-players="4" />
                 <other-nameplate-grid class="m-t-12 m-b-64 m-x-16" />
                 <div class="layout vertical center-vertical grow m-b-64 m-x-16">
@@ -13,7 +13,7 @@
                 </div>
             </div>
         </div>
-        <large-separator direction="vertical" />
+        <large-separator direction="vertical" link-at="end" />
         <div class="layout vertical" style="overflow: hidden">
             <div
                 class="game-capture layout-gap-bottom"

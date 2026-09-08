@@ -6,7 +6,7 @@
                     class="camera-capture layout-gap-bottom"
                     data-capture-index="0"
                 />
-                <div class="grow layout vertical bg-panel">
+                <div class="grow layout vertical bg-panel layout-gap-bottom layout-gap-left layout-gap-right">
                     <player-nameplate :index="0" :max-concurrent-players="4" />
                     <div class="timer-wrapper bg-timer layout-gap-bottom layout vertical center-vertical">
                         <div class="bg-inset">
@@ -18,9 +18,9 @@
                     <media-box class="grow m-y-32 m-x-32" />
                 </div>
             </div>
-            <large-separator direction="vertical" />
+            <large-separator direction="vertical" link-at="end" />
             <div
-                class="game-capture"
+                class="game-capture layout-gap-bottom"
                 data-capture-index="0"
             >
                 <game-content-advisory fixed-height class="layout-gap-bottom" />
@@ -54,7 +54,7 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
 }
 
 .timer-wrapper {
-    padding: 8px 48px;
+    padding: 8px 44px;
 }
 
 .content-advisory {

@@ -1,12 +1,12 @@
 <template>
     <div class="layout-wrapper layout vertical" style="overflow: hidden;">
-        <div class="layout horizontal grow" style="overflow: hidden;">
+        <div class="layout horizontal grow">
             <div class="layout vertical" style="max-width: 500px">
                 <div
                     class="camera-capture layout-gap-bottom"
                     data-capture-index="0"
                 />
-                <div class="grow layout vertical bg-panel">
+                <div class="grow layout vertical bg-panel layout-gap-right layout-gap-left layout-gap-bottom">
                     <player-nameplate :index="0" :max-concurrent-players="4" />
                     <div class="timer-wrapper bg-timer layout-gap-bottom layout vertical center-vertical">
                         <div class="bg-inset">
@@ -18,14 +18,14 @@
                     <media-box class="grow m-y-32 m-x-16" />
                 </div>
             </div>
-            <large-separator direction="vertical" />
+            <large-separator direction="vertical" link-at="end" />
             <div class="layout vertical max-width" style="position: relative">
-                <div class="bg-panel grow" />
+                <div class="bg-panel grow layout-gap-bottom layout-gap-right layout-gap-top" />
                 <div
                     class="game-capture"
                     data-capture-index="0"
                 />
-                <div class="bg-panel grow" />
+                <div class="bg-panel grow layout-gap-top layout-gap-right layout-gap-bottom" />
                 <game-content-advisory fixed-height class="layout-gap-bottom" />
             </div>
         </div>
@@ -57,7 +57,7 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
 }
 
 .timer-wrapper {
-    padding: 8px 14px;
+    padding: 8px 10px;
 }
 
 .content-advisory {

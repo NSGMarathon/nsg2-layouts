@@ -41,6 +41,10 @@ body {
     }
 }
 
+.layout-gap-around {
+    border: 3px solid colors.$layout-gap;
+}
+
 .layout-gap {
     background-color: colors.$layout-gap;
 
