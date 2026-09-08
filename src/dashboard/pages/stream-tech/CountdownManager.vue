@@ -3,44 +3,47 @@
         title="Countdown"
         key="countdown"
     >
-        <ipl-input
-            v-model="countdownMessage"
-            label="Message"
-            name="message"
-        />
-        <div
-            class="layout horizontal center-vertical"
-            style="max-width: 150px; margin: 8px auto 0"
-        >
+        <form @submit.prevent>
             <ipl-input
-                v-model="hours"
-                name="hours"
-                centered
-                :formatter="hourFormatter"
-                :disabled="countdownStore.countdownData.running"
+                v-model="countdownMessage"
+                label="Message"
+                name="message"
             />
-            :
-            <ipl-input
-                v-model="minutes"
-                name="minutes"
-                centered
-                :formatter="minuteSecondFormatter"
-                :disabled="countdownStore.countdownData.running"
+            <div
+                class="layout horizontal center-vertical"
+                style="max-width: 150px; margin: 8px auto 0"
+            >
+                <ipl-input
+                    v-model="hours"
+                    name="hours"
+                    centered
+                    :formatter="hourFormatter"
+                    :disabled="countdownStore.countdownData.running"
+                />
+                :
+                <ipl-input
+                    v-model="minutes"
+                    name="minutes"
+                    centered
+                    :formatter="minuteSecondFormatter"
+                    :disabled="countdownStore.countdownData.running"
+                />
+                :
+                <ipl-input
+                    v-model="seconds"
+                    name="seconds"
+                    centered
+                    :formatter="minuteSecondFormatter"
+                    :disabled="countdownStore.countdownData.running"
+                />
+            </div>
+            <ipl-button
+                class="m-t-8"
+                label="Update"
+                type="submit"
+                @click="update"
             />
-            :
-            <ipl-input
-                v-model="seconds"
-                name="seconds"
-                centered
-                :formatter="minuteSecondFormatter"
-                :disabled="countdownStore.countdownData.running"
-            />
-        </div>
-        <ipl-button
-            class="m-t-8"
-            label="Update"
-            @click="update"
-        />
+        </form>
         <div class="m-t-8 layout horizontal">
             <ipl-button
                 color="green"
