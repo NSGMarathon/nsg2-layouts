@@ -7,71 +7,79 @@
             'with-prizes': showPrizes
         }"
     >
-        <div class="bg-panel left-panel">
-            <div class="layout horizontal logos grow">
-                <img src="../../assets/img/large-logo.png">
-                <media-box class="media-box" />
-            </div>
-            <intermission-prize-display
-                v-if="showPrizes"
-                class="max-width prize-display"
-            />
-            <div class="bg-inset m-t-16 layout vertical center-horizontal">
-                <div class="layout horizontal center-vertical">
-                    <donation-total class="donation-total" />
-                    <div class="pointer-icon">»</div>
-                    <img
-                        class="charity-logo"
-                        src="../../assets/img/charity-logo-wide.png"
-                    >
+        <div class="left-panel layout-gap-around">
+            <div class="bg-panel layout-gap-bottom layout vertical center-vertical grow">
+                <div class="layout horizontal logos grow">
+                    <img src="../../assets/img/large-logo.png">
+                    <media-box class="media-box" />
+                </div>
+                <div class="bg-inset donation-total-wrapper layout vertical center-horizontal">
+                    <div class="layout horizontal center-vertical">
+                        <donation-total class="donation-total" />
+                        <div class="pointer-icon">»</div>
+                        <img
+                            class="charity-logo"
+                            src="../../assets/img/charity-logo-wide.png"
+                        >
+                    </div>
                 </div>
             </div>
-            <div class="bg-inset m-t-16 slide-rotation">
-                <omnibar-slide-rotation
-                    :slide-title-width="150"
-                    without-donation-reminder
-                    without-schedule-items
+            <div class="bg-panel">
+                <intermission-prize-display
+                    v-if="showPrizes"
+                    class="max-width m-b-16 prize-display"
                 />
-            </div>
-            <div class="bg-inset m-t-16 layout vertical">
-                <div class="layout horizontal center-vertical">
-                    <table class="host-display-table">
-                        <tbody>
+                <div class="bg-inset slide-rotation">
+                    <omnibar-slide-rotation
+                        :slide-title-width="150"
+                        without-donation-reminder
+                        without-schedule-items
+                    />
+                </div>
+                <div class="bg-inset m-t-16 layout vertical">
+                    <div class="layout horizontal center-vertical">
+                        <table class="host-display-table">
+                            <tbody>
                             <other-nameplate-grid-cell
                                 :talent="currentHost"
                                 cell-index="H"
                             />
-                        </tbody>
-                    </table>
-                    <div class="music-icon">♫</div>
-                    <div class="grow" style="margin-top: -4px">
-                        <vfd-pixel-text
-                            :font-size="24"
-                            :text-content="musicStore.musicState.track?.artist ?? 'Unknown Artist'"
-                            align="left"
-                            text-align="left"
-                        />
-                        <vfd-pixel-text
-                            :font-size="24"
-                            :text-content="musicStore.musicState.track?.song ?? 'Unknown Song'"
-                            align="left"
-                            text-align="left"
-                        />
+                            </tbody>
+                        </table>
+                        <div class="music-icon">♫</div>
+                        <div class="grow" style="margin-top: -4px">
+                            <vfd-pixel-text
+                                :font-size="24"
+                                :text-content="musicStore.musicState.track?.artist ?? 'Unknown Artist'"
+                                align="left"
+                                text-align="left"
+                            />
+                            <vfd-pixel-text
+                                :font-size="24"
+                                :text-content="musicStore.musicState.track?.song ?? 'Unknown Song'"
+                                align="left"
+                                text-align="left"
+                            />
+                        </div>
                     </div>
+                    <div
+                        v-if="addVisualizerSpace"
+                        style="height: 120px"
+                    />
                 </div>
-                <div
-                    v-if="addVisualizerSpace"
-                    style="height: 120px"
-                />
             </div>
         </div>
         <large-separator direction="vertical" />
-        <div class="bg-panel right-panel">
-            <intermission-schedule />
+        <div class="right-panel layout-gap-right layout-gap-top layout-gap-bottom">
+            <div class="bg-panel">
+                <intermission-schedule />
+            </div>
             <div
                 v-if="addCameraSpace"
-                class="bg-inset camera-border"
-            />
+                class="bg-panel layout-gap-top grow"
+            >
+                <div class="bg-inset camera-border max-height" />
+            </div>
         </div>
     </div>
 </template>
@@ -118,17 +126,31 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr);
     height: 100%;
 
-    > .bg-panel {
-        padding: 40px 50px;
+    .bg-panel {
+        padding: 30px 50px;
+    }
+
+    > .left-panel, > .right-panel {
         display: flex;
         flex-direction: column;
     }
 
     &.with-camera-space {
-        > .bg-panel.right-panel {
-            $schedule-height: 723px;
+        > .right-panel {
+            $schedule-height: 736px;
             // Will explode if the schedule's height changes, but I don't foresee that.
-            clip-path: polygon(0% 0%, 0% 100%, 53px 100%, 53px $schedule-height, calc(100% - 53px) $schedule-height, calc(100% - 53px) calc(100% - 53px), 50px calc(100% - 53px), 53px 100%, 100% 100%, 100% 0%);
+            // ~inky, 2 years later: it changed :)
+            clip-path: polygon(
+                0% 0%,
+                0% 100%,
+                53px 100%,
+                53px $schedule-height,
+                calc(100% - 56px) $schedule-height,
+                calc(100% - 56px) calc(100% - 36px),
+                50px calc(100% - 36px),
+                53px 100%,
+                100% 100%,
+                100% 0%);
 
             > .camera-border {
                 margin-top: 40px;
@@ -139,45 +161,47 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     }
 
     &:not(.with-camera-space) {
-        > .bg-panel.right-panel {
+        > .right-panel > * {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
         }
     }
 
-    &:not(.with-prizes) {
+    &.with-prizes {
         .logos {
-            img {
-                width: 300px;
-            }
+            max-height: 250px;
         }
 
-        .left-panel > * {
-            margin-top: 24px;
+        .donation-total-wrapper {
+            margin-top: 16px;
         }
     }
 
     &.with-visualizer-space {
         .prize-display {
-            height: 250px;
-            margin-top: 32px;
+            height: 225px;
         }
 
-        .logos {
-            margin-top: 0;
-
-            img {
-                width: 225px;
-            }
+        &.with-prizes .logos {
+            max-height: 200px;
         }
     }
 }
 
+.donation-total-wrapper {
+    margin-top: 48px;
+}
+
 .logos {
     justify-content: space-between;
-    margin: 25px 60px 0;
+    align-items: center;
+    margin: 8px 60px;
+    max-height: 300px;
 
     img {
-        width: 250px;
+        height: 100%;
         object-fit: contain;
     }
 
@@ -188,7 +212,6 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 }
 
 .prize-display {
-    margin-top: 56px;
     height: 300px;
 }
 
