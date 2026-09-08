@@ -71,17 +71,17 @@ export class TrackerService extends HasNodecgLogger {
         if (this.trackerClient == null) return;
 
         const results = await Promise.allSettled([
-            this.trackerClient.getMilestones().then(milestones => { this.milestones.value = milestones; }),
-            this.trackerClient.getBids(false).then(currentBids => {
+            this.trackerClient.getMilestones().then((milestones) => { this.mergeNewTrackerData(this.milestones, milestones); }),
+            this.trackerClient.getBids(false).then((currentBids) => {
                 this.sortBids(currentBids);
-                this.currentBids.value = this.mergeLocalValues(currentBids);
+                this.mergeNewTrackerData(this.currentBids, this.mergeLocalValues(currentBids));
             }),
-            this.trackerClient.getBids(true).then(allBids => {
+            this.trackerClient.getBids(true).then((allBids) => {
                 this.sortBids(allBids);
-                this.allBids.value = this.mergeLocalValues(allBids);
+                this.mergeNewTrackerData(this.allBids, this.mergeLocalValues(allBids));
             }),
-            this.trackerClient.getPrizes(false).then(currentPrizes => { this.currentPrizes.value = currentPrizes; }),
-            this.trackerClient.getPrizes(true).then(allPrizes => { this.allPrizes.value = allPrizes; })
+            this.trackerClient.getPrizes(false).then((currentPrizes) => { this.mergeNewTrackerData(this.currentPrizes, currentPrizes) }),
+            this.trackerClient.getPrizes(true).then((allPrizes) => { this.mergeNewTrackerData(this.allPrizes, allPrizes) })
         ]);
 
         if (results.some(result => result.status === 'rejected')) {
@@ -93,6 +93,59 @@ export class TrackerService extends HasNodecgLogger {
             });
         }
         setTimeout(this.pollTrackerData.bind(this), 60 * 1000);
+    }
+
+    private mergeNewTrackerData<T extends { id: number, name: string }[]>(replicant: NodeCG.ServerReplicantWithSchemaDefault<T>, newValue: T) {
+        if (!this.valuesEqual(replicant.value, newValue)) {
+            replicant.value = newValue;
+        }
+    }
+
+    private objectsEqual<T extends Record<string, unknown>>(obj: T, other: T): boolean {
+        const keys = Object.keys(obj).filter((key) => obj[key] != null);
+        const otherKeys = Object.keys(other).filter((key) => other[key] != null);
+
+        if (keys.length !== otherKeys.length) {
+            return false;
+        }
+        for (const key of keys) {
+            const value = obj[key];
+            const otherValue = other[key];
+
+            if (!this.valuesEqual(value, otherValue)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private valuesEqual<T>(value: T, otherValue: T): boolean {
+        if (value === otherValue) {
+            return true;
+        }
+        if (value == null || typeof value !== 'object' || otherValue == null || typeof otherValue !== 'object') {
+            return false;
+        }
+
+        const isArray = Array.isArray(value);
+        const otherIsArray = Array.isArray(otherValue);
+        if (isArray && otherIsArray) {
+            if (value.length !== otherValue.length) {
+                return false;
+            }
+            for (let i = 0; i < value.length; i++) {
+                const arrayValue = value[i];
+                const otherArrayValue = otherValue[i];
+
+                if (!this.valuesEqual(arrayValue, otherArrayValue)) {
+                    return false;
+                }
+            }
+        } else if (isArray || otherIsArray) {
+            return false;
+        }
+
+        return this.objectsEqual(value as Record<string, unknown>, otherValue as Record<string, unknown>);
     }
 
     // Pinning bids was removed from the tracker this year (see donation-tracker pull #802)
