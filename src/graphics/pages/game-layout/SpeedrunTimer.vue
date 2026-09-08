@@ -32,7 +32,7 @@
                         class="run-timer"
                         style="width: max-content"
                         :value="formattedTimer.timer"
-                        :flash="timerStore.timer.state === 'FINISHED'"
+                        :flash="flashTimer"
                     />
                     <div class="m-l-8">
                         <div class="layout horizontal play-pause-section">
@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { useTimerStore } from 'client-shared/stores/TimerStore';
@@ -81,8 +81,12 @@ const props = withDefaults(defineProps<{
 });
 
 const speedrunCount = computed(() => scheduleStore.speedrunCount(scheduleStore.activeSpeedrun?.id));
-
 const usingMetricTime = computed(() => scheduleStore.activeSpeedrun?.timerMode === 'METRIC_TIMER_COUNTUP');
+const flashTimer = ref(false);
+
+watch(() => timerStore.timer.state, (newValue, oldValue) => {
+    flashTimer.value = oldValue != null && newValue === 'FINISHED' && oldValue !== 'FINISHED';
+});
 
 const formattedTimer = computed(() => {
     const time = usingMetricTime.value
