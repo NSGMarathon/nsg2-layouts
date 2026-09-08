@@ -9,4 +9,5 @@
 export interface CountdownData {
 	messageText: string;
 	running: boolean;
+	showBackground?: boolean;
 }

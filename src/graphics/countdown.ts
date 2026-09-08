@@ -5,6 +5,7 @@ import { installCommonHelpers } from 'client-shared/helpers/InstallCommonHelpers
 import { createPinia } from 'pinia';
 import { initCountdownStore } from 'client-shared/stores/CountdownStore';
 import CountdownGraphic from './pages/countdown/CountdownGraphic.vue';
+import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
 
 (async () => {
     const app = createApp(CountdownGraphic);
@@ -13,5 +14,6 @@ import CountdownGraphic from './pages/countdown/CountdownGraphic.vue';
     await Promise.all([
         initCountdownStore()
     ]);
+    initTextScrollEventBus(app);
     app.mount('#app');
 })();

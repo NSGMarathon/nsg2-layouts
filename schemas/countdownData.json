@@ -4,11 +4,13 @@
     "additionalProperties": false,
     "properties": {
         "messageText": { "type": "string" },
-        "running": { "type": "boolean" }
+        "running": { "type": "boolean" },
+        "showBackground": { "type": "boolean" }
     },
     "required": ["messageText", "running"],
     "default": {
         "running": false,
-        "messageText": "Starting soon..."
+        "messageText": "Starting soon...",
+        "showBackground": false
     }
 }

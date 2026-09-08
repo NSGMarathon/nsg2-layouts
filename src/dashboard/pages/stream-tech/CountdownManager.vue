@@ -61,11 +61,18 @@
                 <font-awesome-icon icon="stop" /> Stop
             </ipl-button>
         </div>
+        <div class="layout horizontal center-horizontal m-t-8">
+            <ipl-checkbox
+                v-model="showBackground"
+                small
+                label="Show background"
+            />
+        </div>
     </ipl-expanding-space>
 </template>
 
 <script setup lang="ts">
-import { IplButton, IplExpandingSpace, IplInput } from '@iplsplatoon/vue-components';
+import { IplButton, IplCheckbox, IplExpandingSpace, IplInput } from '@iplsplatoon/vue-components';
 import { useCountdownStore } from 'client-shared/stores/CountdownStore';
 import { computed, ref, watch } from 'vue';
 import { updateRefOnValueChange } from 'client-shared/helpers/StoreHelper';
@@ -129,4 +136,13 @@ function update() {
         countdownStore.setCountdownTimer(timerDuration.value.shiftTo('milliseconds').milliseconds);
     }
 }
+
+const showBackground = computed({
+    get() {
+        return countdownStore.countdownData.showBackground;
+    },
+    set(newValue: boolean) {
+        countdownStore.setShowBackground(newValue);
+    }
+});
 </script>

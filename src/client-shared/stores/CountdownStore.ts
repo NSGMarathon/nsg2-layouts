@@ -24,6 +24,9 @@ export const useCountdownStore = defineStore('countdown', {
         },
         setCountdownRunning(running: boolean) {
             countdownData.value!.running = running;
+        },
+        setShowBackground(newValue: boolean) {
+            countdownData.value!.showBackground = newValue;
         }
     }
 });
