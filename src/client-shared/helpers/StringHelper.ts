@@ -5,6 +5,11 @@ import { Configschema } from 'types/schemas';
 export const CURRENCY_CODE = (nodecg.bundleConfig as Configschema).event?.currency?.code ?? 'NOK';
 export const CURRENCY_UNIT = (nodecg.bundleConfig as Configschema).event?.currency?.unit ?? 'kr';
 
+export const CURRENCY_CONVERSION_ENABLED = (nodecg.bundleConfig as Configschema).currencyConversion?.enabled
+export const OTHER_CURRENCY_LABEL = CURRENCY_CONVERSION_ENABLED
+    ? ((nodecg.bundleConfig as Configschema).currencyConversion!.displayedCurrencyCode ?? 'EUR')
+    : 'USD';
+
 export function addDots(value: string, maxLength?: number): string;
 export function addDots(value: string | undefined | null, maxLength?: number): string | undefined | null;
 export function addDots(value: string | undefined | null, maxLength = 48): string | undefined | null {

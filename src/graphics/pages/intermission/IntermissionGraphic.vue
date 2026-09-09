@@ -13,15 +13,12 @@
                     <img src="../../assets/img/large-logo.png">
                     <media-box class="media-box" />
                 </div>
-                <div class="bg-inset donation-total-wrapper layout vertical center-horizontal">
-                    <div class="layout horizontal center-vertical">
-                        <donation-total class="donation-total" />
-                        <div class="pointer-icon">»</div>
-                        <img
-                            class="charity-logo"
-                            src="../../assets/img/charity-logo-wide.png"
-                        >
-                    </div>
+                <div class="bg-inset donation-total-wrapper layout horizontal center-vertical center-horizontal">
+                    <donation-total class="donation-total m-l-8" show-converted-currency />
+                    <div class="pointer-icon">»</div>
+                    <div
+                        class="charity-logo"
+                    />
                 </div>
             </div>
             <div class="bg-panel">
@@ -192,6 +189,8 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 
 .donation-total-wrapper {
     margin-top: 48px;
+    overflow: hidden;
+    height: 130px;
 }
 
 .logos {
@@ -226,8 +225,13 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
 }
 
 .charity-logo {
-    height: 129px;
-    margin: -8px 0;
+    flex-grow: 1;
+    height: 100%;
+    margin: 0 16px;
+    background-image: url('../../assets/img/charity-logo-wide.png');
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .host-display-table {
@@ -247,5 +251,14 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     overflow: hidden;
     height: 80px;
     padding: 0;
+}
+
+.converted-donation-total-note {
+    color: colors.$vfd-teal;
+    font-size: 28px;
+    font-weight: 500;
+    margin-top: -4px;
+    line-height: 26px;
+    text-align: center;
 }
 </style>

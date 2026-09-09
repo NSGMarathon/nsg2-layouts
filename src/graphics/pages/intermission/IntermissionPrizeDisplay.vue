@@ -22,7 +22,7 @@
                                 class="prize-donation-amount-digits"
                             />
                             <div class="currency-label">
-                                <div class="unlit">USD</div>
+                                <div class="unlit">{{ OTHER_CURRENCY_LABEL }}</div>
                                 <div>{{ CURRENCY_CODE }}</div>
                             </div>
                             <div class="donation-type">
@@ -52,7 +52,7 @@ import prizeImagePlaceholder from '../../assets/img/prize-image-placeholder.png'
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import OpacitySwapTransition from 'components/OpacitySwapTransition.vue';
 import FittedContent from 'components/FittedContent.vue';
-import { CURRENCY_CODE } from 'client-shared/helpers/StringHelper';
+import { CURRENCY_CODE, OTHER_CURRENCY_LABEL } from 'client-shared/helpers/StringHelper';
 
 const currentTrackerDataStore = useCurrentTrackerDataStore();
 
@@ -134,7 +134,7 @@ const activePrize = computed(() => prizeSlides.activeComponent.value == null ? n
         font-size: 24px;
         font-weight: 700;
         color: colors.$vfd-red;
-        line-height: 24px;
+        line-height: 22px;
         margin-bottom: -3px;
         margin-left: 2px;
 

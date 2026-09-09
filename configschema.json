@@ -234,6 +234,23 @@
                     "type": "boolean"
                 }
             }
+        },
+        "currencyConversion": {
+            "type": "object",
+            "properties": {
+                "enabled": { "type": "boolean" },
+                "displayedCurrencyCode": { "type": "string" },
+                "ecb": {
+                    "type": "object",
+                    "properties": {
+                        "seriesKey": {
+                            "type": "string",
+                            "description": "Series key input for the EXR dataset of the European Central Bank. Defaults to 'D.NOK.EUR.SP00.A' to provide daily NOK-EUR conversion rates. For more information, visit "
+                        },
+                        "invertConversion": { "type": "boolean" }
+                    }
+                }
+            }
         }
     }
 }

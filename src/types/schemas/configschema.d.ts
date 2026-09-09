@@ -123,6 +123,19 @@ export interface Configschema {
 		autoShowClueBoxOnDailyDouble?: boolean;
 		[k: string]: unknown;
 	};
+	currencyConversion?: {
+		enabled?: boolean;
+		displayedCurrencyCode?: string;
+		ecb?: {
+			/**
+			 * Series key input for the EXR dataset of the European Central Bank. Defaults to 'D.NOK.EUR.SP00.A' to provide daily NOK-EUR conversion rates. For more information, visit
+			 */
+			seriesKey?: string;
+			invertConversion?: boolean;
+			[k: string]: unknown;
+		};
+		[k: string]: unknown;
+	};
 	[k: string]: unknown;
 }
 export interface ChannelItem {

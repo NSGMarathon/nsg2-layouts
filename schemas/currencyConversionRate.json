@@ -1,0 +1,26 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "oneOf": [
+        { "type": "null" },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rate", "validUntil", "estimatedRefreshTime", "seriesKey"],
+            "properties": {
+                "rate": {
+                    "type": "number"
+                },
+                "validUntil": {
+                    "type": "string"
+                },
+                "estimatedRefreshTime": {
+                    "type": "string"
+                },
+                "seriesKey": {
+                    "type": "string"
+                }
+            }
+        }
+    ],
+    "default": null
+}

@@ -120,6 +120,9 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
         ]
       }
     ]
+  },
+  "currencyConversion": {
+    "enabled": true
   }
 }
 ```
@@ -168,6 +171,35 @@ anomalies are spotted and reported, even when nobody is actively monitoring the 
 
 Configure the `errorReporting.mentions` property to define Discord user IDs to receive alerts. 
 Roles may be alerted by adding the `&` character before the role ID.
+
+#### Currency Conversion
+
+nsg2-layouts includes facilities for retrieving currency conversion data through the [ECB Data Portal web services](https://data.ecb.europa.eu/help/api/overview).
+Using the minimal example configuration provided above, the layouts will convert the donation total provided by the 
+tracker from Norwegian Krone into Euros.
+
+The currency converter may be reconfigured. To provide an example, this configuration would convert the donation total 
+from Euros to U.S. Dollars:
+```json
+{
+    "currencyConversion": {
+        "enabled": true,
+        "displayedCurrencyCode": "USD",
+        "ecb": {
+            "seriesKey": "D.USD.EUR.SP00.A",
+            "invertConversion": false
+        }
+    }
+}
+```
+
+- `currencyConversion.enabled` determines whether currency exchange rates are requested.
+- `currencyConversion.displayedCurrencyCode` defines the currency code shown on the layouts.
+- `currencyConversion.ecb.seriesKey` defines the series key input for the EXR dataset of the European Central Bank.
+  For more information, visit https://data.ecb.europa.eu/data/datasets/EXR/structure
+- `currencyConversion.ecb.invertConversion` will invert the exchange rate if set to `true`.
+  Since the ECB dataset only provides exchange rates in one direction (e.g. EUR -> NOK), this can be set to use the
+  exchange rate in the other direction. (e.g. NOK -> EUR)
 
 ## Usage
 
