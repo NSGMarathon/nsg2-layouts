@@ -2,7 +2,6 @@
     <div
         class="intermission-layout"
         :class="{
-            'with-visualizer-space': addVisualizerSpace,
             'with-camera-space': addCameraSpace,
             'with-prizes': showPrizes
         }"
@@ -61,10 +60,6 @@
                             />
                         </div>
                     </div>
-                    <div
-                        v-if="addVisualizerSpace"
-                        style="height: 120px"
-                    />
                 </div>
             </div>
         </div>
@@ -104,7 +99,6 @@ import OtherNameplateGridCell from 'components/OtherNameplateGridCell.vue';
 
 const currentTrackerDataStore = useCurrentTrackerDataStore();
 
-const addVisualizerSpace = (nodecg.bundleConfig as Configschema).intermission?.addVisualizerSpace ?? false;
 const addCameraSpace = (nodecg.bundleConfig as Configschema).intermission?.addCameraSpace ?? true;
 const showPrizes = computed(() => currentTrackerDataStore.currentPrizes.length > 0);
 
@@ -202,12 +196,6 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
             .pointer-icon {
                 margin: 0 32px;
             }
-        }
-    }
-
-    &.with-visualizer-space {
-        .prize-display {
-            height: 225px;
         }
     }
 }

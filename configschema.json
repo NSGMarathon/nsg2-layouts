@@ -51,7 +51,6 @@
         "intermission": {
             "type": "object",
             "properties": {
-                "addVisualizerSpace": { "type": "boolean" },
                 "addCameraSpace": { "type": "boolean" }
             }
         },
