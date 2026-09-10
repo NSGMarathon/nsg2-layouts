@@ -1,45 +1,47 @@
 <template>
     <div class="prize-display bg-inset">
-        <div class="layout horizontal center-vertical center-horizontal max-height">
-            <opacity-swap-transition mode="default">
+        <opacity-swap-transition mode="default">
+            <div
+                v-if="activePrize != null"
+                :key="activePrize?.id"
+                class="layout horizontal max-height center-horizontal center-vertical max-width"
+            >
                 <div
-                    v-if="activePrize != null"
-                    :key="activePrize?.id"
-                    class="layout horizontal max-height center-horizontal max-width"
-                >
-                    <div
-                        class="prize-image"
-                        :style="{ backgroundImage: `url('${useBackupImageForSlide[activePrize.id] === true ? prizeImagePlaceholder : activePrize.image}')` }"
-                    />
-                    <div class="layout vertical center-vertical prize-details">
-                        <div class="prize-label">Prize</div>
+                    class="prize-image m-r-16"
+                    :style="{ backgroundImage: `url('${useBackupImageForSlide[activePrize.id] === true ? prizeImagePlaceholder : activePrize.image}')` }"
+                />
+                <div class="prize-details layout vertical">
+                    <div class="prize-label">Prize</div>
+                    <div class="max-width">
                         <fitted-content class="prize-name">{{ activePrize.name }}</fitted-content>
-                        <div v-if="activePrize.provider" class="provider">Provided by {{ activePrize.provider }}</div>
-                        <div class="layout horizontal prize-donation-amount">
-                            <seven-segment-digits
-                                :digit-count="Math.max(3, String(Math.floor(activePrize.minimumBid)).length)"
-                                :value="Math.floor(activePrize.minimumBid)"
-                                class="prize-donation-amount-digits"
-                            />
-                            <div class="currency-label">
-                                <div class="unlit">{{ OTHER_CURRENCY_LABEL }}</div>
-                                <div>{{ CURRENCY_CODE }}</div>
-                            </div>
-                            <div class="donation-type">
-                                <template v-if="activePrize.sumDonations">
-                                    <div class="unlit">Minimum Donation</div>
-                                    <div>Cumulative Donations</div>
-                                </template>
-                                <template v-else>
-                                    <div class="unlit">Cumulative Donations</div>
-                                    <div>Minimum Donation</div>
-                                </template>
-                            </div>
+                        <fitted-content v-if="activePrize.provider" class="provider">
+                            Provided by {{ activePrize.provider }}
+                        </fitted-content>
+                    </div>
+                    <div class="layout horizontal prize-donation-amount">
+                        <seven-segment-digits
+                            :digit-count="Math.max(3, String(Math.floor(activePrize.minimumBid)).length)"
+                            :value="Math.floor(activePrize.minimumBid)"
+                            class="prize-donation-amount-digits"
+                        />
+                        <div class="currency-label">
+                            <div class="unlit">{{ OTHER_CURRENCY_LABEL }}</div>
+                            <div>{{ CURRENCY_CODE }}</div>
+                        </div>
+                        <div class="donation-type">
+                            <template v-if="activePrize.sumDonations">
+                                <div class="unlit">Minimum Donation</div>
+                                <div>Cumulative Donations</div>
+                            </template>
+                            <template v-else>
+                                <div class="unlit">Cumulative Donations</div>
+                                <div>Minimum Donation</div>
+                            </template>
                         </div>
                     </div>
                 </div>
-            </opacity-swap-transition>
-        </div>
+            </div>
+        </opacity-swap-transition>
     </div>
 </template>
 
@@ -79,23 +81,27 @@ const activePrize = computed(() => prizeSlides.activeComponent.value == null ? n
 
 .prize-display {
     overflow: hidden;
+    position: relative;
 
-    > div {
-        position: relative;
+    > * {
+        position: absolute;
+        height: calc(100% - 16px);
+        width: calc(100% - 16px);
     }
 }
 
 .prize-image {
     height: 100%;
     min-width: 260px;
-    margin: 0 16px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .prize-details {
+    height: 195px;
     align-items: flex-start;
+    justify-content: space-between;
     color: colors.$vfd-teal;
     flex-shrink: 1;
     width: 100%;
@@ -109,7 +115,7 @@ const activePrize = computed(() => prizeSlides.activeComponent.value == null ? n
     font-size: 25px;
     font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .prize-name {
@@ -120,10 +126,11 @@ const activePrize = computed(() => prizeSlides.activeComponent.value == null ? n
 }
 
 .provider {
-    margin-top: 6px;
-    margin-right: 12px;
+    margin-top: 4px;
     font-size: 26px;
-    font-weight: 600;
+    font-weight: 500;
+    overflow: hidden;
+    width: 100%;
 }
 
 .prize-donation-amount {
