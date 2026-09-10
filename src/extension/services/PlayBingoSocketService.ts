@@ -7,6 +7,7 @@ import { generateUserAgent } from '../helpers/GenerateUserAgent';
 import { BingoConfig } from 'types/schemas/bingoConfig';
 import WebSocket from 'ws';
 import { isBlank } from 'shared/StringHelper';
+import { BingoTalentMapping } from 'types/schemas/bingoTalentMapping';
 
 interface PlayBingoPlayer {
     id: string
@@ -132,6 +133,7 @@ export class PlayBingoSocketService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
     private readonly bingoState: NodeCG.ServerReplicantWithSchemaDefault<BingoState>;
     private readonly bingoConfig: NodeCG.ServerReplicantWithSchemaDefault<BingoConfig>;
+    private readonly bingoTalentMapping: NodeCG.ServerReplicantWithSchemaDefault<BingoTalentMapping>;
     private readonly axios: AxiosInstance;
     private socket?: WebSocket;
     private socketReconnectionTimeout?: NodeJS.Timeout;
@@ -153,8 +155,9 @@ export class PlayBingoSocketService extends HasNodecgLogger {
         });
         this.bingoState = nodecg.Replicant('bingoState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<BingoState>;
         this.bingoConfig = nodecg.Replicant('bingoConfig') as unknown as NodeCG.ServerReplicantWithSchemaDefault<BingoConfig>;
+        this.bingoTalentMapping = nodecg.Replicant('bingoTalentMapping') as unknown as NodeCG.ServerReplicantWithSchemaDefault<BingoTalentMapping>;
 
-        this.bingoConfig.on('change', newValue => {
+        this.bingoConfig.on('change', (newValue, oldValue) => {
             if (newValue.enabled && !isBlank(newValue.roomSlug)) {
                 this.start().catch(e => {
                     this.logError('Error connecting to Bingo socket', e);
@@ -166,6 +169,10 @@ export class PlayBingoSocketService extends HasNodecgLogger {
                     players: [],
                     board: []
                 };
+            }
+
+            if (oldValue != null && newValue.roomSlug !== oldValue.roomSlug) {
+                this.bingoTalentMapping.value = [];
             }
         });
     }

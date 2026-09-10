@@ -24,23 +24,38 @@ const bingoStore = useBingoStore();
 const scheduleStore = useScheduleStore();
 const talentStore = useTalentStore();
 
-const playerOptions = computed<SelectOptions>(() => bingoStore.bingoState.players
-    .filter(bingoPlayer => bingoPlayer.name !== nodecg.bundleName)
-    .map(bingoPlayer => ({
-        name: bingoPlayer.name,
-        value: bingoPlayer.id
-    })));
+const playerOptions = computed<SelectOptions>(() => {
+    const result = bingoStore.bingoState.players
+        .filter(bingoPlayer => bingoPlayer.name !== nodecg.bundleName)
+        .map(bingoPlayer => ({
+            name: bingoPlayer.name,
+            value: bingoPlayer.id
+        }))
 
-function onBingoPlayerSelect(talentId: string, bingoPlayerId: string) {
+    result.unshift({
+        name: 'None',
+        value: null as unknown as string
+    });
+
+    return result;
+});
+
+function onBingoPlayerSelect(talentId: string, bingoPlayerId: string | null) {
     const newTalentMapping = cloneDeep(bingoStore.bingoTalentMapping);
     const existingTalentIndex = newTalentMapping.findIndex(mappingItem => mappingItem.talentId === talentId);
     if (existingTalentIndex === -1) {
-        newTalentMapping.push({
-            talentId,
-            bingoPlayerId
-        });
+        if (bingoPlayerId != null) {
+            newTalentMapping.push({
+                talentId,
+                bingoPlayerId
+            });
+        }
     } else {
-        newTalentMapping[existingTalentIndex].bingoPlayerId = bingoPlayerId;
+        if (bingoPlayerId == null) {
+            newTalentMapping.splice(existingTalentIndex, 1);
+        } else {
+            newTalentMapping[existingTalentIndex].bingoPlayerId = bingoPlayerId;
+        }
     }
     bingoStore.setBingoTalentMapping(newTalentMapping);
 }

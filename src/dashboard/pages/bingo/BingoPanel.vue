@@ -31,7 +31,7 @@
         </div>
     </ipl-space>
     <bingo-talent-mapping-configurer
-        v-if="bingoStore.bingoConfig.enabled"
+        v-if="bingoStore.bingoConfig.enabled && showTalentMappings"
         class="m-t-8"
     />
 </template>
@@ -43,8 +43,10 @@ import { computed, ref } from 'vue';
 import { updateRefOnValueChange } from 'client-shared/helpers/StoreHelper';
 import ErrorDisplay from '../../components/ErrorDisplay.vue';
 import BingoTalentMappingConfigurer from './BingoTalentMappingConfigurer.vue';
+import { useScheduleStore } from 'client-shared/stores/ScheduleStore';
 
 const bingoStore = useBingoStore();
+const scheduleStore = useScheduleStore();
 
 const enabled = computed({
     get() {
@@ -76,6 +78,11 @@ const stateDisplay = computed(() => {
             return { text: 'Not connected', color: 'state-background-red' };
     }
 });
+
+const showTalentMappings = computed(() =>
+    scheduleStore.activeSpeedrun != null &&
+    (scheduleStore.activeSpeedrun.teams.length > 1 ||
+    scheduleStore.activeSpeedrun.teams[0].playerIds.length > 1));
 </script>
 
 <style lang="scss" scoped>
