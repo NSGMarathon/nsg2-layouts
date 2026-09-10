@@ -8,17 +8,19 @@
         }"
     >
         <div class="left-panel layout-gap-around">
-            <div class="bg-panel layout-gap-bottom layout vertical center-vertical grow">
-                <div class="layout horizontal logos grow">
-                    <img src="../../assets/img/large-logo.png">
-                    <media-box class="media-box" />
-                </div>
-                <div class="bg-inset donation-total-wrapper layout horizontal center-vertical center-horizontal">
-                    <donation-total class="donation-total m-l-8" show-converted-currency />
-                    <div class="pointer-icon">»</div>
-                    <div
+            <div class="top-left-layout bg-panel layout-gap-bottom">
+                <img
+                    src="../../assets/img/large-logo.png"
+                    class="event-logo"
+                >
+                <media-box class="media-box" />
+                <div class="bg-inset donation-total-wrapper">
+                    <img
                         class="charity-logo"
-                    />
+                        src="../../assets/img/charity-logo.png"
+                    >
+                    <div class="pointer-icon">»</div>
+                    <donation-total class="donation-total m-l-8" show-converted-currency />
                 </div>
             </div>
             <div class="bg-panel">
@@ -130,6 +132,7 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     > .left-panel, > .right-panel {
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     &.with-camera-space {
@@ -167,12 +170,38 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     }
 
     &.with-prizes {
-        .logos {
-            max-height: 250px;
+        .top-left-layout {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            grid-auto-flow: column dense;
+            gap: 16px 32px;
         }
 
         .donation-total-wrapper {
-            margin-top: 16px;
+            grid-row: span 2;
+            flex-direction: column;
+
+            .pointer-icon {
+                transform: rotate(-90deg);
+            }
+        }
+    }
+
+    &:not(.with-prizes) {
+        .top-left-layout {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: minmax(0, 2.25fr) minmax(0, 3fr);
+            gap: 48px 16px;
+            padding: 80px 50px;
+        }
+
+        .donation-total-wrapper {
+            grid-column: span 2;
+            flex-direction: row-reverse;
+
+            .pointer-icon {
+                margin: 0 32px;
+            }
         }
     }
 
@@ -180,26 +209,16 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
         .prize-display {
             height: 225px;
         }
-
-        &.with-prizes .logos {
-            max-height: 200px;
-        }
     }
 }
 
-.donation-total-wrapper {
-    margin-top: 48px;
+.top-left-layout {
+    flex-grow: 1;
+    display: grid;
     overflow: hidden;
-    height: 130px;
-}
 
-.logos {
-    justify-content: space-between;
-    align-items: center;
-    margin: 8px 60px;
-    max-height: 300px;
-
-    img {
+    .event-logo {
+        width: 100%;
         height: 100%;
         object-fit: contain;
     }
@@ -210,28 +229,32 @@ const currentHost = computed(() => talentStore.findTalentItemById(talentStore.cu
     }
 }
 
-.prize-display {
-    height: 300px;
-}
+.donation-total-wrapper {
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.donation-total {
-    font-size: 1.5em;
-}
+    .pointer-icon {
+        color: colors.$vfd-teal;
+        font-size: 3em;
+        margin: 0 16px;
+    }
 
-.pointer-icon {
-    color: colors.$vfd-teal;
-    font-size: 3em;
-    margin: 0 16px;
+    .donation-total {
+        font-size: 1.5em;
+    }
 }
 
 .charity-logo {
-    flex-grow: 1;
-    height: 100%;
-    margin: 0 16px;
-    background-image: url('../../assets/img/charity-logo-wide.png');
-    background-position: center;
-    background-size: contain;
-    background-repeat: no-repeat;
+    max-width: 100%;
+    min-height: 0;
+    width: 300px;
+}
+
+.prize-display {
+    height: 250px;
 }
 
 .host-display-table {
