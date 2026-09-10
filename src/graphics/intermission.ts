@@ -24,7 +24,7 @@ import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
         initDonationStore(),
         initCurrentTrackerDataStore(),
         initTimerStore(),
-        initAssetStore(),
+        initAssetStore('assets:intermissionMediaBoxImages'),
         initMusicStore(),
         initMixerStore()
     ]);

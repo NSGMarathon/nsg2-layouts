@@ -17,12 +17,12 @@ import { useSlides } from '../helpers/useSlides';
 import { useAssetStore } from 'client-shared/stores/AssetStore';
 
 const assetStore = useAssetStore();
-const slides = useSlides(computed(() => assetStore['assets:mediaBoxImages']
-    .map(sponsor => ({
-        component: sponsor.url,
+const slides = useSlides(computed(() => assetStore.allMediaBoxImages
+    .map((image) => ({
+        component: image.url,
         duration: 15,
-        beforeChange: async (sponsor) => {
-            await loadAndCheckIfImageExists(sponsor);
+        beforeChange: async (image) => {
+            await loadAndCheckIfImageExists(image);
         }
     }))));
 

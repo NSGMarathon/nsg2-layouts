@@ -23,7 +23,7 @@ import { initBingoStore } from 'client-shared/stores/BingoStore';
         initScheduleStore(),
         initTalentStore(),
         initTimerStore(),
-        initAssetStore(),
+        initAssetStore('assets:gameLayoutMediaBoxImages'),
         initMixerStore(),
         initSpeedrunPlaylistStore(),
         initBingoStore()

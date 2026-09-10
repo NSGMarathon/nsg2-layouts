@@ -153,6 +153,26 @@
                 ]
             },
             {
+                "name": "gameLayoutMediaBoxImages",
+                "title": "Media box images (Game layout only)",
+                "allowedTypes": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "gif"
+                ]
+            },
+            {
+                "name": "intermissionMediaBoxImages",
+                "title": "Media box images (Intermission only)",
+                "allowedTypes": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "gif"
+                ]
+            },
+            {
                 "name": "jepContestantSignatures",
                 "title": "Jeopardy contestant signatures",
                 "allowedTypes": [
