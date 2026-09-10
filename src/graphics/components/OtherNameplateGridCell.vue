@@ -16,7 +16,7 @@
                 <fitted-content class="commentator-pronoun-wrapper">
                     <badge
                         v-if="!isBlank(props.talent.pronouns)"
-                        class="commentator-pronouns"
+                        class="pronouns"
                     >
                         {{ props.talent.pronouns }}
                     </badge>
@@ -135,7 +135,7 @@ td {
     margin-left: 4px;
 }
 
-.commentator-pronouns {
+.pronouns {
     font-size: 17.5px !important;
     transform: translateY(-0.5px);
 }

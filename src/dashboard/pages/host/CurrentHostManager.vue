@@ -8,7 +8,7 @@
         </ipl-message>
         <div v-else>
             <div class="text-low-emphasis">Current host</div>
-            <span class="host-name">{{ currentHost.name }}</span><ipl-badge v-if="currentHost.pronouns" class="m-l-4">{{ currentHost.pronouns }}</ipl-badge>
+            <span class="host-name">{{ currentHost.name }}</span><ipl-badge v-if="currentHost.pronouns" class="m-l-4 pronouns">{{ currentHost.pronouns }}</ipl-badge>
         </div>
         <div class="layout horizontal center-horizontal m-t-8">
             <ipl-button

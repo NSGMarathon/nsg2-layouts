@@ -78,7 +78,7 @@
                                 </fitted-content>
                                 <badge
                                     v-if="talent.pronouns"
-                                    class="talent-pronouns"
+                                    class="pronouns"
                                 >
                                     {{ talent.pronouns }}
                                 </badge>
@@ -408,7 +408,7 @@ const baseIndex = computed(() => scheduleStore.playerNameplateAssignments[feedIn
     transform: translate(2px, -2px);
 }
 
-.talent-country, .talent-pronouns {
+.talent-country, .pronouns {
     margin-left: 8px;
     font-size: 20px;
 }
