@@ -55,6 +55,12 @@ interface PlayBingoHiddenBoard {
     hidden: true
 }
 
+interface PlayBingoGoalImage {
+    id: string
+    name: string
+    mediaFile: string
+    gameId: string
+}
 
 interface PlayBingoGoal {
     id: string
@@ -62,6 +68,15 @@ interface PlayBingoGoal {
     description: string | null
     difficulty?: number | null
     categories?: string[]
+    count: number | null
+    image: PlayBingoGoalImage | null
+    secondaryImage: PlayBingoGoalImage | null
+    imageTag: {
+        id: string
+        label: string
+        color: string
+        gameId: string
+    } | null
 }
 
 interface PlayBingoCell {
@@ -111,6 +126,7 @@ interface PlayBingoAuthorizeResponse {
 }
 
 const expectedSocketClosureCode = 4001;
+const baseUrl = 'https://playbingo.gg';
 
 export class PlayBingoSocketService extends HasNodecgLogger {
     private readonly nodecg: NodeCG.ServerAPI<Configschema>;
@@ -129,7 +145,7 @@ export class PlayBingoSocketService extends HasNodecgLogger {
 
         this.nodecg = nodecg;
         this.axios = axios.create({
-            baseURL: 'https://playbingo.gg/api',
+            baseURL: `${baseUrl}/api`,
             headers: {
                 'User-Agent': generateUserAgent(nodecg),
                 Accept: 'application/json'
@@ -318,7 +334,13 @@ export class PlayBingoSocketService extends HasNodecgLogger {
             id: cell.goal.id,
             goal: cell.goal.goal,
             description: cell.goal.description,
-            completedByPlayers: cell.completedPlayers
+            completedByPlayers: cell.completedPlayers,
+            image: cell.goal.image == null ? null : {
+                src: `${baseUrl}/media/goalImage/${cell.goal.image.mediaFile}`,
+                count: cell.goal.count,
+                label: cell.goal.imageTag?.label,
+                labelColor: cell.goal.imageTag?.color
+            }
         };
     }
 

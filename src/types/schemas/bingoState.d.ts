@@ -18,6 +18,12 @@ export interface BingoState {
 		id: string;
 		goal: string;
 		description?: string | null;
+		image?: {
+			src: string;
+			label?: string | null;
+			labelColor?: string | null;
+			count?: number | null;
+		} | null;
 		completedByPlayers: string[];
 	}[][];
 }

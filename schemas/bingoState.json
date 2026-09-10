@@ -34,6 +34,17 @@
                         "id": { "type": "string" },
                         "goal": { "type": "string" },
                         "description": { "type": ["string", "null"] },
+                        "image": {
+                            "type": ["object", "null"],
+                            "additionalProperties": false,
+                            "required": ["src"],
+                            "properties": {
+                                "src": { "type": "string" },
+                                "label": { "type": ["string", "null"] },
+                                "labelColor": { "type": ["string", "null"] },
+                                "count": { "type": ["number", "null"] }
+                            }
+                        },
                         "completedByPlayers": {
                             "type": "array",
                             "items": {

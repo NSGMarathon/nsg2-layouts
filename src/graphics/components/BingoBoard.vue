@@ -34,13 +34,37 @@
                             :key="`cell_${col.id}`"
                             class="board-cell"
                             :style="{
-                                fontSize: col.goal.length > 35 ? '0.75em' : '1em',
-                                background: cellBackground(col.completedByColors)
+                                fontSize: col.goal.length > 42 ? '0.8em' : '1em',
+                                background: cellBackground(col.completedByColors),
+                                color: col.completedByColors.length === 1 ? getContrastingTextColor(col.completedByColors[0], '#fff', '#000') : undefined
                             }"
                             :class="{ completed: col.completedByPlayers.length > 0 }"
                         >
+                            <div
+                                v-if="col.image != null"
+                                :style="{ backgroundImage: `url('${col.image.src}')` }"
+                                class="cell-image"
+                            >
+                                <div
+                                    v-if="col.image.count != null"
+                                    class="cell-count"
+                                >
+                                    {{ col.image.count }}
+                                </div>
+                                <div
+                                    v-if="col.image.label != null"
+                                    class="cell-label"
+                                    :style="{
+                                        backgroundColor: col.image.labelColor ?? colors.vfdTeal,
+                                        color: getContrastingTextColor(col.image.labelColor ?? colors.vfdTeal, '#fff', '#000')
+                                    }"
+                                >
+                                    {{ col.image.label }}
+                                </div>
+                            </div>
                             <span
-                                :style="{ color: col.completedByColors.length === 1 ? getContrastingTextColor(col.completedByColors[0], '#fff', '#000') : undefined }"
+                                v-else
+                                class="cell-text"
                                 :class="{ shadowed: col.completedByColors.length > 1 }"
                             >
                                 {{ col.goal }}
@@ -67,6 +91,7 @@ import { useBingoStore } from 'client-shared/stores/BingoStore';
 import { computed } from 'vue';
 import { getContrastingTextColor } from '@iplsplatoon/vue-components';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
+import { colors } from '../styles/colors';
 
 const props = withDefaults(defineProps<{
     standalone?: boolean
@@ -187,12 +212,50 @@ const boardSize = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25em;
     overflow: hidden;
+
+    > .cell-text {
+        padding: 0.25em;
+    }
 
     > .shadowed {
         filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 1px #000);
         color: #fff;
+    }
+
+    > .cell-image {
+        width: 100%;
+        height: calc(100% - 1em);
+        margin: 0.5em;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        position: relative;
+    }
+
+    .cell-count {
+        position: absolute;
+        bottom: -0.4em;
+        right: -0.4em;
+        background-color: colors.$vfd-teal;
+        color: #000;
+        font-family: 'Roboto Condensed';
+        font-weight: 600;
+        font-size: 1.5em;
+        line-height: 1.1em;
+        padding: 0 0.25em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cell-label {
+        position: absolute;
+        top: -0.2em;
+        left: -0.2em;
+        padding: 0 0.25em;
+        font-family: 'Roboto Condensed';
+        font-weight: 500;
+        font-size: 1.25em;
+        line-height: 1.15em;
     }
 }
 
