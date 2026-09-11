@@ -129,7 +129,10 @@ export class TwitchService extends HasNodecgLogger {
                         category: item.category,
                         twitchCategory: item.twitchCategory,
                         hasVideoFile: item.videoFile != null,
-                        teams: item.teams.map(team => team.playerIds.map(playerId => this.talentService.findTalentItemById(playerId.id)?.name))
+                        teams: item.teams.map(team => ({
+                            playerNames: team.playerIds.map(playerId => this.talentService.findTalentItemById(playerId.id)?.name),
+                            teamName: team.name
+                        }))
                     };
                 } else {
                     return {
