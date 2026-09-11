@@ -34,6 +34,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "name": "NSG Fall 2024",
     "donationUrl": "donate.nsgmarathon.com",
     "scheduleUrl": "schedule.nsgmarathon.com",
+    "omnibarDonationReminderMessage": "In support of the NABP",
     "currency": {
       "code": "NOK",
       "unit": " kr"
@@ -54,13 +55,7 @@ To configure this bundle, create the file `[nodecg]/cfg/nsg2-layouts.json` with 
     "clientId": "twitch_client_id",
     "clientSecret": "twitch_client_secret",
     "redirectUri": "http://localhost:9090/nsg2-layouts/twitch-auth",
-    "titleTemplates": {
-      "speedrun": "NSG Fall 2024: {{title}} [{{category}}] by {{talent}}",
-      "race": "NSG Fall 2024: {{title}} [{{category}}] - {{talent}}",
-      "other": "NSG Fall 2024: {{title}} with {{talent}}",
-      "withoutTalent": "NSG Fall 2024: {{title}}",
-      "fallback": "NSG Fall 2024 benefiting Norges Blindeforbund"
-    }
+    "fallbackTitle": "NSG Fall 2024 benefiting Norges Blindeforbund"
   },
   "foobar2000": {
     "address": "http://localhost:8880",

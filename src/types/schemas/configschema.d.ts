@@ -54,6 +54,7 @@ export interface Configschema {
 		clientId?: string;
 		clientSecret?: string;
 		redirectUri?: string;
+		fallbackTitle?: string;
 		titleTemplates?: {
 			speedrun: string;
 			race?: string;

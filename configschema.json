@@ -101,6 +101,7 @@
                 "clientId": { "type": "string" },
                 "clientSecret": { "type": "string" },
                 "redirectUri": { "type": "string" },
+                "fallbackTitle": { "type": "string" },
                 "titleTemplates": {
                     "type": "object",
                     "properties": {

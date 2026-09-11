@@ -16,6 +16,7 @@ import { findActiveScheduleItem } from '../helpers/ScheduleHelpers';
 import isEqual from 'lodash/isEqual';
 import { DateTime } from 'luxon';
 import { HasNodecgLogger } from '../helpers/HasNodecgLogger';
+import { isBlank } from 'shared/StringHelper';
 
 const TWITCH_STREAM_TITLE_LENGTH_CAP = 140;
 const DEFAULT_TWITCH_CATEGORY = 'Special Events';
@@ -30,8 +31,9 @@ export class TwitchService extends HasNodecgLogger {
     private readonly twitchClient: TwitchClient | null;
     private readonly talentService: TalentService;
     private readonly scheduleService: ScheduleService;
-    private readonly twitchConfig?: Configschema['twitch'];
     private defaultGameId: string | null = null;
+    private readonly eventName: string;
+    private readonly fallbackTitle: string;
 
     constructor(
         nodecg: NodeCG.ServerAPI<Configschema>,
@@ -51,7 +53,8 @@ export class TwitchService extends HasNodecgLogger {
         this.twitchClient = twitchClient;
         this.talentService = talentService;
         this.scheduleService = scheduleService;
-        this.twitchConfig = nodecg.bundleConfig.twitch;
+        this.eventName = nodecg.bundleConfig.event?.name ?? 'NSG';
+        this.fallbackTitle = nodecg.bundleConfig.twitch?.fallbackTitle ?? this.eventName;
 
         if (twitchOauthClient == null) {
             this.logger.warn('Twitch API configuration is missing. Logging in to Twitch will not be possible.');
@@ -193,27 +196,23 @@ export class TwitchService extends HasNodecgLogger {
     }
 
     private getStreamTitle(scheduleItem: ScheduleItem | null): string | null {
-        const titleTemplates = this.twitchConfig?.titleTemplates;
-        if (titleTemplates == null) {
-            this.logger.warn('Twitch title templates are not configured!');
-            return null;
-        }
-
         if (scheduleItem == null) {
-            return titleTemplates.fallback;
+            return this.fallbackTitle;
         } else if (scheduleItem.type === 'SPEEDRUN') {
-            let titleTemplate = titleTemplates.race != null && scheduleItem.teams.length > 1 ? titleTemplates.race : titleTemplates.speedrun;
-            if (scheduleItem.videoFile != null) {
-                titleTemplate = `[PRE-RECORDED] ${titleTemplate}`;
-            }
+            const isRace = scheduleItem.teams.length > 1;
 
-            const result = titleTemplate
-                .replace('{{talent}}', this.talentService.formatScheduleItemTalentList(scheduleItem))
-                .replace('{{category}}', scheduleItem.category?.trim() ?? '???')
-                .replace('{{title}}', scheduleItem.title.trim());
+            const baseTitle = [
+                scheduleItem.videoFile != null ? '[PRE-RECORDED]' : null,
+                `${this.eventName}:`,
+                scheduleItem.title.trim(),
+                isBlank(scheduleItem.category) ? null : `[${scheduleItem.category!.trim()}]`,
+                isRace ? '- ' : 'by '
+            ].filter(Boolean).join(' ');
+
+            const talentList = this.talentService.formatScheduleItemTalentList(scheduleItem);
 
             // Attempt to shorten very long titles
-            if (result.length > TWITCH_STREAM_TITLE_LENGTH_CAP) {
+            if (baseTitle.length + talentList.length > TWITCH_STREAM_TITLE_LENGTH_CAP) {
                 let firstTalentItem: TalentItem | null = null;
                 let talentCount = 0;
                 for (let i = 0; i < scheduleItem.teams.length; i++) {
@@ -234,24 +233,19 @@ export class TwitchService extends HasNodecgLogger {
                     talentCount--;
                 }
 
-                return titleTemplate
-                    .replace('{{talent}}',
-                        firstTalentItem == null
-                            ? `${talentCount} player${talentCount === 1 ? '' : 's'}`
-                            : talentCount === 0
-                                ? firstTalentItem.name
-                                : `${firstTalentItem.name} & ${talentCount} other${talentCount === 1 ? '' : 's'}`)
-                    .replace('{{category}}', scheduleItem.category?.trim() ?? '???')
-                    .replace('{{title}}', scheduleItem.title.trim());
+                const shortenedTalentList = firstTalentItem == null
+                    ? `${talentCount} player${talentCount === 1 ? '' : 's'}`
+                    : talentCount === 0
+                        ? firstTalentItem.name
+                        : `${firstTalentItem.name} & ${talentCount} other${talentCount === 1 ? '' : 's'}`;
+
+                return baseTitle + shortenedTalentList;
             }
-            return result;
+            return baseTitle + talentList;
         } else if (scheduleItem.talentIds.length === 0) {
-            return titleTemplates.withoutTalent
-                .replace('{{title}}', scheduleItem.title.trim());
+            return `${this.eventName}: ${scheduleItem.title.trim()}`;
         } else {
-            return titleTemplates.other
-                .replace('{{title}}', scheduleItem.title.trim())
-                .replace('{{talent}}', this.talentService.formatScheduleItemTalentList(scheduleItem));
+            return `${this.eventName}: ${scheduleItem.title.trim()} with ${this.talentService.formatScheduleItemTalentList(scheduleItem)}`;
         }
     }
 
