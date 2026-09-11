@@ -3,8 +3,8 @@
         <div class="title">OBS Socket</div>
         <ipl-toggle
             v-model="socketEnabled"
-            true-label="Enabled"
-            false-label="Disabled"
+            true-label="Enable"
+            false-label="Disable"
         />
     </ipl-space>
     <ipl-space
