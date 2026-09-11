@@ -178,6 +178,10 @@ async function selectRelayPlayer(playerIndex: number) {
     }
 }
 
+.team-name {
+    overflow-wrap: anywhere;
+}
+
 .team-timer-controls {
     max-width: 200px;
     min-width: 200px;
