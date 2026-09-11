@@ -13,10 +13,7 @@
                 />
             </div>
             <large-separator direction="vertical" />
-            <div
-                class="game-capture"
-                data-capture-index="1"
-            />
+            <bingo-board only-single-player />
             <div class="bg-panel grow layout-gap-right layout-gap-left layout-gap-top" />
         </div>
         <div class="other-content-row layout-gap-top">
@@ -53,6 +50,7 @@ import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import TeamResultDisplay from '../TeamResultDisplay.vue';
 import GameContentAdvisory from '../GameContentAdvisory.vue';
+import BingoBoard from 'components/BingoBoard.vue';
 </script>
 
 <style scoped lang="scss">
@@ -63,11 +61,6 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
 
     &[data-capture-index="0"] {
         aspect-ratio: 16 / 9;
-        height: 100%;
-    }
-
-    &[data-capture-index="1"] {
-        aspect-ratio: 3 / 4;
         height: 100%;
     }
 }
@@ -114,5 +107,9 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
     left: 0;
     width: 100%;
     height: 40px;
+}
+
+.bingo-board__wrapper {
+    font-size: 1.15em;
 }
 </style>

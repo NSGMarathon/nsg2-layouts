@@ -28,6 +28,7 @@ import Layout_16x9_4g1c from './layouts/Layout_16x9_4g1c.vue';
 import Layout_16x9_3g1c from './layouts/Layout_16x9_3g1c.vue';
 import Layout_16x9_3x4_1c from './layouts/Layout_16x9_3x4_1c.vue';
 import { GameLayoutFeedIndexInjectionKey, PlayerNameplateModeInjectionKey } from '../../helpers/Injections';
+import Layout_16x9_1g1c_bingo from './layouts/Layout_16x9_1g1c_bingo.vue';
 
 const obsStore = useObsStore();
 
@@ -44,7 +45,8 @@ const gameLayoutComponentMap: Record<typeof layoutKeys[number], Component> = {
     '4x3-4g1c': Layout_4x3_4g1c,
     '4x3-2g1c-ds': Layout_4x3_2g1c_ds,
     '3x2-1g1c': Layout_3x2_1g1c,
-    '16x9-3x4-1c': Layout_16x9_3x4_1c
+    '16x9-3x4-1c': Layout_16x9_3x4_1c,
+    '16x9-1g1c-bingo': Layout_16x9_1g1c_bingo
 };
 
 const params = new URLSearchParams(window.location.search);

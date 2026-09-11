@@ -3,11 +3,12 @@
         class="bingo-board__wrapper"
         :class="{
             'standalone-bingo': props.standalone,
-            'multiple-teams': hasMultipleTeams
+            'multiple-teams': hasMultipleTeams,
+            'only-single-player': props.onlySinglePlayer
         }"
     >
-        <div v-if="props.standalone || !hasMultipleTeams" class="bg-panel" />
-        <div v-if="hasMultipleTeams" class="scores bg-timer">
+        <div v-if="!props.onlySinglePlayer && (props.standalone || !hasMultipleTeams)" class="bg-panel" />
+        <div v-if="!props.onlySinglePlayer && hasMultipleTeams" class="scores bg-timer">
             <div
                 v-for="([color, score]) of scoreColorMap.entries()"
                 class="bg-inset"
@@ -82,7 +83,7 @@
                 </template>
             </div>
         </div>
-        <div v-if="props.standalone || !hasMultipleTeams" class="bg-panel" />
+        <div v-if="!props.onlySinglePlayer && (props.standalone || !hasMultipleTeams)" class="bg-panel" />
     </div>
 </template>
 
@@ -93,11 +94,10 @@ import { getContrastingTextColor } from '@iplsplatoon/vue-components';
 import SevenSegmentDigits from 'components/SevenSegmentDigits.vue';
 import { colors } from '../styles/colors';
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     standalone?: boolean
-}>(), {
-    standalone: false
-});
+    onlySinglePlayer?: boolean
+}>();
 
 const bingoStore = useBingoStore();
 const boardPresent = computed(() => bingoStore.bingoState.board.length > 0);
@@ -172,6 +172,7 @@ const boardSize = computed(() => {
 .bingo-board__wrapper {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
+    position: relative;
 
     &.multiple-teams {
         grid-template-columns: 1fr auto;
@@ -186,11 +187,18 @@ const boardSize = computed(() => {
             grid-template-columns: 1fr minmax(2em, 25%) auto 1fr;
         }
     }
+
+    &.only-single-player {
+        grid-template-columns: minmax(0, 1fr);
+        overflow: hidden;
+        background-color: colors.$vfd-background;
+        justify-items: center;
+    }
 }
 
 .bingo-board__aspect-ratio-square {
     aspect-ratio: 1 / 1;
-    background-color: #000;
+    background-color: colors.$vfd-background;
     padding: 8px;
     height: 100%;
     position: relative;
