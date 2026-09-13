@@ -18,7 +18,7 @@
         </div>
         <div class="other-content-row layout-gap-top">
             <div class="column">
-                <player-nameplate :index="0" />
+                <player-nameplate :index="0" fixed-height />
                 <div class="timer-wrapper bg-timer layout vertical center-vertical grow">
                     <speedrun-details class="bg-inset" />
                     <speedrun-timer class="m-t-8 bg-inset" />
