@@ -241,6 +241,15 @@ Example: `http://localhost:9090/bundles/nsg2-layouts/graphics/standalone-bingo.h
 The `standalone-bingo` graphic is currently only tested using a 16:9 viewport, and might not respond well to being used 
 in other setups.
 
+### Archipelago
+
+nsg2-layouts can display events that happen during [Archipelago](https://archipelago.gg/) speedruns.  
+Archipelago integration has been made for runs that use a small number of slots. Multiworlds with more than one team 
+have not been tested.  
+Set up the integration in the "3 - Setup" workspace of the NodeCG dashboard. The "Slot name" field can be filled with 
+the name of any slot in the multiworld.  
+Once enabled, Archipelago events will be displayed on the "16:9 1P" and "16:9 2P" game layouts.
+
 ### Jeopardy
 
 Jep stands for Jeopardy. To play, define the questions for each round of play in the configuration file as such:

@@ -19,3 +19,7 @@ export function isBlank(value: unknown): boolean {
 export function getErrorMessage(e: unknown): string {
     return typeof e === 'object' && e != null && 'message' in e ? String(e.message) : String(e);
 }
+
+export function possessive(value: string): string {
+    return value.endsWith('s') ? "'" : "'s";
+}

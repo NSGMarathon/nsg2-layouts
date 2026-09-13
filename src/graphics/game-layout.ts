@@ -13,6 +13,7 @@ import { initMixerStore, useMixerStore } from 'client-shared/stores/MixerStore';
 import { initTextScrollEventBus } from './helpers/TextScrollEventBus';
 import { initSpeedrunPlaylistStore } from 'client-shared/stores/SpeedrunPlaylistStore';
 import { initBingoStore } from 'client-shared/stores/BingoStore';
+import { initArchipelagoStore, useArchipelagoStore } from 'client-shared/stores/ArchipelagoStore';
 
 (async () => {
     const app = createApp(GameLayoutGraphic);
@@ -26,9 +27,11 @@ import { initBingoStore } from 'client-shared/stores/BingoStore';
         initAssetStore('assets:gameLayoutMediaBoxImages'),
         initMixerStore(),
         initSpeedrunPlaylistStore(),
-        initBingoStore()
+        initBingoStore(),
+        initArchipelagoStore()
     ]);
     initTextScrollEventBus(app);
     useMixerStore().listenForMixerLevels();
+    useArchipelagoStore().listenForEvents();
     app.mount('#app');
 })();

@@ -40,6 +40,7 @@ import { PlayBingoSocketService } from './services/PlayBingoSocketService';
 import { JepService } from './services/JepService';
 import { JepController } from './controllers/JepController';
 import { CurrencyConversionService } from './services/CurrencyConversionService';
+import { ArchipelagoService } from './services/ArchipelagoService';
 
 export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const oengusClient = new OengusClient(nodecg);
@@ -70,6 +71,7 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     const interstitialVideoPlayerService = new InterstitialVideoPlayerService(nodecg, obsConnectorService, videoFileService);
     new PlayBingoSocketService(nodecg);
     new CurrencyConversionService(nodecg);
+    new ArchipelagoService(nodecg);
 
     const jepService = new JepService(nodecg);
     new JepController(nodecg, jepService);

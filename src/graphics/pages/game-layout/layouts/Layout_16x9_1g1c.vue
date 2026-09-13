@@ -7,8 +7,9 @@
             />
             <div class="grow layout vertical bg-panel layout-gap-right layout-gap-bottom layout-gap-left">
                 <player-nameplate :index="0" :max-concurrent-players="4" />
-                <other-nameplate-grid class="m-t-12 m-b-64 m-x-16" />
-                <div class="layout vertical center-vertical grow m-b-64 m-x-16">
+                <other-nameplate-grid class="m-t-12 m-b-16 m-x-16" />
+                <archipelago-message :max-line-count="3" class="bg-inset m-x-16 m-b-16" />
+                <div class="layout vertical center-vertical grow m-b-64 m-t-48 m-x-16">
                     <media-box class="max-height" style="max-height: 275px" />
                 </div>
             </div>
@@ -40,6 +41,7 @@ import SpeedrunDetails from '../SpeedrunDetails.vue';
 import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import GameContentAdvisory from '../GameContentAdvisory.vue';
+import ArchipelagoMessage from '../ArchipelagoMessage.vue';
 </script>
 
 <style scoped lang="scss">
@@ -69,5 +71,9 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
 .content-advisory {
     height: 32px;
     font-size: 22px;
+}
+
+.archipelago-message {
+    height: 94px;
 }
 </style>

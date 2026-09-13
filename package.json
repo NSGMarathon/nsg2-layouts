@@ -73,6 +73,14 @@
                 "headerColor": "#262F40"
             },
             {
+                "name": "archipelago",
+                "title": "Archipelago",
+                "width": 2,
+                "file": "archipelago.html",
+                "workspace": "3 - Setup",
+                "headerColor": "#262F40"
+            },
+            {
                 "name": "stream-tech",
                 "title": "1 - Stream Tech Dashboard",
                 "file": "stream-tech.html",
@@ -241,6 +249,7 @@
     },
     "dependencies": {
         "@floating-ui/vue": "^1.1.11",
+        "archipelago.js": "^2.1.0",
         "axios": "^1.19.0",
         "axios-retry": "^4.5.0",
         "cookie": "~2.0.1",

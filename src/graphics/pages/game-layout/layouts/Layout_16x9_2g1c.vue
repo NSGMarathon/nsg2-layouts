@@ -42,6 +42,7 @@
                 class="camera-capture"
                 data-capture-index="0"
             >
+                <archipelago-message :max-line-count="2" />
                 <game-content-advisory class="layout-gap-bottom" />
             </div>
             <div class="column">
@@ -65,6 +66,7 @@ import OtherNameplateGrid from '../OtherNameplateGrid.vue';
 import MediaBox from 'components/MediaBox.vue';
 import TeamResultDisplay from '../TeamResultDisplay.vue';
 import GameContentAdvisory from '../GameContentAdvisory.vue';
+import ArchipelagoMessage from '../ArchipelagoMessage.vue';
 </script>
 
 <style scoped lang="scss">
@@ -126,10 +128,16 @@ import GameContentAdvisory from '../GameContentAdvisory.vue';
     border-color: colors.$layout-gap;
 }
 
+.archipelago-message {
+    width: 100%;
+    height: 80px;
+
+    :deep(.message) {
+        height: 56px;
+    }
+}
+
 .content-advisory {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
 }
 </style>
