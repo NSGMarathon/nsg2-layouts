@@ -42,7 +42,7 @@ import { JepController } from './controllers/JepController';
 import { CurrencyConversionService } from './services/CurrencyConversionService';
 import { ArchipelagoService } from './services/ArchipelagoService';
 
-export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
+export = (nodecg: NodeCG.ServerAPI<Configschema>) => {
     const oengusClient = new OengusClient(nodecg);
     const discordWebhookClient = DiscordWebhookClient.hasRequiredConfig(nodecg) ? new DiscordWebhookClient(nodecg) : null;
 
@@ -90,4 +90,11 @@ export = (nodecg: NodeCG.ServerAPI<Configschema>): void => {
     new SpeedrunPlaylistController(nodecg, speedrunPlaylistService);
     new InterstitialVideoPlayerController(nodecg, interstitialVideoPlayerService);
     new TodoListController(nodecg, todoListService);
+
+    // A few services are returned for use by other bundles. First introduced for layout-gateway-nsg2-layouts.
+    return {
+        interstitialVideoPlayerService,
+        twitchService,
+        obsConnectorService
+    };
 };
