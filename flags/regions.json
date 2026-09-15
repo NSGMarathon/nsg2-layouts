@@ -437,5 +437,8 @@
     "DE-SN": "Sachsen",
     "DE-ST": "Sachsen-Anhalt",
     "DE-SH": "Schleswig-Holstein",
-    "DE-TH": "Thüringen"
+    "DE-TH": "Thüringen",
+    "X-PRD-NB": "Non-binary",
+    "X-PRD-RB": "Rainbow",
+    "X-PRD-TG": "Transgender"
 }
