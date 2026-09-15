@@ -349,4 +349,5 @@ When the players are done answering, re-enable the score display to hide the clu
 - Any other image assets in this repository may only be used with prior permission from the Norway Speedrunner Gathering
 - The [DSEG font family](https://github.com/keshikan/DSEG) by [keshikan](https://github.com/keshikan) is licensed under the [SIL Open Font License, version 1.1](https://openfontlicense.org/)
 - The [HD44780A00 5x8](https://fontstruct.com/fontstructions/show/1850879/hd44780a00-5x8) by [Lord Nightmare](https://fontstruct.com/fontstructors/59995/lord_nightmare) on FontStruct is licensed under the [Creative Commons BY-SA 3.0 License](https://creativecommons.org/licenses/by-sa/3.0/)
-- The list of country and region flags in this project's `flags` directory is from the [region-flags](https://github.com/fonttools/region-flags) project by fonttools. 
+- The list of country and region flags in this project's `flags` directory is from the [region-flags](https://github.com/fonttools/region-flags) project by fonttools, 
+  besides all entries beginning in `X-`, which were added by the NSG team.
