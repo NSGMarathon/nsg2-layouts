@@ -7,6 +7,12 @@
             class="prompt"
             :class="{ smaller: ensmallenPrompt }"
         >
+            <div
+                class="hidden-from-contestants-indicator"
+                :style="{ opacity: props.hiddenFromContestants ? '1' : '0' }"
+            >
+                Secret!
+            </div>
             {{ props.prompt }}
         </div>
         <div class="answer">
@@ -29,12 +35,15 @@ const props = defineProps<{
     title: string
     prompt: string
     answer?: string
+    hiddenFromContestants?: boolean
 }>();
 
 const ensmallenPrompt = computed(() => props.prompt.length >= 96);
 </script>
 
 <style scoped lang="scss">
+@use '../../styles/dashboard-colors';
+
 .clue-display {
     box-sizing: border-box;
     display: flex;
@@ -72,5 +81,16 @@ const ensmallenPrompt = computed(() => props.prompt.length >= 96);
 .answer {
     font-weight: 400;
     font-size: 1.25em;
+}
+
+.hidden-from-contestants-indicator {
+    font-weight: 400;
+    font-size: 0.6em;
+    background-color: dashboard-colors.$state-red;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    padding: 2px 4px 3px;
+    border-radius: 8px;
 }
 </style>

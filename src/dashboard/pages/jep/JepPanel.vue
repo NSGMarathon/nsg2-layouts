@@ -101,6 +101,7 @@
                 <jep-dashboard-clue-display
                     v-if="jepStore.selectedClue != null"
                     :title="`${jepStore.selectedClue.categoryName} ${jepStore.selectedClue.value}${jepStore.selectedClue.isDailyDouble ? ' - Daily Double!' : ''}`"
+                    :hidden-from-contestants="jepStore.selectedClue.isDailyDouble && jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER'"
                     :prompt="jepStore.selectedClue.prompt"
                     :answer="jepStore.selectedClue.answer"
                     class="selected-clue-overlay"
@@ -126,16 +127,19 @@
                 </template>
             </div>
             <jep-dashboard-clue-display
-                v-else-if="jepStore.jepState.state === 'REVEALING_CATEGORIES' || jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'"
+                v-else-if="jepStore.jepState.state === 'REVEALING_CATEGORIES'"
                 title="The Final Jeopardy category is..."
+                :hidden-from-contestants="jepStore.jepState.state === 'REVEALING_CATEGORIES'"
                 :prompt="jepStore.finalJeopardyClue?.categoryName ?? ''"
                 class="final-jeopardy-display"
             />
             <jep-dashboard-clue-display
                 v-else-if="
                     jepStore.jepState.state === 'FINAL_JEP_READING_CLUE' ||
+                    jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS' ||
                     isReadOnly && (jepStore.jepState.state === 'FINAL_JEP_AWAITING_ANSWERS' || jepStore.jepState.state === 'FINAL_JEP_REVEALING_ANSWERS')
                 "
+                :hidden-from-contestants="jepStore.jepState.state === 'FINAL_JEP_AWAITING_WAGERS'"
                 :title="`Final Jeopardy - ${jepStore.finalJeopardyClue?.categoryName}`"
                 :prompt="jepStore.finalJeopardyClue?.prompt ?? ''"
                 :answer="jepStore.finalJeopardyClue?.answer ?? ''"
