@@ -32,6 +32,7 @@ export class JepService extends HasNodecgLogger {
     private readonly jepOverlays: NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
     private readonly configIsValid: boolean;
     private readonly autoShowClueBoxOnDailyDouble: boolean;
+    private readonly autoShowClueBoxOnFinalJeopardy: boolean;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         super(nodecg);
@@ -43,6 +44,7 @@ export class JepService extends HasNodecgLogger {
         this.jepOverlays = nodecg.Replicant('jepOverlays') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
         this.configIsValid = JepService.isConfigValid(nodecg.bundleConfig);
         this.autoShowClueBoxOnDailyDouble = nodecg.bundleConfig.jeopardy?.autoShowClueBoxOnDailyDouble ?? false;
+        this.autoShowClueBoxOnFinalJeopardy = nodecg.bundleConfig.jeopardy?.autoShowClueBoxOnFinalJeopardy ?? false;
 
         if (!this.configIsValid) {
             this.logger.info('Jeopardy config is missing or incomplete; only the testing board will be available.');
@@ -384,7 +386,9 @@ export class JepService extends HasNodecgLogger {
                 answerRevealed: false
             }))
         });
-        this.jepOverlays.value.scoreOverlayMode = 'NONE';
+        if (this.autoShowClueBoxOnFinalJeopardy) {
+            this.jepOverlays.value.scoreOverlayMode = 'NONE';
+        }
     }
 
     finalJepRevealAnswer(contestantIndex: number, amountWagered: number, isCorrect: boolean) {

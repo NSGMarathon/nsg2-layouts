@@ -279,7 +279,9 @@ Jep stands for Jeopardy. To play, define the questions for each round of play in
         ],
         "finalJeopardy": [
             // [...]
-        ]
+        ],
+        "autoShowClueBoxOnDailyDouble": false,
+        "autoShowClueBoxOnFinalJeopardy": false
     }
 }
 ```

@@ -121,6 +121,7 @@ export interface Configschema {
 		doubleJeopardy?: ConfigJepBoard;
 		finalJeopardy?: ConfigJepBoard;
 		autoShowClueBoxOnDailyDouble?: boolean;
+		autoShowClueBoxOnFinalJeopardy?: boolean;
 		[k: string]: unknown;
 	};
 	currencyConversion?: {
