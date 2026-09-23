@@ -74,6 +74,7 @@ async function removeCurrentHost() {
 .host-name {
     font-size: 1.5em;
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .ipl-badge {

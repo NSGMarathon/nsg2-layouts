@@ -13,15 +13,17 @@
             <div class="interstitial-title">{{ props.interstitial.title }}</div>
             <div
                 v-if="props.interstitial.talentIds.length > 0 || props.interstitial.type === 'OTHER'"
-                class="m-t-2"
+                class="m-t-2 overflow-anywhere"
             >
                 <font-awesome-icon icon="headset" size="sm" fixed-width />
                 {{ props.interstitial.talentIds.length === 0 ? 'No talent!' : talentStore.formatTalentIdList(props.interstitial.talentIds, 4) }}
             </div>
         </div>
-        <div class="controls edit-button-wrapper layout horizontal center-vertical">
+        <div
+            v-if="!props.readonly"
+            class="controls edit-button-wrapper layout horizontal center-vertical"
+        >
             <ipl-button
-                v-if="!props.readonly"
                 small
                 inline
                 color="transparent"
@@ -90,6 +92,7 @@ async function setCompleted(completed: boolean) {
 .interstitial-title {
     font-size: 1.25em;
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .interstitial-display {

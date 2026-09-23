@@ -27,25 +27,27 @@
                 </template>
             </ipl-badge>
             <div class="speedrun-title">{{ props.speedrun.title }}</div>
-            <div class="m-t-2">
+            <div class="m-t-2 overflow-anywhere">
                 <span>est. {{ formatScheduleItemEstimate(props.speedrun) }}</span>
                 <template v-if="props.speedrun.category != null">
                     – {{ props.speedrun.category }}
                 </template>
             </div>
-            <div class="m-t-4">
+            <div class="m-t-4 overflow-anywhere">
                 <font-awesome-icon icon="gamepad" size="sm" fixed-width /> {{ talentStore.formatSpeedrunTeamList(props.speedrun) }}
             </div>
             <div
                 v-if="props.speedrun.commentatorIds.length > 0"
-                class="m-t-4"
+                class="m-t-4 overflow-anywhere"
             >
                 <font-awesome-icon icon="headset" size="sm" fixed-width /> {{ talentStore.formatTalentIdList(props.speedrun.commentatorIds, 4) }}
             </div>
         </div>
-        <div class="controls layout vertical center-vertical">
+        <div
+            v-if="!props.readonly"
+            class="controls layout vertical center-vertical"
+        >
             <ipl-button
-                v-if="!props.readonly"
                 small
                 inline
                 color="transparent"
@@ -126,6 +128,7 @@ const showScheduledStartTime = computed(() => props.speedrun.id === scheduleStor
 .speedrun-title {
     font-size: 1.5em;
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .speedrun-display {

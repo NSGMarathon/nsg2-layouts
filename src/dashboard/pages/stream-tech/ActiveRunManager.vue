@@ -35,7 +35,7 @@
                 <div class="m-y-8">
                     <div class="text-low-emphasis">Active run ({{ speedrunCount.current === -1 ? '?' : speedrunCount.current }}/{{ speedrunCount.total }})</div>
                     <div class="speedrun-name">{{ scheduleStore.activeSpeedrun.title }}</div>
-                    <div>{{ scheduleStore.activeSpeedrun.category }}</div>
+                    <div class="overflow-anywhere">{{ scheduleStore.activeSpeedrun.category }}</div>
                 </div>
                 <div class="speedrun-details">
                     <ipl-data-row
@@ -188,6 +188,7 @@ async function seekToPreviousRun() {
 .speedrun-name {
     font-weight: 700;
     font-size: 2em;
+    overflow-wrap: anywhere;
 }
 
 .speedrun-details {

@@ -12,7 +12,7 @@
         <div class="m-t-8 m-b-16 m-x-8">
             <div class="text-low-emphasis">Active run ({{ speedrunCount.current === -1 ? '?' : speedrunCount.current }}/{{ speedrunCount.total }})</div>
             <div class="speedrun-name">{{ scheduleStore.activeSpeedrun.title }}</div>
-            <div>{{ scheduleStore.activeSpeedrun.category }}</div>
+            <div class="overflow-anywhere">{{ scheduleStore.activeSpeedrun.category }}</div>
         </div>
         <ipl-space
             color="secondary"
@@ -30,7 +30,7 @@
             :key="team.id"
             class="team"
         >
-            <div>{{ team.name || talentStore.formatTalentIdList(team.playerIds, 4) }}</div>
+            <div class="overflow-anywhere">{{ team.name || talentStore.formatTalentIdList(team.playerIds, 4) }}</div>
             <div
                 class="team-result"
                 :class="{
@@ -87,6 +87,7 @@ const timerColor = computed(() => {
 .speedrun-name {
     font-weight: 700;
     font-size: 1.5em;
+    overflow-wrap: anywhere;
 }
 
 .main-timer-display {
@@ -101,6 +102,7 @@ const timerColor = computed(() => {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
+    gap: 8px;
 
     &:nth-of-type(odd) {
         background-color: var(--ipl-input-color-alpha);

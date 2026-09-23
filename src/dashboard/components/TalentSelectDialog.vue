@@ -26,6 +26,7 @@
                 :key="result.id"
                 clickable
                 color="secondary"
+                class="overflow-anywhere"
                 @click="onTalentSelect(result)"
             >
                 {{ result.name }}

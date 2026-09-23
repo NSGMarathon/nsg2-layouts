@@ -9,17 +9,20 @@
         <div class="m-t-4 m-b-2">
             <div class="text-low-emphasis">Next run ({{ speedrunCount.current === -1 ? '?' : speedrunCount.current }}/{{ speedrunCount.total }})</div>
             <div class="speedrun-name">{{ scheduleStore.nextSpeedrun.title }}</div>
-            <div class="m-b-8">
+            <div class="m-b-8 overflow-anywhere">
                 <span>est. {{ formatDuration(scheduleStore.nextSpeedrun.estimate) }}</span>
                 <template v-if="scheduleStore.nextSpeedrun.category != null">
                     – {{ scheduleStore.nextSpeedrun.category }}
                 </template>
             </div>
-            <div>
+            <div class="overflow-anywhere">
                 <font-awesome-icon icon="gamepad" size="sm" fixed-width />
                 {{ talentStore.formatSpeedrunTeamList(scheduleStore.nextSpeedrun) }}
             </div>
-            <div v-if="scheduleStore.nextSpeedrun.commentatorIds.length > 0">
+            <div
+                v-if="scheduleStore.nextSpeedrun.commentatorIds.length > 0"
+                class="overflow-anywhere"
+            >
                 <font-awesome-icon icon="headset" size="sm" fixed-width />
                 {{ talentStore.formatTalentIdList(scheduleStore.nextSpeedrun.commentatorIds, 4) }}
             </div>
@@ -91,6 +94,7 @@ const speedrunCount = computed(() => scheduleStore.speedrunCount(scheduleStore.n
 .speedrun-name {
     font-weight: 600;
     font-size: 1.5em;
+    overflow-wrap: anywhere;
 }
 
 .speedrun-details {

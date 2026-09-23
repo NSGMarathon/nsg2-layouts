@@ -2,7 +2,7 @@
     <div class="stream-tech-layout">
         <layout-manager />
         <active-run-manager />
-        <div>
+        <div style="overflow-y: auto">
             <next-run-manager />
             <div class="alerts m-t-8">
                 <ipl-message
@@ -102,7 +102,7 @@ body {
     display: grid;
     height: 100vh;
     padding: 8px;
-    grid-template-columns: 0.75fr 1.5fr 1fr 1fr;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
     box-sizing: border-box;
     min-width: 1500px;

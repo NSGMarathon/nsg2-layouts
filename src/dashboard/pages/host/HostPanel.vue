@@ -82,7 +82,7 @@ body {
     display: grid;
     height: 100vh;
     padding: 8px;
-    grid-template-columns: 0.75fr 1fr 1fr 1fr;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
     box-sizing: border-box;
     min-width: 1500px;
