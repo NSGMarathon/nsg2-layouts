@@ -31,13 +31,13 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'readyToSwitch': []
+    'readyToSwitch': [{ scrolled: boolean }]
 }>();
 let readyToSwitchMessageTimeout: number | undefined = undefined;
-let finishedScrolls = [true, true];
+const finishedScrolls = [true, true];
 onMounted(() => {
      readyToSwitchMessageTimeout = window.setTimeout(() => {
-         emit('readyToSwitch');
+         emit('readyToSwitch', { scrolled: false });
      }, 1000);
 });
 // If the text on this slide scrolls, we want to show this slide at minimum until all displayed text has finished scrolling
@@ -48,7 +48,7 @@ function onScrollStart(lineIndex: number) {
 function onScrollEnd(lineIndex: number) {
     finishedScrolls[lineIndex] = true;
     if (finishedScrolls.every(scroll => scroll)) {
-        emit('readyToSwitch');
+        emit('readyToSwitch', { scrolled: true });
     }
 }
 

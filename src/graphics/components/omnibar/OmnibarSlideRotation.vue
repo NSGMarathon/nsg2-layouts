@@ -224,12 +224,14 @@ const slides = useSlides(() => {
 });
 
 let manualSlideAdvanceTimeout: number | undefined = undefined;
-function onSlideSwitchReady() {
+function onSlideSwitchReady({ scrolled }: { scrolled: boolean }) {
     if (manualSlideAdvanceTimeout == null) {
         manualSlideAdvanceTimeout = window.setTimeout(() => {
             manualSlideAdvanceTimeout = undefined;
             slides.advanceSlide();
-        }, 10 * 1000);
+            // 19 instead of an even 20 seconds, since the schedule item display takes 1 second to declare it is ready
+            // to switch if neither line of text was scrolled
+        }, scrolled ? 10 * 1000 : 19 * 1000);
     }
 }
 
