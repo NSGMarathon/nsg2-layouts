@@ -58,16 +58,18 @@
                             :key="visibleMilestone?.id"
                             :milestone="visibleMilestone!"
                         />
-                        <omnibar-incentive-display
-                            v-else-if="slides.activeComponent.value === 'incentive'"
-                            :key="visibleIncentive?.id"
-                            :incentive="visibleIncentive!"
-                        />
-                        <omnibar-bid-war-display
-                            v-else-if="slides.activeComponent.value === 'bidwar'"
-                            :key="visibleBidWar?.id"
-                            :bid-war="visibleBidWar!"
-                        />
+                        <template v-else-if="slides.activeComponent.value === 'bid1' || slides.activeComponent.value === 'bid2'">
+                            <omnibar-incentive-display
+                                v-if="visibleBid?.type === 'incentive'"
+                                :key="`incentive_${visibleBid?.id}`"
+                                :incentive="visibleBid!"
+                            />
+                            <omnibar-bid-war-display
+                                v-else
+                                :key="`bidwar_${visibleBid?.id}`"
+                                :bid-war="visibleBid!"
+                            />
+                        </template>
                     </transition>
                 </div>
             </div>
@@ -176,29 +178,21 @@ const {
 } = useRotatingList(() => currentTrackerDataStore.milestones.filter(milestone => donationStore.donationTotal >= milestone.start && donationStore.donationTotal < milestone.amount));
 
 const {
-    visibleItem: visibleIncentive,
-    enabled: incentivesEnabled,
-    beforeShow: beforeIncentiveShow
+    visibleItem: visibleBid,
+    enabled: bidsEnabled,
+    beforeShow: beforeBidShow
 } = useRotatingList(() => {
-    const allIncentives = currentTrackerDataStore.currentBids.filter(bid => (bid.options == null || bid.options.length === 0) && bid.goal != null);
-    const pinnedIncentives = allIncentives.filter(incentive => incentive.pinned);
-    if (pinnedIncentives.length > 0 || anyBidsPinned.value) {
-        return pinnedIncentives;
-    }
-    return allIncentives;
-});
-
-const {
-    visibleItem: visibleBidWar,
-    enabled: bidWarsEnabled,
-    beforeShow: beforeBidWarShow
-} = useRotatingList(() => {
-    const allBids = currentTrackerDataStore.currentBids.filter(bid => bid.options != null && (bid.userOptionsAllowed || bid.options.length > 0));
-    const pinnedBids = allBids.filter(bid => bid.pinned);
-    if (pinnedBids.length > 0 || anyBidsPinned.value) {
+    const bids = currentTrackerDataStore.currentBids
+        .filter((bid) => (bid.options != null && (bid.options.length !== 0 || bid.userOptionsAllowed)) || bid.goal != null)
+        .map((bid) => ({
+            ...bid,
+            type: (bid.options == null || (bid.options.length === 0 && !bid.userOptionsAllowed)) ? 'incentive' : 'bidWar'
+        }));
+    const pinnedBids = bids.filter((bid) => bid.pinned);
+    if (pinnedBids.length !== 0) {
         return pinnedBids;
     }
-    return allBids;
+    return bids;
 });
 
 const anyBidsPinned = computed(() => currentTrackerDataStore.currentBids.some(bid => bid.pinned === true));
@@ -210,8 +204,8 @@ const slides = useSlides(() => {
 
     if (anyBidsPinned.value) {
         result.push(
-            { component: 'incentive', enabled: incentivesEnabled, beforeChange: beforeIncentiveShow, duration: 120 },
-            { component: 'bidwar', enabled: bidWarsEnabled, beforeChange: beforeBidWarShow, duration: 120 },
+            { component: 'bid1', enabled: bidsEnabled, beforeChange: beforeBidShow, duration: 60 },
+            { component: 'bid2', enabled: bidsEnabled, beforeChange: beforeBidShow, duration: 60 },
             { component: 'donationReminder1', enabled: showDonationReminder, duration: 10 },
             { component: 'donationReminder2', enabled: showDonationReminder, duration: 10 });
     } else {
@@ -220,8 +214,8 @@ const slides = useSlides(() => {
             { component: 'later', enabled: computed(() => scheduleItemAfterNext.value != null), duration: null },
             { component: 'nextSpeedrun', enabled: computed(() => nextSpeedrun.value != null), duration: null },
             { component: 'milestone', enabled: milestonesEnabled, beforeChange: beforeMilestoneShow, duration: 30 },
-            { component: 'incentive', enabled: incentivesEnabled, beforeChange: beforeIncentiveShow, duration: 30 },
-            { component: 'bidwar', enabled: bidWarsEnabled, beforeChange: beforeBidWarShow, duration: 30 },
+            { component: 'bid1', enabled: bidsEnabled, beforeChange: beforeBidShow, duration: 30 },
+            { component: 'bid2', enabled: bidsEnabled, beforeChange: beforeBidShow, duration: 30 },
             { component: 'donationReminder1', enabled: showDonationReminder, duration: 10 },
             { component: 'donationReminder2', enabled: showDonationReminder, duration: 10 });
     }
@@ -250,10 +244,12 @@ const slideTitle = computed(() => {
             return 'Later';
         case 'milestone':
             return 'Milestone';
-        case 'incentive':
-            return 'Incentive';
-        case 'bidwar':
-            return 'Bid War';
+        case 'bid1':
+        case 'bid2':
+            if (visibleBid.value == null) {
+                return '???';
+            }
+            return visibleBid.value.type === 'incentive' ? 'Incentive' : 'Bid War';
         default:
             return '???';
     }
