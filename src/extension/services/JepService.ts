@@ -19,6 +19,7 @@ import { DateTime } from 'luxon';
 import cloneDeep from 'lodash/cloneDeep';
 import { JepContestants } from 'types/schemas/jepContestants';
 import { JepOverlays } from 'types/schemas/jepOverlays';
+import debounce from 'lodash/debounce';
 
 type MapToOmitUpdateTime<T> = T extends any ? Omit<T, 'lastUpdated'> : never;
 type JepStateWithoutEntryTime = MapToOmitUpdateTime<JepState>;
@@ -30,9 +31,11 @@ export class JepService extends HasNodecgLogger {
     private readonly jepContestants: NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
     private readonly jepState: NodeCG.ServerReplicantWithSchemaDefault<JepState>;
     private readonly jepOverlays: NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
+    private readonly jepImageClues: NodeCG.ServerReplicantWithSchemaDefault<NodeCG.AssetFile[]>;
     private readonly configIsValid: boolean;
     private readonly autoShowClueBoxOnDailyDouble: boolean;
     private readonly autoShowClueBoxOnFinalJeopardy: boolean;
+    private readonly debouncedCheckImageClues: () => void;
 
     constructor(nodecg: NodeCG.ServerAPI<Configschema>) {
         super(nodecg);
@@ -42,15 +45,21 @@ export class JepService extends HasNodecgLogger {
         this.jepContestants = nodecg.Replicant('jepContestants') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepContestants>;
         this.jepState = nodecg.Replicant('jepState') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepState>;
         this.jepOverlays = nodecg.Replicant('jepOverlays') as unknown as NodeCG.ServerReplicantWithSchemaDefault<JepOverlays>;
+        this.jepImageClues = nodecg.Replicant('assets:jepImageClues') as unknown as NodeCG.ServerReplicantWithSchemaDefault<NodeCG.AssetFile[]>;
         this.configIsValid = JepService.isConfigValid(nodecg.bundleConfig);
         this.autoShowClueBoxOnDailyDouble = nodecg.bundleConfig.jeopardy?.autoShowClueBoxOnDailyDouble ?? false;
         this.autoShowClueBoxOnFinalJeopardy = nodecg.bundleConfig.jeopardy?.autoShowClueBoxOnFinalJeopardy ?? false;
+        this.debouncedCheckImageClues = debounce(this.checkImageClues, 250);
 
         if (!this.configIsValid) {
             this.logger.info('Jeopardy config is missing or incomplete; only the testing board will be available.');
             this.jepBoard.value.usingTestBoard = true;
         } else {
             this.logger.info('Jeopardy config is OK');
+            this.jepImageClues.on('change', (_, oldValue) => {
+                if (oldValue == null) return;
+                this.debouncedCheckImageClues();
+            });
         }
     }
 
@@ -478,6 +487,39 @@ export class JepService extends HasNodecgLogger {
         }
     }
 
+    private checkImageClues() {
+        if (!this.configIsValid) return;
+
+        const firstRoundOk = this.checkBoardImageClues(this.nodecg.bundleConfig.jeopardy!.firstRound, 'the first round');
+        const doubleJeopardyOk = this.checkBoardImageClues(this.nodecg.bundleConfig.jeopardy!.doubleJeopardy, 'Double Jeopardy');
+        const finalJeopardyOk = this.checkBoardImageClues(this.nodecg.bundleConfig.jeopardy!.finalJeopardy, 'Final Jeopardy');
+
+        if (firstRoundOk && doubleJeopardyOk && finalJeopardyOk) {
+            this.logger.info('Image clue check was successful');
+        }
+    }
+
+    private checkBoardImageClues(board: DeepReadonly<ConfigJepBoard> | null | undefined, logRoundName: string) {
+        if (board == null) return true;
+
+        let allImagesPresent = true;
+        for (let i = 0; i < board.length; i++) {
+            const category = board[i];
+            for (let j = 0; j < category.clues.length; j++) {
+                const clue = category.clues[j];
+                if (clue.imageFileName != null) {
+                    const matchingImageFile = this.jepImageClues.value.find((image) => (image.name + image.ext) === clue.imageFileName);
+                    if (matchingImageFile == null) {
+                        this.logger.warn(`Image file "${clue.imageFileName}" not found for clue #${j + 1} in category "${category.categoryName}" of ${logRoundName}!`);
+                        allImagesPresent = false;
+                    }
+                }
+            }
+        }
+
+        return allImagesPresent;
+    }
+
     private markClueAnswered(cluePos: CluePosition) {
         this.jepBoard.value.answeredClueCount++;
         this.jepBoard.value.categories[cluePos[0]].clues[cluePos[1]].answered = true;
@@ -503,10 +545,30 @@ export class JepService extends HasNodecgLogger {
                     ({ prompt: `The ${this.prettyPrintOrdinal(i + 1)} clue in the "${categoryName}" category`, answer: `clue used for testing (${categoryIndex}; ${i})`, isDailyDouble: dailyDoubleIndex === i }))
             });
 
+            const generateCategoryWithImages = (categoryIndex: number, categoryName: string, dailyDoubleIndex: number) => {
+                if (this.jepImageClues.value.length === 0) return generateCategory(categoryIndex, categoryName, dailyDoubleIndex);
+
+                return {
+                    categoryName,
+                    clues: Array.from({ length: JEP_CLUES_PER_CATEGORY }, (_, i) => {
+                        const selectedIndex = Math.floor(Math.random() * this.jepImageClues.value.length);
+                        console.log(`selected index ${selectedIndex} out of ${this.jepImageClues.value.length}`);
+                        const imageFile = this.jepImageClues.value[selectedIndex];
+
+                        return ({
+                            prompt: `The ${this.prettyPrintOrdinal(i + 1)} clue in the "${categoryName}" category`,
+                            answer: `clue used for testing (${categoryIndex}; ${i})`,
+                            isDailyDouble: dailyDoubleIndex === i,
+                            imageFileName: imageFile.name + imageFile.ext
+                        });
+                    })
+                }
+            }
+
             switch (round) {
                 case 'JEOPARDY':
                     board = [
-                        generateCategory(0, 'Testing', 2),
+                        generateCategoryWithImages(0, 'Testing', 2),
                         generateCategory(1, 'Cresting'),
                         generateCategory(2, 'Jesting'),
                         generateCategory(3, 'Resting'),
@@ -566,7 +628,8 @@ export class JepService extends HasNodecgLogger {
                     prompt: clue.prompt,
                     answer: clue.answer,
                     isDailyDouble: clue.isDailyDouble,
-                    answered: false
+                    answered: false,
+                    imageFileName: clue.imageFileName
                 }))
             }))
         };

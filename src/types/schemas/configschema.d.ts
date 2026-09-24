@@ -11,6 +11,7 @@ export type ConfigJepBoard = {
 	clues: {
 		prompt: string;
 		answer: string;
+		imageFileName?: string;
 		isDailyDouble?: boolean;
 	}[];
 }[];

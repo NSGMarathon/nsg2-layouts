@@ -37,6 +37,9 @@
                                 "answer": {
                                     "type": "string"
                                 },
+                                "imageFileName": {
+                                    "type": "string"
+                                },
                                 "isDailyDouble": {
                                     "type": "boolean"
                                 }

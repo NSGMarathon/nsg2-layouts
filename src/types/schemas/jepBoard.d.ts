@@ -17,6 +17,7 @@ export interface JepBoard {
 			answer: string;
 			answered: boolean;
 			isDailyDouble?: boolean;
+			imageFileName?: string;
 		}[];
 	}[];
 }

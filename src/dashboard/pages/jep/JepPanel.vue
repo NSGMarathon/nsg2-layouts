@@ -104,6 +104,7 @@
                     :hidden-from-contestants="jepStore.selectedClue.isDailyDouble && jepStore.jepState.state === 'DAILY_DOUBLE_AWAITING_WAGER'"
                     :prompt="jepStore.selectedClue.prompt"
                     :answer="jepStore.selectedClue.answer"
+                    :image="jepStore.selectedClue?.imageFileUrl"
                     class="selected-clue-overlay"
                 />
                 <template v-for="(cat, i) of jepStore.jepBoard.categories">
@@ -143,6 +144,7 @@
                 :title="`Final Jeopardy - ${jepStore.finalJeopardyClue?.categoryName}`"
                 :prompt="jepStore.finalJeopardyClue?.prompt ?? ''"
                 :answer="jepStore.finalJeopardyClue?.answer ?? ''"
+                :image="jepStore.selectedClue?.imageFileUrl"
                 class="final-jeopardy-display"
             />
             <div

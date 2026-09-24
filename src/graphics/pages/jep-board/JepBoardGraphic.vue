@@ -71,9 +71,14 @@
                                     class="clue-prompt layout horizontal center-horizontal center-vertical"
                                     :class="{ 'smaller': tile.prompt.length >= 90 }"
                                 >
-                                    <span>
+                                    <span v-if="tile.imageFileUrl == null">
                                         {{ tile.prompt }}
                                     </span>
+                                    <span
+                                        v-else
+                                        class="clue-image"
+                                        :style="{ backgroundImage: `url('${tile.imageFileUrl}')` }"
+                                    />
                                 </div>
                                 <div
                                     v-if="tile.isDailyDouble"
@@ -139,7 +144,11 @@ const indicateBuzzersActive = computed(() =>
 
 const boardElem = useTemplateRef('boardElem');
 
-type BoardContentTile = ({ type: 'none' } | ({ type: 'clue' } & JepBoard['categories'][number]['clues'][number]) | { type: 'category-name', name: string });
+type BoardContentTile = ({ type: 'none' } | ({ type: 'clue', imageFileUrl: string | null } & JepBoard['categories'][number]['clues'][number]) | { type: 'category-name', name: string });
+
+function findImageFileUrl(clue: JepBoard['categories'][number]['clues'][number]): string | null {
+    return clue.imageFileName == null ? null : (jepStore['assets:jepImageClues'].find((image) => image.name + image.ext === clue.imageFileName)?.url ?? null);
+}
 
 const boardContent = computed<{ heading: ({ name: string, allCluesAnswered: boolean } | null)[], tiles: BoardContentTile[][] }>(() => {
     if (jepStore.jepBoard.round === 'FINAL_JEOPARDY') {
@@ -158,7 +167,10 @@ const boardContent = computed<{ heading: ({ name: string, allCluesAnswered: bool
         result.tiles[2][3] = { type: 'category-name', name: jepStore.jepBoard.categories[0].name };
 
         if (jepStore.jepState.state !== 'STARTING_NEXT_ROUND' && jepStore.jepState.state !== 'REVEALING_CATEGORIES' && jepStore.jepState.state !== 'FINAL_JEP_AWAITING_WAGERS') {
-            result.tiles[3][3] = { type: 'clue', ...jepStore.jepBoard.categories[0].clues[0] };
+            const clue = jepStore.jepBoard.categories[0].clues[0];
+            const imageFileUrl = findImageFileUrl(clue);
+
+            result.tiles[3][3] = { type: 'clue', imageFileUrl, ...clue };
         }
 
         return result;
@@ -182,7 +194,12 @@ const boardContent = computed<{ heading: ({ name: string, allCluesAnswered: bool
         }),
         tiles: Array.from(
             { length: JEP_CLUES_PER_CATEGORY },
-            (_, i) => Array.from({ length: JEP_CATEGORY_COUNT }, (_, j) => ({ ...jepStore.jepBoard.categories[j].clues[i], type: 'clue' })))
+            (_, i) => Array.from({ length: JEP_CATEGORY_COUNT }, (_, j) => {
+                const clue = jepStore.jepBoard.categories[j].clues[i];
+                const imageFileUrl = findImageFileUrl(clue);
+
+                return ({ ...clue, imageFileUrl, type: 'clue' });
+            }))
     };
 });
 
@@ -537,8 +554,16 @@ body {
             font-size: 14px;
         }
 
-        > * {
+        > *:not(.clue-image) {
             filter: drop-shadow(0 0 0.25px rgba(255, 255, 255, 0.75));
+        }
+
+        > .clue-image {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
     }
 }

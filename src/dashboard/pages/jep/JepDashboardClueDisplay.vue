@@ -5,7 +5,7 @@
         </div>
         <div
             class="prompt"
-            :class="{ smaller: ensmallenPrompt }"
+            :class="{ smaller: ensmallenPrompt, 'has-image': props.image != null }"
         >
             <div
                 class="hidden-from-contestants-indicator"
@@ -13,7 +13,14 @@
             >
                 Secret!
             </div>
-            {{ props.prompt }}
+            <div
+                v-if="props.image != null"
+                class="prompt-image"
+                :style="{ backgroundImage: `url('${props.image}')` }"
+            />
+            <template v-else>
+                {{ props.prompt }}
+            </template>
         </div>
         <div class="answer">
             <div
@@ -35,6 +42,7 @@ const props = defineProps<{
     title: string
     prompt: string
     answer?: string
+    image?: string | null
     hiddenFromContestants?: boolean
 }>();
 
@@ -70,6 +78,30 @@ const ensmallenPrompt = computed(() => props.prompt.length >= 96);
     &.smaller {
         font-size: 1.5em;
     }
+
+    &.has-image {
+        width: 100%;
+        flex-grow: 1;
+        margin: 8px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        > .hidden-from-contestants-indicator {
+            position: unset;
+            transform: unset;
+            display: inline;
+            margin-bottom: 4px;
+        }
+    }
+}
+
+.prompt-image {
+    width: 100%;
+    flex-grow: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .answer-label {

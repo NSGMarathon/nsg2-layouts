@@ -42,6 +42,9 @@
                                 },
                                 "isDailyDouble": {
                                     "type": "boolean"
+                                },
+                                "imageFileName": {
+                                    "type": "string"
                                 }
                             }
                         }

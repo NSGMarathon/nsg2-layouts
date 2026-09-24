@@ -288,6 +288,10 @@ Jep stands for Jeopardy. To play, define the questions for each round of play in
 Each round must contain 6 categories, and each category must contain 5 clues, besides Final Jeopardy, which has one 
 category and one clue. If these requirements aren't satisfied, the game will only be playable in a testing mode.
 
+Any clue may also include an image file by adding the `imageFileName` property. Upload the image files for use by the 
+layouts using the "Assets" tab of the NodeCG dashboard. The layouts will log a warning if any of the specified images 
+cannot be found.
+
 Before starting the game, collect a signature and smaller "symbol" from each player. Upload them in the "Assets" tab of 
 the NodeCG dashboard under the "Jeopardy contestant signatures" and "Jeopardy contestant symbols" categories. 
 They'll be shown on the on-screen graphics at various points in the game. It is recommended to use a 3:2 aspect ratio 

@@ -13,6 +13,7 @@ const jepState = nodecg.Replicant<JepState>('jepState');
 const jepOverlays = nodecg.Replicant<JepOverlays>('jepOverlays');
 const jepContestantSignatures = nodecg.Replicant<NodeCG.AssetFile[]>('assets:jepContestantSignatures');
 const jepContestantSymbols = nodecg.Replicant<NodeCG.AssetFile[]>('assets:jepContestantSymbols');
+const jepImageClues = nodecg.Replicant<NodeCG.AssetFile[]>('assets:jepImageClues');
 
 interface JepStore {
     jepBoard: JepBoard
@@ -21,6 +22,7 @@ interface JepStore {
     jepOverlays: JepOverlays
     'assets:jepContestantSignatures': NodeCG.AssetFile[]
     'assets:jepContestantSymbols': NodeCG.AssetFile[]
+    'assets:jepImageClues': NodeCG.AssetFile[]
 }
 
 export const useJepStore = defineStore('jep', {
@@ -30,7 +32,8 @@ export const useJepStore = defineStore('jep', {
         jepState: null,
         jepOverlays: null,
         'assets:jepContestantSignatures': [],
-        'assets:jepContestantSymbols': []
+        'assets:jepContestantSymbols': [],
+        'assets:jepImageClues': []
     } as unknown as JepStore),
     getters: {
         getClueValue: (state) => {
@@ -65,15 +68,20 @@ export const useJepStore = defineStore('jep', {
                     return -1;
             }
         },
-        selectedClue(state): { position: CluePosition, categoryName: string, value: number, prompt: string, answer: string, answered: boolean, isDailyDouble?: boolean } | null {
+        selectedClue(state): { position: CluePosition, categoryName: string, value: number, prompt: string, answer: string, answered: boolean, isDailyDouble?: boolean, imageFileName?: string, imageFileUrl?: string | null } | null {
             if ('cluePosition' in state.jepState) {
                 const cluePos = state.jepState.cluePosition as CluePosition;
                 const category = state.jepBoard.categories[cluePos[0]];
                 if (category != null) {
+                    const clue = category.clues[cluePos[1]];
+                    const imageFileUrl = clue.imageFileName == null ? null
+                        : state['assets:jepImageClues'].find((image) => (image.name + image.ext) === clue.imageFileName)?.url ?? null;
+
                     return {
                         position: cluePos,
                         categoryName: category.name,
                         value: this.getClueValue(cluePos[1]),
+                        imageFileUrl,
                         ...category.clues[cluePos[1]]
                     };
                 }
@@ -98,5 +106,6 @@ export const initJepStore = createReplicantStoreInitializer([
     jepState,
     jepOverlays,
     jepContestantSignatures,
-    jepContestantSymbols
+    jepContestantSymbols,
+    jepImageClues
 ], useJepStore);

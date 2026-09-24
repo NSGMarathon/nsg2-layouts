@@ -195,6 +195,17 @@
                     "png",
                     "webp"
                 ]
+            },
+            {
+                "name": "jepImageClues",
+                "title": "Jeopardy image clues",
+                "allowedTypes": [
+                    "png",
+                    "webp",
+                    "jpg",
+                    "jpeg",
+                    "gif"
+                ]
             }
         ],
         "soundCues": [
